@@ -1,0 +1,70 @@
+{
+  "name": "wiil-js",
+  "version": "0.0.0",
+  "description": "Official JavaScript/TypeScript SDK for WIIL Platform - AI-powered conversational services for intelligent customer interactions, voice processing, real-time translation, and business management",
+  "license": "MIT",
+  "author": "WIIL",
+  "homepage": "https://console.wiil.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wiil-io/wiil-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wiil-io/wiil-js/issues"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "docs": "typedoc",
+    "tag:bash": "bash ./scripts/tag-script.sh",
+    "git:commit": "bash ./scripts/commit-script.sh",
+    "prepare": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.14",
+    "@vitest/coverage-v8": "^2.1.8",
+    "nock": "^14.0.0",
+    "typedoc": "^0.27.5",
+    "typescript": "^5.8.2",
+    "vitest": "^2.1.8"
+  },
+  "keywords": [
+    "wiil",
+    "wiil-platform",
+    "wiil-sdk",
+    "ai",
+    "artificial-intelligence",
+    "conversational-ai",
+    "chatbot",
+    "voice-ai",
+    "speech-to-text",
+    "text-to-speech",
+    "stt",
+    "tts",
+    "translation",
+    "real-time-translation",
+    "voice-translation",
+    "business-automation",
+    "appointment-booking",
+    "reservation-system",
+    "order-management",
+    "customer-service",
+    "telephony",
+    "voice-calls",
+    "agent-deployment",
+    "typescript",
+    "sdk"
+  ],
+  "dependencies": {
+    "axios": "^1.7.9",
+    "wiil-core-js": "github:wiil-io/core-js#main",
+    "zod": "^4.1.12"
+  }
+}
