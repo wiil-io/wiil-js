@@ -65,7 +65,7 @@ Deploy and manage AI agents with customizable behavior:
 - **Instruction Configurations** - The heart of agent behavior with prompts, guidelines, and compliance rules
 - **Deployment Configurations** - Combine agents and instructions into deployable units
 - **Phone Configurations** - Configure telephony settings for voice calls
-- **Provisioning Configurations** - Manage provisioning settings
+- **Deployment Channels** - Manage OTT Chat, Telephony, SMS, and Email channels
 
 ### 2. Advanced Service Configuration
 
@@ -74,7 +74,6 @@ Enable voice-powered conversations with end-to-end processing:
 - **Provisioning Chain Configurations** - STT → Agent → TTS voice processing pipelines
 - **Speech-to-Text (STT)** - Convert voice to text using Deepgram, OpenAI Whisper, Cartesia
 - **Text-to-Speech (TTS)** - Generate natural voice using ElevenLabs, Cartesia, OpenAI
-- **Deployment Channels** - Manage OTT Chat, Telephony, SMS, and Email channels
 
 ### 3. Translation Services
 
@@ -571,16 +570,159 @@ const client = new WiilClient({
 
 ## Platform Architecture
 
-The WIIL Platform is built on four integrated domains:
+The WIIL Platform provides a unified architecture that bridges AI agent deployment with business operations, enabling organizations to conduct intelligent customer conversations that drive measurable business outcomes.
 
-| Domain | Purpose | Resources |
-|--------|---------|-----------|
-| **Service Configuration** | AI agent deployment and management | Agent Configs, Deployment Configs, Instruction Configs, Channels |
-| **Advanced Service Configuration** | Voice processing pipelines (STT → Agent → TTS) | Provisioning Chains, Deployment Channels |
-| **Translation Services** | Real-time multilingual translation | Translation Sessions, Conversation Configs, Knowledge Sources |
-| **Business Management** | Catalog management and AI-powered transactions | Services, Products, Menus, Customers, Appointments, Orders |
+### Unified Architecture Overview
 
-The **Conversations** entity serves as the central integration hub, connecting AI agents with customers and driving business transactions.
+The platform integrates two core architectural domains through the **Conversations** entity:
+
+![WIIL Platform Unified Architecture](unified-architecture.png)
+
+### Core Architectural Domains
+
+#### 1. Service Configuration
+
+**Purpose**: Manages the deployment and behavior of AI agents within the platform.
+
+**Key Components**:
+
+- **Agent Configurations** - Define AI agent capabilities and characteristics
+- **Instruction Configurations** - The heart of agent behavior with system prompts, guidelines, and compliance rules
+- **Deployment Configurations** - Combine agents and instructions into deployable units
+- **Deployment Channels** - Communication channels (OTT Chat, Telephony, SMS, Email)
+- **Phone Configurations** - Telephony-specific settings for voice calls
+- **Conversation Configurations** - Configuration for conversation sessions
+- **Knowledge Sources** - Knowledge bases for agent context and accuracy
+
+**SDK Resources**: `agentConfigs`, `instructionConfigs`, `deploymentConfigs`, `deploymentChannels`, `phoneConfigs`, `conversationConfigs`, `knowledgeSources`
+
+#### 2. Advanced Service Configuration
+
+**Purpose**: Enables voice-powered conversations with end-to-end processing pipelines.
+
+**Key Components**:
+
+- **Provisioning Chain Configurations** - STT → Agent → TTS voice processing workflows
+- **Speech-to-Text (STT)** - Voice-to-text conversion using Deepgram, OpenAI Whisper, Cartesia
+- **Text-to-Speech (TTS)** - Natural voice generation using ElevenLabs, Cartesia, OpenAI
+
+**SDK Resources**: `provisioningConfigs`
+
+#### 3. Translation Services
+
+**Purpose**: Provides real-time multilingual voice translation capabilities.
+
+**Key Components**:
+
+- **Translation Chain Configurations** - STT → Translation Processing → TTS pipelines for language pairs
+- **Translation Service Requests** - Initiate translation sessions
+- **Translation Participants** - Multi-participant translation sessions with language isolation
+- **Translation Service Logs** - Transcription logging and session records
+
+**SDK Resources**: `translationSessions`
+
+#### 4. Business Management
+
+**Purpose**: Manages business entity catalogs and their transactional operations through AI-powered conversations.
+
+**Management Modules** (Platform Services):
+
+| Module | Manages Catalog | Powers Transactions |
+|--------|----------------|---------------------|
+| **Appointment Management** | Business Services | Service Appointments |
+| **Reservation Management** | Reservable Assets (Resources) | Reservations |
+| **Menu Management** | Menu Categories & Items | Menu Orders |
+| **Product Management** | Product Categories & Products | Product Orders |
+
+**Business Catalogs**:
+
+- **Business Services** - Bookable services (salons, clinics, consulting)
+- **Reservable Assets** - Bookable resources (tables, rooms, equipment)
+- **Menu Categories & Items** - Food and beverage offerings
+- **Product Categories & Products** - Retail products
+
+**Transactional Operations** (AI-Powered):
+
+- **Service Appointments** - Created through AI conversations
+- **Reservations** - Created through AI conversations
+- **Menu Orders** - Created through AI conversations
+- **Product Orders** - Created through AI conversations
+
+**SDK Resources**: `businessServices`, `reservationResources`, `menus`, `products`, `customers`, `serviceAppointments`, `reservations`, `menuOrders`, `productOrders`
+
+### Integration Hub: Conversations
+
+The **Conversations** entity serves as the central integration point, bridging Service Configuration and Business Management:
+
+**Key Attributes**:
+
+```typescript
+{
+  // Service Configuration References
+  deployment_config_id: string,      // Which agent deployment
+  instruction_config_id: string,     // Agent behavior guidelines
+  channel_id: string,                // Communication channel
+
+  // Business Context
+  customer_id: string,               // Business customer
+  conversation_type: string,         // OTT_CHAT, TELEPHONY_CALL, SMS, EMAIL
+
+  // Conversation Data
+  messages: ConversationMessage[],   // Conversation history
+  status: string,                    // ACTIVE, COMPLETED, TRANSFERRED
+  conversationSummary: object        // AI-generated summary
+}
+```
+
+**Role in Architecture**:
+
+1. **Links** AI agents (via deployment/instruction configs) with business customers
+2. **Enables** AI agents to leverage business catalogs during conversations
+3. **Drives** transactional outcomes (appointments, reservations, orders)
+4. **Supports** multi-channel conversations (voice, chat, SMS, email)
+
+### Data Flow: Conversation to Transaction
+
+```text
+1. Customer Initiates Contact
+         ↓
+2. Channel Routes to Deployment Configuration
+         ↓
+3. Conversation Created
+   • Links deployment_config_id
+   • Links instruction_config_id
+   • Links channel_id
+   • Links customer_id
+         ↓
+4. AI Agent Conducts Conversation
+   • Guided by Instruction Configuration
+   • Queries Business Catalogs (via Management Modules)
+   • Presents available services/products/resources
+         ↓
+5. Customer Confirms Intent
+         ↓
+6. Transaction Created
+   • Service Appointment
+   • Reservation
+   • Menu Order
+   • Product Order
+         ↓
+7. Management Module Processes Transaction
+```
+
+### Design Principles
+
+**Unified Customer Experience**: Customers interact through Conversations, unaware of the underlying system complexity.
+
+**Separation of Configuration and Execution**: Service Configuration defines *how* agents behave; Business Management defines *what* they can do.
+
+**AI-First Conversations**: AI Powered Services leverages catalog data in customer conversations to intelligently drive transactional operations.
+
+**Catalog-Transaction Separation**: Clear distinction between catalog/configuration data (managed by Management Modules) and transactional data (powered by AI Powered Services through conversations).
+
+**Multi-Channel Support**: Conversations span multiple channel types (OTT Chat, Telephony, SMS, Email).
+
+**Transactional Outcomes**: Every conversation can result in measurable business transactions.
 
 ## License
 
@@ -589,9 +731,9 @@ MIT © [WIIL](https://wiil.io)
 ## Support
 
 - **Documentation**: [https://docs.wiil.io](https://docs.wiil.io)
-- **API Reference**: [https://api.wiil.io/docs](https://api.wiil.io/docs)
+- **API Reference**: [https://docs.wiil.io/developer/api-reference](https://docs.wiil.io/developer/api-reference)
 - **Issues**: [GitHub Issues](https://github.com/wiil-io/wiil-js/issues)
-- **Email**: [support@wiil.io](mailto:support@wiil.io)
+- **Email**: [dev-support@wiil.io](mailto:dev-support@wiil.io)
 
 ## Contributing
 
