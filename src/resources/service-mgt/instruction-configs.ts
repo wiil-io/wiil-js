@@ -151,4 +151,25 @@ export class InstructionConfigurationsResource {
 
     return this.http.get<PaginatedResultType<InstructionConfiguration>>(path);
   }
+
+  /**
+   * Retrieves the list of supported instruction templates.
+   *
+   * @returns Promise resolving to array of supported instruction template configurations
+   *
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   *
+   * @example
+   * ```typescript
+   * const templates = await client.instructionConfigs.getSupportedTemplates();
+   * console.log(`Found ${templates.length} supported templates`);
+   * templates.forEach(template => {
+   *   console.log(`- ${template.name} (${template.id})`);
+   * });
+   * ```
+   */
+  public async getSupportedTemplates(): Promise<InstructionConfiguration[]> {
+    return this.http.get<InstructionConfiguration[]>(`${this.resource_path}/supported-templates`);
+  }
 }

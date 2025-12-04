@@ -10,6 +10,7 @@ import {
   DeploymentChannelUpdateRequest,
   PaginatedResultType,
   PaginationRequest,
+  UpdateDeploymentChannel,
 } from 'wiil-core-js';
 import { HttpClient } from '../../client/HttpClient';
 
@@ -108,7 +109,7 @@ export class DeploymentChannelsResource {
    */
   public async getByIdentifier(identifier: string, type: DeploymentType): Promise<DeploymentChannel> {
     return this.http.get<DeploymentChannel>(
-      `${this.resource_path}/by-identifier/${identifier}?type=${type}`
+      `${this.resource_path}/by-identifier/${encodeURIComponent(identifier)}?type=${type}`
     );
   }
 
@@ -122,8 +123,8 @@ export class DeploymentChannelsResource {
    * @throws {@link WiilAPIError} - When the deployment channel is not found or API returns an error
    * @throws {@link WiilNetworkError} - When network communication fails
    */
-  public async update(data: DeploymentChannelUpdateRequest): Promise<DeploymentChannel> {
-    return this.http.patch<DeploymentChannelUpdateRequest, DeploymentChannel>(
+  public async update(data: UpdateDeploymentChannel): Promise<DeploymentChannel> {
+    return this.http.patch<UpdateDeploymentChannel, DeploymentChannel>(
       this.resource_path,
       data
     );

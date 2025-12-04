@@ -46,8 +46,7 @@ console.log('Organization:', organization.companyName);
 // Create a project
 const project = await client.projects.create({
   name: 'Production Environment',
-  description: 'Main production deployment',
-  isDefault: true
+  description: 'Main production deployment'
 });
 
 console.log('Project created:', project.id);
@@ -139,8 +138,7 @@ console.log('Service Status:', org.serviceStatus);
 // Create a project
 const project = await client.projects.create({
   name: 'Production Environment',
-  description: 'Main production deployment',
-  isDefault: true
+  description: 'Main production deployment'
 });
 
 // Get a project

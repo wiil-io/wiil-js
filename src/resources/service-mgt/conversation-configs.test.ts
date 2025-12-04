@@ -5,7 +5,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import nock from 'nock';
 import { WiilClient } from '../../client/WiilClient';
-import { ServiceConversationConfigType, PaginatedResultType } from 'wiil-core-js';
+import { ServiceConversationConfigType, PaginatedResultType, ServiceConversationType } from 'wiil-core-js';
 import { WiilAPIError } from '../../errors/WiilError';
 
 const BASE_URL = 'https://api.wiil.io/v1';
@@ -29,13 +29,20 @@ describe('ConversationConfigurationsResource', () => {
     it('should retrieve a conversation configuration by ID', async () => {
       const mockResponse: ServiceConversationConfigType = {
         id: 'conv_123',
-        name: 'Default Config',
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
+        channel_id: 'ch_456',
+        organization_id: 'org_789',
+        project_id: 'proj_101',
+        deployment_config_id: 'deploy_202',
+        channel_identifier: '+12125551234',
+        conversation_type: ServiceConversationType.OTT_CHAT,
+        is_campaign: false,
+        durationInSeconds: 15,
+        created_at: Date.now(),
+        updated_at: Date.now(),
       };
 
       nock(BASE_URL)
-        .get('/conversation-configs/conv_123')
+        .get('/cconversation-configurations/conv_123')
         .matchHeader('X-WIIL-API-Key', API_KEY)
         .reply(200, {
           success: true,
@@ -46,12 +53,13 @@ describe('ConversationConfigurationsResource', () => {
       const result = await client.conversationConfigs.get('conv_123');
 
       expect(result.id).toBe('conv_123');
-      expect(result.name).toBe('Default Config');
+      expect(result.channel_id).toBe('ch_456');
+      expect(result.conversation_type).toBe(ServiceConversationType.OTT_CHAT);
     });
 
     it('should throw API error when conversation configuration not found', async () => {
       nock(BASE_URL)
-        .get('/conversation-configs/invalid_id')
+        .get('/cconversation-configurations/invalid_id')
         .reply(404, {
           success: false,
           error: { code: 'NOT_FOUND', message: 'Conversation configuration not found' },
@@ -69,15 +77,29 @@ describe('ConversationConfigurationsResource', () => {
       const mockConfigs: ServiceConversationConfigType[] = [
         {
           id: 'conv_1',
-          name: 'Config 1',
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
+          channel_id: 'ch_100',
+          organization_id: 'org_789',
+          project_id: 'proj_101',
+          deployment_config_id: 'deploy_202',
+          channel_identifier: '+12125551234',
+          conversation_type: ServiceConversationType.OTT_CHAT,
+          is_campaign: false,
+          durationInSeconds: 15,
+          created_at: Date.now(),
+          updated_at: Date.now(),
         },
         {
           id: 'conv_2',
-          name: 'Config 2',
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
+          channel_id: 'ch_200',
+          organization_id: 'org_789',
+          project_id: 'proj_101',
+          deployment_config_id: 'deploy_202',
+          channel_identifier: '+12125555678',
+          conversation_type: ServiceConversationType.TELEPHONY_CALL,
+          is_campaign: false,
+          durationInSeconds: 30,
+          created_at: Date.now(),
+          updated_at: Date.now(),
         },
       ];
 
@@ -94,7 +116,7 @@ describe('ConversationConfigurationsResource', () => {
       };
 
       nock(BASE_URL)
-        .get('/conversation-configs')
+        .get('/cconversation-configurations')
         .matchHeader('X-WIIL-API-Key', API_KEY)
         .reply(200, {
           success: true,

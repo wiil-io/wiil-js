@@ -5,7 +5,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import nock from 'nock';
 import { WiilClient } from '../../client/WiilClient';
-import { KnowledgeSource, PaginatedResultType } from 'wiil-core-js';
+import { KnowledgeSource, PaginatedResultType, KnowledgeTypes, KnowledgeBaseProcessingStatus, StorageTier } from 'wiil-core-js';
 import { WiilAPIError } from '../../errors/WiilError';
 
 const BASE_URL = 'https://api.wiil.io/v1';
@@ -30,6 +30,13 @@ describe('KnowledgeSourcesResource', () => {
       const mockResponse: KnowledgeSource = {
         id: 'ks_123',
         name: 'Product Documentation',
+        sourceType: KnowledgeTypes.DOCUMENT,
+        request_success: true,
+        processingStatus: KnowledgeBaseProcessingStatus.COMPLETED,
+        storage_tier: StorageTier.FIRESTORE,
+        access_count: 42,
+        is_compressed: false,
+        metadata: {},
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -47,6 +54,7 @@ describe('KnowledgeSourcesResource', () => {
 
       expect(result.id).toBe('ks_123');
       expect(result.name).toBe('Product Documentation');
+      expect(result.sourceType).toBe(KnowledgeTypes.DOCUMENT);
     });
 
     it('should throw API error when knowledge source not found', async () => {
@@ -70,12 +78,27 @@ describe('KnowledgeSourcesResource', () => {
         {
           id: 'ks_1',
           name: 'Source 1',
+          sourceType: KnowledgeTypes.DOCUMENT,
+          request_success: true,
+          processingStatus: KnowledgeBaseProcessingStatus.COMPLETED,
+          storage_tier: StorageTier.FIRESTORE,
+          access_count: 10,
+          is_compressed: false,
+          metadata: {},
           createdAt: Date.now(),
           updatedAt: Date.now(),
         },
         {
           id: 'ks_2',
           name: 'Source 2',
+          sourceType: KnowledgeTypes.URL,
+          request_success: true,
+          processingStatus: KnowledgeBaseProcessingStatus.COMPLETED,
+          storage_tier: StorageTier.CLOUD_STORAGE_STANDARD,
+          access_count: 5,
+          is_compressed: true,
+          compression_ratio: 0.6,
+          metadata: {},
           createdAt: Date.now(),
           updatedAt: Date.now(),
         },

@@ -35,7 +35,7 @@ import { HttpClient } from '../../client/HttpClient';
  */
 export class ConversationConfigurationsResource {
   private readonly http: HttpClient;
-  private readonly resource_path = '/conversation-configs';
+  private readonly resource_path = '/cconversation-configurations';
 
   /**
    * Creates a new ConversationConfigurationsResource instance.

@@ -27,6 +27,7 @@ import {
   ConversationConfigurationsResource,
   TranslationSessionsResource,
   KnowledgeSourcesResource,
+  SupportModelsResource,
 } from '../resources/service-mgt';
 import { WiilConfigurationError } from '../errors/WiilError';
 
@@ -199,6 +200,25 @@ export class WiilClient {
    */
   public readonly knowledgeSources: KnowledgeSourcesResource;
 
+  /**
+   * Support Models resource for accessing LLM model configurations.
+   *
+   * @remarks
+   * Provides read-only access to the Wiil Support Model Registry, including
+   * default models for various capabilities and lookup methods.
+   *
+   * @example
+   * ```typescript
+   * // Get default multi-mode model
+   * const model = await client.supportModels.getDefaultMultiMode();
+   * console.log('Default model:', model.name);
+   *
+   * // List all models
+   * const models = await client.supportModels.list();
+   * ```
+   */
+  public readonly supportModels: SupportModelsResource;
+
   private readonly http: HttpClient;
 
   /**
@@ -261,6 +281,7 @@ export class WiilClient {
     this.conversationConfigs = new ConversationConfigurationsResource(this.http);
     this.translationSessions = new TranslationSessionsResource(this.http);
     this.knowledgeSources = new KnowledgeSourcesResource(this.http);
+    this.supportModels = new SupportModelsResource(this.http);
   }
 
   /**

@@ -14,7 +14,6 @@ import {
   CreateBusinessMenuItemSchema,
   UpdateBusinessMenuItem,
   UpdateBusinessMenuItemSchema,
-  MenuQRCode,
   PaginatedResultType,
   PaginationRequest,
 } from 'wiil-core-js';
@@ -64,10 +63,19 @@ export class MenusResource {
   }
 
   /**
-   * Lists all menu categories.
+   * Lists all menu categories with optional pagination.
    */
-  public async listCategories(): Promise<MenuCategory[]> {
-    return this.http.get<MenuCategory[]>(`${this.resource_path}/categories`);
+  public async listCategories(
+    params?: Partial<PaginationRequest>
+  ): Promise<PaginatedResultType<MenuCategory>> {
+    const queryParams = new URLSearchParams();
+
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
+
+    const path = `${this.resource_path}/categories${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+
+    return this.http.get<PaginatedResultType<MenuCategory>>(path);
   }
 
   /**
@@ -126,30 +134,38 @@ export class MenusResource {
   }
 
   /**
-   * Retrieves menu items by category.
+   * Retrieves menu items by category with optional pagination.
    */
   public async getItemsByCategory(
     categoryId: string,
-    includeUnavailable?: boolean
-  ): Promise<BusinessMenuItem[]> {
+    params?: Partial<PaginationRequest & { includeUnavailable?: boolean }>
+  ): Promise<PaginatedResultType<BusinessMenuItem>> {
     const queryParams = new URLSearchParams();
-    if (includeUnavailable !== undefined) queryParams.append('includeUnavailable', includeUnavailable.toString());
+
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
+    if (params?.includeUnavailable !== undefined) queryParams.append('includeUnavailable', params.includeUnavailable.toString());
 
     const path = `${this.resource_path}/items/by-category/${categoryId}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
-    return this.http.get<BusinessMenuItem[]>(path);
+    return this.http.get<PaginatedResultType<BusinessMenuItem>>(path);
   }
 
   /**
-   * Retrieves popular menu items.
+   * Retrieves popular menu items with optional pagination.
    */
-  public async getPopularItems(limit?: number): Promise<BusinessMenuItem[]> {
+  public async getPopularItems(
+    params?: Partial<PaginationRequest & { limit?: number }>
+  ): Promise<PaginatedResultType<BusinessMenuItem>> {
     const queryParams = new URLSearchParams();
-    if (limit) queryParams.append('limit', limit.toString());
+
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
 
     const path = `${this.resource_path}/items/popular${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
-    return this.http.get<BusinessMenuItem[]>(path);
+    return this.http.get<PaginatedResultType<BusinessMenuItem>>(path);
   }
 
   /**
@@ -170,29 +186,4 @@ export class MenusResource {
     return this.http.delete<boolean>(`${this.resource_path}/items/${id}`);
   }
 
-  // =============== Menu QR Code Methods ===============
-
-  /**
-   * Retrieves all menu QR codes.
-   */
-  public async getQRCodes(): Promise<MenuQRCode[]> {
-    return this.http.get<MenuQRCode[]>(`${this.resource_path}/qr-codes`);
-  }
-
-  /**
-   * Generates a new menu QR code.
-   */
-  public async generateQRCode(data?: { name?: string; categoryId?: string }): Promise<MenuQRCode> {
-    return this.http.post<{ name?: string; categoryId?: string }, MenuQRCode>(
-      `${this.resource_path}/qr-codes`,
-      data || {}
-    );
-  }
-
-  /**
-   * Deletes a menu QR code.
-   */
-  public async deleteQRCode(id: string): Promise<boolean> {
-    return this.http.delete<boolean>(`${this.resource_path}/qr-codes/${id}`);
-  }
 }

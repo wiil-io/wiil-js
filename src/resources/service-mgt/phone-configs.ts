@@ -104,7 +104,7 @@ export class PhoneConfigurationsResource {
    * @throws {@link WiilNetworkError} - When network communication fails
    */
   public async getByPhoneNumber(phoneNumber: string): Promise<PhoneConfiguration> {
-    return this.http.get<PhoneConfiguration>(`${this.resource_path}/by-phone-number/${phoneNumber}`);
+    return this.http.get<PhoneConfiguration>(`${this.resource_path}/by-phone-number/${encodeURIComponent(phoneNumber)}`);
   }
 
   /**

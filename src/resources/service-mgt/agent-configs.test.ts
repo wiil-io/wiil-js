@@ -5,7 +5,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import nock from 'nock';
 import { WiilClient } from '../../client/WiilClient';
-import { AgentConfiguration, PaginatedResultType, ServiceStatus } from 'wiil-core-js';
+import { AgentConfiguration, PaginatedResultType, AssistantType, LLMType } from 'wiil-core-js';
 import { WiilAPIError } from '../../errors/WiilError';
 
 const BASE_URL = 'https://api.wiil.io/v1';
@@ -29,15 +29,25 @@ describe('AgentConfigurationsResource', () => {
     it('should create a new agent configuration', async () => {
       const input = {
         name: 'Customer Service Agent',
-        description: 'AI agent for customer support',
-        serviceStatus: ServiceStatus.ACTIVE,
+        modelId: 'model_gpt4_turbo',
+        instructionConfigurationId: 'instr_789',
+        defaultFunctionState: LLMType.MULTI_MODE,
+        usesWiilSupportModel: true,
+        assistantType: AssistantType.GENERAL,
+        call_transfer_config: [],
+        metadata: { department: 'support' },
       };
 
       const mockResponse: AgentConfiguration = {
         id: 'agent_123',
         name: 'Customer Service Agent',
-        description: 'AI agent for customer support',
-        serviceStatus: ServiceStatus.ACTIVE,
+        modelId: 'model_gpt4_turbo',
+        instructionConfigurationId: 'instr_789',
+        defaultFunctionState: LLMType.MULTI_MODE,
+        usesWiilSupportModel: true,
+        assistantType: AssistantType.GENERAL,
+        call_transfer_config: [],
+        metadata: { department: 'support' },
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -55,6 +65,7 @@ describe('AgentConfigurationsResource', () => {
 
       expect(result.id).toBe('agent_123');
       expect(result.name).toBe('Customer Service Agent');
+      expect(result.modelId).toBe('model_gpt4_turbo');
     });
   });
 
@@ -63,7 +74,12 @@ describe('AgentConfigurationsResource', () => {
       const mockResponse: AgentConfiguration = {
         id: 'agent_123',
         name: 'Customer Service Agent',
-        serviceStatus: ServiceStatus.ACTIVE,
+        modelId: 'model_gpt4_turbo',
+        instructionConfigurationId: 'instr_789',
+        defaultFunctionState: LLMType.MULTI_MODE,
+        usesWiilSupportModel: true,
+        assistantType: AssistantType.GENERAL,
+        call_transfer_config: [],
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -81,6 +97,7 @@ describe('AgentConfigurationsResource', () => {
 
       expect(result.id).toBe('agent_123');
       expect(result.name).toBe('Customer Service Agent');
+      expect(result.modelId).toBe('model_gpt4_turbo');
     });
 
     it('should throw API error when agent configuration not found', async () => {
@@ -103,14 +120,19 @@ describe('AgentConfigurationsResource', () => {
       const updateData = {
         id: 'agent_123',
         name: 'Updated Agent Name',
-        description: 'Updated description',
+        metadata: { department: 'enterprise-support' },
       };
 
       const mockResponse: AgentConfiguration = {
         id: 'agent_123',
         name: 'Updated Agent Name',
-        description: 'Updated description',
-        serviceStatus: ServiceStatus.ACTIVE,
+        modelId: 'model_gpt4_turbo',
+        instructionConfigurationId: 'instr_789',
+        defaultFunctionState: LLMType.MULTI_MODE,
+        usesWiilSupportModel: true,
+        assistantType: AssistantType.GENERAL,
+        call_transfer_config: [],
+        metadata: { department: 'enterprise-support' },
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -119,7 +141,7 @@ describe('AgentConfigurationsResource', () => {
         .patch('/agent-configurations', {
           id: 'agent_123',
           name: 'Updated Agent Name',
-          description: 'Updated description',
+          metadata: { department: 'enterprise-support' },
         })
         .matchHeader('X-WIIL-API-Key', API_KEY)
         .reply(200, {
@@ -131,7 +153,7 @@ describe('AgentConfigurationsResource', () => {
       const result = await client.agentConfigs.update(updateData);
 
       expect(result.name).toBe('Updated Agent Name');
-      expect(result.description).toBe('Updated description');
+      expect(result.metadata?.department).toBe('enterprise-support');
     });
   });
 
@@ -171,14 +193,24 @@ describe('AgentConfigurationsResource', () => {
         {
           id: 'agent_1',
           name: 'Agent 1',
-          serviceStatus: ServiceStatus.ACTIVE,
+          modelId: 'model_gpt4_turbo',
+          instructionConfigurationId: 'instr_789',
+          defaultFunctionState: LLMType.MULTI_MODE,
+          usesWiilSupportModel: true,
+          assistantType: AssistantType.GENERAL,
+          call_transfer_config: [],
           createdAt: Date.now(),
           updatedAt: Date.now(),
         },
         {
           id: 'agent_2',
           name: 'Agent 2',
-          serviceStatus: ServiceStatus.ACTIVE,
+          modelId: 'model_claude_sonnet',
+          instructionConfigurationId: 'instr_790',
+          defaultFunctionState: LLMType.TEXT_PROCESSING,
+          usesWiilSupportModel: true,
+          assistantType: AssistantType.PHONE,
+          call_transfer_config: [],
           createdAt: Date.now(),
           updatedAt: Date.now(),
         },
