@@ -30,8 +30,6 @@ describe('ServiceAppointmentsResource', () => {
       const input = {
         businessServiceId: 'service_123',
         customerId: 'cust_456',
-        customerName: 'John Doe',
-        customerEmail: 'john@example.com',
         startTime: Date.now(),
         endTime: Date.now() + 60 * 60 * 1000,
         duration: 60,
@@ -44,8 +42,6 @@ describe('ServiceAppointmentsResource', () => {
         id: 'appointment_123',
         businessServiceId: 'service_123',
         customerId: 'cust_456',
-        customerName: 'John Doe',
-        customerEmail: 'john@example.com',
         startTime: Date.now(),
         endTime: Date.now() + 60 * 60 * 1000,
         duration: 60,
@@ -78,8 +74,6 @@ describe('ServiceAppointmentsResource', () => {
       const input = {
         businessServiceId: 'service_456',
         customerId: 'cust_789',
-        customerName: 'Jane Smith',
-        customerEmail: 'jane@example.com',
         startTime: Date.now(),
         endTime: Date.now() + 45 * 60 * 1000,
         duration: 45,
@@ -93,8 +87,6 @@ describe('ServiceAppointmentsResource', () => {
         id: 'appointment_456',
         businessServiceId: 'service_456',
         customerId: 'cust_789',
-        customerName: 'Jane Smith',
-        customerEmail: 'jane@example.com',
         startTime: Date.now(),
         endTime: Date.now() + 45 * 60 * 1000,
         duration: 45,
@@ -127,8 +119,6 @@ describe('ServiceAppointmentsResource', () => {
       const input = {
         businessServiceId: 'service_789',
         customerId: 'cust_999',
-        customerName: 'Bob Johnson',
-        customerEmail: 'bob@example.com',
         startTime: Date.now(),
         endTime: Date.now() + 30 * 60 * 1000,
         duration: 30,
@@ -144,8 +134,6 @@ describe('ServiceAppointmentsResource', () => {
         id: 'appointment_789',
         businessServiceId: 'service_789',
         customerId: 'cust_999',
-        customerName: 'Bob Johnson',
-        customerEmail: 'bob@example.com',
         startTime: Date.now(),
         endTime: Date.now() + 30 * 60 * 1000,
         duration: 30,
@@ -179,8 +167,6 @@ describe('ServiceAppointmentsResource', () => {
       const input = {
         businessServiceId: 'service_free',
         customerId: 'cust_111',
-        customerName: 'Alice Brown',
-        customerEmail: 'alice@example.com',
         startTime: Date.now(),
         duration: 15,
         totalPrice: 0,
@@ -192,8 +178,6 @@ describe('ServiceAppointmentsResource', () => {
         id: 'appointment_free',
         businessServiceId: 'service_free',
         customerId: 'cust_111',
-        customerName: 'Alice Brown',
-        customerEmail: 'alice@example.com',
         startTime: Date.now(),
         duration: 15,
         totalPrice: 0,
@@ -225,8 +209,6 @@ describe('ServiceAppointmentsResource', () => {
         id: 'appointment_123',
         businessServiceId: 'service_123',
         customerId: 'cust_456',
-        customerName: 'John Doe',
-        customerEmail: 'john@example.com',
         startTime: Date.now(),
         endTime: Date.now() + 60 * 60 * 1000,
         duration: 60,
@@ -250,7 +232,6 @@ describe('ServiceAppointmentsResource', () => {
 
       expect(result.id).toBe('appointment_123');
       expect(result.status).toBe(AppointmentStatus.CONFIRMED);
-      expect(result.customerName).toBe('John Doe');
     });
 
     it('should throw API error when appointment not found', async () => {
@@ -275,7 +256,6 @@ describe('ServiceAppointmentsResource', () => {
           id: 'appointment_1',
           businessServiceId: 'service_1',
           customerId: 'cust_123',
-          customerName: 'John Doe',
           startTime: Date.now(),
           duration: 60,
           totalPrice: 79.99,
@@ -288,7 +268,6 @@ describe('ServiceAppointmentsResource', () => {
           id: 'appointment_2',
           businessServiceId: 'service_2',
           customerId: 'cust_123',
-          customerName: 'John Doe',
           startTime: Date.now() + 7 * 24 * 60 * 60 * 1000,
           duration: 45,
           totalPrice: 120.00,

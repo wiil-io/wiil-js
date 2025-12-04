@@ -31,8 +31,6 @@ describe('ReservationsResource', () => {
         reservationType: ResourceType.TABLE,
         resourceId: 'resource_table5',
         customerId: 'cust_123',
-        customerName: 'John Doe',
-        customerEmail: 'john@example.com',
         startTime: Date.now(),
         endTime: Date.now() + 2 * 60 * 60 * 1000,
         duration: 2,
@@ -49,8 +47,6 @@ describe('ReservationsResource', () => {
         reservationType: ResourceType.TABLE,
         resourceId: 'resource_table5',
         customerId: 'cust_123',
-        customerName: 'John Doe',
-        customerEmail: 'john@example.com',
         startTime: Date.now(),
         endTime: Date.now() + 2 * 60 * 60 * 1000,
         duration: 2,
@@ -86,8 +82,6 @@ describe('ReservationsResource', () => {
         reservationType: ResourceType.ROOM,
         resourceId: 'resource_room101',
         customerId: 'cust_456',
-        customerName: 'Jane Smith',
-        customerEmail: 'jane@example.com',
         startTime: Date.now(),
         endTime: Date.now() + 3 * 24 * 60 * 60 * 1000,
         duration: 3,
@@ -104,8 +98,6 @@ describe('ReservationsResource', () => {
         reservationType: ResourceType.ROOM,
         resourceId: 'resource_room101',
         customerId: 'cust_456',
-        customerName: 'Jane Smith',
-        customerEmail: 'jane@example.com',
         startTime: Date.now(),
         endTime: Date.now() + 3 * 24 * 60 * 60 * 1000,
         duration: 3,
@@ -142,8 +134,6 @@ describe('ReservationsResource', () => {
         reservationType: ResourceType.RENTALS,
         resourceId: 'resource_confroom',
         customerId: 'cust_789',
-        customerName: 'Bob Johnson',
-        customerEmail: 'bob@example.com',
         startTime: Date.now(),
         endTime: Date.now() + 4 * 60 * 60 * 1000,
         duration: 4,
@@ -159,8 +149,6 @@ describe('ReservationsResource', () => {
         reservationType: ResourceType.RENTALS,
         resourceId: 'resource_confroom',
         customerId: 'cust_789',
-        customerName: 'Bob Johnson',
-        customerEmail: 'bob@example.com',
         startTime: Date.now(),
         endTime: Date.now() + 4 * 60 * 60 * 1000,
         duration: 4,
@@ -193,8 +181,6 @@ describe('ReservationsResource', () => {
       const input = {
         reservationType: ResourceType.TABLE,
         customerId: 'cust_999',
-        customerName: 'Alice Brown',
-        customerEmail: 'alice@example.com',
         startTime: Date.now(),
         duration: 1,
         personsNumber: 2,
@@ -208,8 +194,6 @@ describe('ReservationsResource', () => {
         id: 'reservation_general',
         reservationType: ResourceType.TABLE,
         customerId: 'cust_999',
-        customerName: 'Alice Brown',
-        customerEmail: 'alice@example.com',
         startTime: Date.now(),
         duration: 1,
         personsNumber: 2,
@@ -244,8 +228,6 @@ describe('ReservationsResource', () => {
         reservationType: ResourceType.TABLE,
         resourceId: 'resource_table5',
         customerId: 'cust_123',
-        customerName: 'John Doe',
-        customerEmail: 'john@example.com',
         startTime: Date.now(),
         endTime: Date.now() + 2 * 60 * 60 * 1000,
         duration: 2,
@@ -296,7 +278,6 @@ describe('ReservationsResource', () => {
           id: 'reservation_1',
           reservationType: ResourceType.TABLE,
           customerId: 'cust_123',
-          customerName: 'John Doe',
           startTime: Date.now(),
           duration: 2,
           personsNumber: 4,
@@ -311,7 +292,6 @@ describe('ReservationsResource', () => {
           id: 'reservation_2',
           reservationType: ResourceType.ROOM,
           customerId: 'cust_123',
-          customerName: 'John Doe',
           startTime: Date.now() + 7 * 24 * 60 * 60 * 1000,
           duration: 2,
           personsNumber: 2,
@@ -871,44 +851,6 @@ describe('ReservationsResource', () => {
         expect(result[0].reservationType).toBe(ResourceType.TABLE);
         expect(result[0].defaultReservationDuration).toBe(2);
         expect(result[1].reservationType).toBe(ResourceType.ROOM);
-      });
-    });
-
-    describe('createSettings', () => {
-      it('should create reservation settings', async () => {
-        const input = {
-          reservationType: ResourceType.RENTALS,
-          settingType: ReservationSettingType.CAPACITY,
-          defaultReservationDuration: 4,
-          defaultReservationDurationUnit: ResourceReservationDurationUnit.HOURS,
-          isActive: true,
-        };
-
-        const mockResponse: ReservationSettings = {
-          id: 'settings_123',
-          reservationType: ResourceType.RENTALS,
-          settingType: ReservationSettingType.CAPACITY,
-          defaultReservationDuration: 4,
-          defaultReservationDurationUnit: ResourceReservationDurationUnit.HOURS,
-          isActive: true,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        };
-
-        nock(BASE_URL)
-          .post('/reservations/settings', input)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
-          .reply(200, {
-            success: true,
-            data: mockResponse,
-            metadata: { timestamp: Date.now(), version: 'v1' },
-          });
-
-        const result = await client.reservations.createSettings(input);
-
-        expect(result.id).toBe('settings_123');
-        expect(result.reservationType).toBe(ResourceType.RENTALS);
-        expect(result.defaultReservationDuration).toBe(4);
       });
     });
 

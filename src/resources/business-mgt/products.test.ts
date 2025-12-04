@@ -31,16 +31,12 @@ describe('ProductsResource', () => {
         const input = {
           name: 'Electronics',
           description: 'Electronic devices and accessories',
-          displayOrder: 1,
-          isDefault: false,
         };
 
         const mockResponse: ProductCategory = {
           id: 'category_123',
           name: 'Electronics',
           description: 'Electronic devices and accessories',
-          displayOrder: 1,
-          isDefault: false,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         };
@@ -58,20 +54,16 @@ describe('ProductsResource', () => {
 
         expect(result.id).toBe('category_123');
         expect(result.name).toBe('Electronics');
-        expect(result.displayOrder).toBe(1);
-        expect(result.isDefault).toBe(false);
       });
 
       it('should create a default category', async () => {
         const input = {
           name: 'Uncategorized',
-          isDefault: true,
         };
 
         const mockResponse: ProductCategory = {
           id: 'category_default',
           name: 'Uncategorized',
-          isDefault: true,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         };
@@ -87,7 +79,7 @@ describe('ProductsResource', () => {
 
         const result = await client.products.createCategory(input);
 
-        expect(result.isDefault).toBe(true);
+        expect(result.name).toBe('Uncategorized');
       });
     });
 
@@ -97,8 +89,6 @@ describe('ProductsResource', () => {
           id: 'category_123',
           name: 'Clothing',
           description: 'Apparel and fashion items',
-          displayOrder: 2,
-          isDefault: false,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         };
@@ -116,7 +106,6 @@ describe('ProductsResource', () => {
 
         expect(result.id).toBe('category_123');
         expect(result.name).toBe('Clothing');
-        expect(result.displayOrder).toBe(2);
       });
 
       it('should throw API error when category not found', async () => {
@@ -141,8 +130,6 @@ describe('ProductsResource', () => {
             id: 'category_1',
             name: 'Electronics',
             description: 'Electronic devices',
-            displayOrder: 1,
-            isDefault: false,
             createdAt: Date.now(),
             updatedAt: Date.now(),
           },
@@ -150,8 +137,6 @@ describe('ProductsResource', () => {
             id: 'category_2',
             name: 'Clothing',
             description: 'Apparel items',
-            displayOrder: 2,
-            isDefault: false,
             createdAt: Date.now(),
             updatedAt: Date.now(),
           },
@@ -182,8 +167,6 @@ describe('ProductsResource', () => {
 
         expect(result.data).toHaveLength(2);
         expect(result.meta.totalCount).toBe(2);
-        expect(result.data[0].displayOrder).toBe(1);
-        expect(result.data[1].displayOrder).toBe(2);
       });
 
       it('should list categories with custom pagination parameters', async () => {
@@ -232,8 +215,6 @@ describe('ProductsResource', () => {
           id: 'category_123',
           name: 'Updated Electronics',
           description: 'Modern electronic devices and gadgets',
-          displayOrder: 1,
-          isDefault: false,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         };
@@ -307,7 +288,6 @@ describe('ProductsResource', () => {
             unit: 'inches' as const,
           },
           isActive: true,
-          displayOrder: 1,
         };
 
         const mockResponse: BusinessProduct = {
@@ -330,7 +310,6 @@ describe('ProductsResource', () => {
             unit: 'inches',
           },
           isActive: true,
-          displayOrder: 1,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         };
@@ -513,7 +492,6 @@ describe('ProductsResource', () => {
             categoryId: 'category_1',
             trackInventory: false,
             isActive: true,
-            displayOrder: 1,
             createdAt: Date.now(),
             updatedAt: Date.now(),
           },
@@ -525,7 +503,6 @@ describe('ProductsResource', () => {
             trackInventory: true,
             stockQuantity: 100,
             isActive: true,
-            displayOrder: 2,
             createdAt: Date.now(),
             updatedAt: Date.now(),
           },

@@ -10,8 +10,6 @@ import {
   UpdateReservation,
   UpdateReservationSchema,
   ReservationSettings,
-  CreateReservationSettings,
-  CreateReservationSettingsSchema,
   UpdateReservationSettings,
   UpdateReservationSettingsSchema,
   PaginatedResultType,
@@ -269,24 +267,6 @@ export class ReservationsResource {
    */
   public async getSettings(): Promise<ReservationSettings[]> {
     return this.http.get<ReservationSettings[]>(`${this.resource_path}/settings`);
-  }
-
-  /**
-   * Creates reservation settings.
-   *
-   * @param data - Reservation settings data
-   * @returns Promise resolving to the created settings
-   *
-   * @throws {@link WiilValidationError} - When input validation fails
-   * @throws {@link WiilAPIError} - When the API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   */
-  public async createSettings(data: CreateReservationSettings): Promise<ReservationSettings> {
-    return this.http.post<CreateReservationSettings, ReservationSettings>(
-      `${this.resource_path}/settings`,
-      data,
-      CreateReservationSettingsSchema
-    );
   }
 
   /**

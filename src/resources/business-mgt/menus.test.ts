@@ -32,7 +32,6 @@ describe('MenusResource', () => {
           name: 'Appetizers',
           description: 'Delicious starters to begin your meal',
           displayOrder: 1,
-          isDefault: false,
         };
 
         const mockResponse: MenuCategory = {
@@ -40,7 +39,6 @@ describe('MenusResource', () => {
           name: 'Appetizers',
           description: 'Delicious starters to begin your meal',
           displayOrder: 1,
-          isDefault: false,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         };
@@ -59,19 +57,16 @@ describe('MenusResource', () => {
         expect(result.id).toBe('category_123');
         expect(result.name).toBe('Appetizers');
         expect(result.displayOrder).toBe(1);
-        expect(result.isDefault).toBe(false);
       });
 
       it('should create a default category', async () => {
         const input = {
           name: 'Uncategorized',
-          isDefault: true,
         };
 
         const mockResponse: MenuCategory = {
           id: 'category_default',
           name: 'Uncategorized',
-          isDefault: true,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         };
@@ -87,7 +82,7 @@ describe('MenusResource', () => {
 
         const result = await client.menus.createCategory(input);
 
-        expect(result.isDefault).toBe(true);
+        expect(result.name).toBe('Uncategorized');
       });
     });
 
@@ -98,7 +93,6 @@ describe('MenusResource', () => {
           name: 'Main Course',
           description: 'Our signature dishes',
           displayOrder: 2,
-          isDefault: false,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         };
@@ -142,7 +136,6 @@ describe('MenusResource', () => {
             name: 'Appetizers',
             description: 'Starters',
             displayOrder: 1,
-            isDefault: false,
             createdAt: Date.now(),
             updatedAt: Date.now(),
           },
@@ -151,7 +144,6 @@ describe('MenusResource', () => {
             name: 'Main Course',
             description: 'Entrees',
             displayOrder: 2,
-            isDefault: false,
             createdAt: Date.now(),
             updatedAt: Date.now(),
           },
@@ -233,7 +225,6 @@ describe('MenusResource', () => {
           name: 'Updated Appetizers',
           description: 'New and improved starters',
           displayOrder: 1,
-          isDefault: false,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         };

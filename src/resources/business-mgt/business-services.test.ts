@@ -35,7 +35,6 @@ describe('BusinessServicesResource', () => {
         isBookable: true,
         price: 50.00,
         isActive: true,
-        displayOrder: 1,
       };
 
       const mockResponse: BusinessService = {
@@ -47,7 +46,6 @@ describe('BusinessServicesResource', () => {
         isBookable: true,
         price: 50.00,
         isActive: true,
-        displayOrder: 1,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -81,7 +79,6 @@ describe('BusinessServicesResource', () => {
         isBookable: true,
         price: 80.00,
         isActive: true,
-        displayOrder: 2,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -134,7 +131,6 @@ describe('BusinessServicesResource', () => {
         isBookable: true,
         price: 90.00,
         isActive: true,
-        displayOrder: 2,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -201,7 +197,6 @@ describe('BusinessServicesResource', () => {
           isBookable: true,
           price: 40.00,
           isActive: true,
-          displayOrder: 1,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         },
@@ -214,7 +209,6 @@ describe('BusinessServicesResource', () => {
           isBookable: true,
           price: 0,
           isActive: true,
-          displayOrder: 3,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         },

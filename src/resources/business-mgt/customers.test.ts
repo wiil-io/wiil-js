@@ -5,7 +5,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import nock from 'nock';
 import { WiilClient } from '../../client/WiilClient';
-import { Customer, PaginatedResultType, CallPriority, PreferredContactMethod, BestTimeToCall } from 'wiil-core-js';
+import { Customer, PaginatedResultType, PreferredContactMethod, BestTimeToCall } from 'wiil-core-js';
 import { WiilAPIError } from '../../errors/WiilError';
 
 const BASE_URL = 'https://api.wiil.io/v1';
@@ -34,7 +34,6 @@ describe('CustomersResource', () => {
         lastname: 'Doe',
         email: 'john.doe@example.com',
         preferred_language: 'en',
-        call_priority: CallPriority.MEDIUM,
         preferred_contact_method: PreferredContactMethod.EMAIL,
         best_time_to_call: BestTimeToCall.AFTERNOON,
         timezone: 'America/New_York',
@@ -64,7 +63,6 @@ describe('CustomersResource', () => {
         lastname: 'Doe',
         email: 'john.doe@example.com',
         preferred_language: 'en',
-        call_priority: CallPriority.MEDIUM,
         preferred_contact_method: PreferredContactMethod.EMAIL,
         best_time_to_call: BestTimeToCall.AFTERNOON,
         timezone: 'America/New_York',
@@ -117,7 +115,6 @@ describe('CustomersResource', () => {
         lastname: 'Smith',
         email: 'jane.smith@example.com',
         preferred_language: 'en',
-        call_priority: CallPriority.HIGH,
         preferred_contact_method: PreferredContactMethod.PHONE,
         timezone: 'America/Los_Angeles',
         isValidatedNames: false,
@@ -139,7 +136,6 @@ describe('CustomersResource', () => {
       expect(result.id).toBe('cust_123');
       expect(result.firstname).toBe('Jane');
       expect(result.lastname).toBe('Smith');
-      expect(result.call_priority).toBe(CallPriority.HIGH);
     });
 
     it('should throw API error when customer not found', async () => {
@@ -166,7 +162,6 @@ describe('CustomersResource', () => {
         lastname: 'Doe',
         email: 'john.doe@example.com',
         preferred_language: 'en',
-        call_priority: CallPriority.MEDIUM,
         preferred_contact_method: PreferredContactMethod.EMAIL,
         isValidatedNames: false,
         createdAt: Date.now(),
@@ -212,7 +207,6 @@ describe('CustomersResource', () => {
         lastname: 'Johnson',
         email: 'alice.johnson@example.com',
         preferred_language: 'en',
-        call_priority: CallPriority.LOW,
         preferred_contact_method: PreferredContactMethod.SMS,
         isValidatedNames: true,
         createdAt: Date.now(),
@@ -259,7 +253,6 @@ describe('CustomersResource', () => {
           lastname: 'Smith',
           email: 'john.smith@example.com',
           preferred_language: 'en',
-          call_priority: CallPriority.MEDIUM,
           preferred_contact_method: PreferredContactMethod.EMAIL,
           isValidatedNames: false,
           createdAt: Date.now(),
@@ -272,7 +265,6 @@ describe('CustomersResource', () => {
           lastname: 'Doe',
           email: 'johnny.doe@example.com',
           preferred_language: 'en',
-          call_priority: CallPriority.MEDIUM,
           preferred_contact_method: PreferredContactMethod.EMAIL,
           isValidatedNames: false,
           createdAt: Date.now(),
@@ -361,7 +353,6 @@ describe('CustomersResource', () => {
         lastname: 'Doe',
         email: 'newemail@example.com',
         preferred_language: 'en',
-        call_priority: CallPriority.MEDIUM,
         preferred_contact_method: PreferredContactMethod.SMS,
         tags: ['vip', 'updated'],
         isValidatedNames: false,
@@ -426,7 +417,6 @@ describe('CustomersResource', () => {
           lastname: 'Anderson',
           email: 'alice@example.com',
           preferred_language: 'en',
-          call_priority: CallPriority.HIGH,
           preferred_contact_method: PreferredContactMethod.EMAIL,
           isValidatedNames: true,
           createdAt: Date.now(),
@@ -439,7 +429,6 @@ describe('CustomersResource', () => {
           lastname: 'Brown',
           email: 'bob@example.com',
           preferred_language: 'es',
-          call_priority: CallPriority.MEDIUM,
           preferred_contact_method: PreferredContactMethod.PHONE,
           isValidatedNames: false,
           createdAt: Date.now(),

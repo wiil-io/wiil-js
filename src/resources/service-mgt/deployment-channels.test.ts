@@ -35,7 +35,6 @@ describe('DeploymentChannelsResource', () => {
         channelIdentifier: '+12125551234',
         configuration: {
           phoneConfigurationId: 'phone_123',
-          hasForwardingEnabled: false,
         },
       };
 
@@ -47,7 +46,6 @@ describe('DeploymentChannelsResource', () => {
         channelIdentifier: '+12125551234',
         configuration: {
           phoneConfigurationId: 'phone_123',
-          hasForwardingEnabled: false,
         },
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -93,10 +91,8 @@ describe('DeploymentChannelsResource', () => {
         channelIdentifier: 'https://example.com',
         configuration: {
           communicationType: OttCommunicationType.UNIFIED,
-          customCssUrl: null,
           widgetConfiguration: {
             position: 'right' as const,
-            theme: 'light' as const,
             customTheme: {},
           },
         },
@@ -131,7 +127,6 @@ describe('DeploymentChannelsResource', () => {
         channelIdentifier: '+12125551234',
         configuration: {
           phoneConfigurationId: 'phone_123',
-          hasForwardingEnabled: false,
         },
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -177,7 +172,6 @@ describe('DeploymentChannelsResource', () => {
         channelIdentifier: '+12125551234',
         configuration: {
           phoneConfigurationId: 'phone_123',
-          hasForwardingEnabled: false,
         },
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -219,7 +213,6 @@ describe('DeploymentChannelsResource', () => {
         channelIdentifier: '+12125551234',
         configuration: {
           phoneConfigurationId: 'phone_123',
-          hasForwardingEnabled: false,
         },
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -286,7 +279,6 @@ describe('DeploymentChannelsResource', () => {
           channelIdentifier: '+12125551111',
           configuration: {
             phoneConfigurationId: 'phone_111',
-            hasForwardingEnabled: false,
           },
           createdAt: Date.now(),
           updatedAt: Date.now(),
@@ -299,10 +291,8 @@ describe('DeploymentChannelsResource', () => {
           channelIdentifier: 'https://example.com',
           configuration: {
             communicationType: OttCommunicationType.UNIFIED,
-            customCssUrl: null,
             widgetConfiguration: {
               position: 'right' as const,
-              theme: 'light' as const,
               customTheme: {},
             },
           },
@@ -351,7 +341,6 @@ describe('DeploymentChannelsResource', () => {
           channelIdentifier: '+12125551111',
           configuration: {
             phoneConfigurationId: 'phone_111',
-            hasForwardingEnabled: false,
           },
           createdAt: Date.now(),
           updatedAt: Date.now(),

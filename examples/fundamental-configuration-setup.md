@@ -394,12 +394,12 @@ if (!defaultModel) {
 
 // Create agent configuration
 const agentConfig = await client.agentConfigs.create({
-  name: 'Customer Support Agent',
+  agentName: 'Customer Support Agent',
   modelId: defaultModel.modelId,  // Wiil Model ID from Step 4
   instructionConfigurationId: instructionConfig.id  // From Step 3
 });
 
-console.log(`Agent Created: ${agentConfig.name}`);
+console.log(`Agent Created: ${agentConfig.agentName}`);
 console.log(`Agent ID: ${agentConfig.id}`);
 console.log(`Using Model: ${defaultModel.name} (${defaultModel.modelId})`);
 console.log(`Using Instructions: ${instructionConfig.instructionName}`);
@@ -443,11 +443,8 @@ const webChatChannel = await client.deploymentChannels.create({
   recordingEnabled: true,  // Enable conversation recording
   configuration: {
     communicationType: 'TEXT',  // TEXT, VOICE, or UNIFIED
-    customCssUrl: null,  // Optional custom CSS for widget styling
     widgetConfiguration: {
-      position: 'right',  // 'left' or 'right'
-      theme: 'light',  // 'light', 'dark', or 'custom'
-      customTheme: {}  // Custom theme colors (if theme is 'custom')
+      position: 'right'  // 'left' or 'right'
     }
   }
 });
@@ -483,6 +480,8 @@ The Deployment Configuration:
 ### Code
 
 ```typescript
+import { DeploymentStatus, DeploymentProvisioningType } from 'wiil-js';
+
 const deploymentConfig = await client.deploymentConfigs.create({
   // Required fields
   projectId: project.id,                        // From Step 2
@@ -493,8 +492,8 @@ const deploymentConfig = await client.deploymentConfigs.create({
   // Optional fields
   deploymentName: 'Customer Support Deployment',
   isActive: true,
-  deploymentStatus: 'pending',  // Will be 'pending' initially
-  provisioningType: 'direct'    // 'direct' or 'chained' (for voice processing)
+  deploymentStatus: DeploymentStatus.PENDING,  // Will be PENDING initially (PENDING, ACTIVE, PAUSED, ARCHIVED)
+  provisioningType: DeploymentProvisioningType.DIRECT  // DIRECT or CHAINED (for voice processing)
 });
 
 console.log(`Deployment Created: ${deploymentConfig.deploymentName}`);
@@ -520,7 +519,7 @@ Active: true
 
 ### For Web Chat
 
-After creating the web chat channel, integrate it into your website:
+After creating the deployment configuration, integrate the WIIL widget into your website using the `deploymentConfigId`:
 
 #### HTML Integration
 
@@ -536,17 +535,22 @@ After creating the web chat channel, integrate it into your website:
   <!-- Your website content -->
   <h1>Welcome to ACME Corporation</h1>
 
-  <!-- WIIL Chat Widget - Add before closing </body> tag -->
-  <script src="https://cdn.wiil.io/chat-widget.js"></script>
-  <script>
-    WiilChat.init({
-      channelId: 'p6q7r8s9t0',  // Your channel ID from Step 7
-      apiKey: 'pk_your_public_api_key'  // Public API key from WIIL Console
-    });
-  </script>
+  <!-- WIIL Widget - Add before closing </body> tag -->
+  <div
+    id="wiil-widget"
+    data-config-id="k1l2m3n4o5"
+    data-features="chat,voice"
+  ></div>
+  <script src="https://cdn.wiil.io/public/wiil-widget.js"></script>
+  <script>WiilWidget.init();</script>
 </body>
 </html>
 ```
+
+**Configuration Options:**
+
+- `data-config-id`: Your deployment configuration ID from Step 7 (required)
+- `data-features`: Comma-separated list of features to enable (e.g., "chat", "voice", "chat,voice")
 
 #### React Integration
 
@@ -555,19 +559,25 @@ import { useEffect } from 'react';
 
 function App() {
   useEffect(() => {
-    // Load WIIL Chat Widget
+    // Create widget container
+    const widgetDiv = document.createElement('div');
+    widgetDiv.id = 'wiil-widget';
+    widgetDiv.setAttribute('data-config-id', 'k1l2m3n4o5');  // Your deployment config ID
+    widgetDiv.setAttribute('data-features', 'chat,voice');
+    document.body.appendChild(widgetDiv);
+
+    // Load WIIL Widget script
     const script = document.createElement('script');
-    script.src = 'https://cdn.wiil.io/chat-widget.js';
+    script.src = 'https://cdn.wiil.io/public/wiil-widget.js';
     script.async = true;
     script.onload = () => {
-      window.WiilChat.init({
-        channelId: 'p6q7r8s9t0',
-        apiKey: 'pk_your_public_api_key'
-      });
+      window.WiilWidget.init();
     };
     document.body.appendChild(script);
 
     return () => {
+      // Cleanup on unmount
+      document.body.removeChild(widgetDiv);
       document.body.removeChild(script);
     };
   }, []);
@@ -679,230 +689,26 @@ Based on real conversations, update your instruction configuration:
 ```typescript
 const updatedInstructions = await client.instructionConfigs.update({
   id: instructionConfig.id,
-  systemPrompt: '... improved prompt based on learnings ...',
-  version: '1.1'
+  instructions: '... improved instructions based on learnings ...',
+  guardrails: '... updated safety constraints ...'
 });
 ```
 
-### 3. Add Knowledge Sources
+### 3. Enable Multi-Channel
 
-Enhance your agent with domain-specific knowledge:
+Deploy the same agent across multiple channels. See the [Channels Guide](./channels/README.md) for detailed setup:
 
-```typescript
-const knowledgeSource = await client.knowledgeSources.create({
-  name: 'Product Documentation',
-  description: 'Complete product catalog and specifications',
-  sourceType: 'DOCUMENT',
-  content: '... your product documentation ...'
-});
+- **[Voice Channels](./channels/voice-channels.md)**: Phone call support
+- **[SMS Channels](./channels/sms-channels.md)**: Text messaging support
 
-// Link to deployment
-await client.deploymentConfigs.update({
-  id: deploymentConfig.id,
-  knowledgeSourceIds: [knowledgeSource.id]
-});
-```
+### 4. Explore Advanced Features
 
-### 4. Enable Multi-Channel
-
-Deploy the same agent across multiple channels:
-
-```typescript
-// Add SMS channel
-const smsChannel = await client.deploymentChannels.create({
-  name: 'SMS Support',
-  channelType: 'SMS',
-  deploymentConfigId: deploymentConfig.id,
-  // ... SMS configuration
-});
-
-// Add phone channel
-const phoneChannel = await client.deploymentChannels.create({
-  name: 'Phone Support',
-  channelType: 'TELEPHONY',
-  deploymentConfigId: deploymentConfig.id,
-  // ... phone configuration
-});
-```
-
-### 5. Configure Business Catalogs
-
-Enable transactional operations (appointments, orders):
-
-```typescript
-// Create a business service
-const service = await client.businessServices.create({
-  name: 'Consultation',
-  description: '30-minute business consultation',
-  duration: 30,
-  price: 100.00
-});
-
-// Agent can now book appointments for this service!
-```
-
-### 6. Set Up Escalation Workflow
-
-Configure human handoff:
-
-```typescript
-await client.deploymentConfigs.update({
-  id: deploymentConfig.id,
-  escalationConfig: {
-    enabled: true,
-    humanAgentQueue: 'support-tier-1',
-    notifyVia: ['email', 'slack'],
-    notificationEmail: 'support@acme.com',
-    slackWebhook: 'https://hooks.slack.com/...'
-  }
-});
-```
-
-### 7. Implement A/B Testing
-
-Test different instruction sets:
-
-```typescript
-// Create variant instructions
-const instructionsV2 = await client.instructionConfigs.create({
-  name: 'Customer Support Instructions v2.0',
-  systemPrompt: '... alternative approach ...'
-});
-
-// Create test deployment (10% traffic)
-const testDeployment = await client.deploymentConfigs.create({
-  name: 'A/B Test - Instructions v2',
-  agentConfigId: agentConfig.id,
-  instructionConfigId: instructionsV2.id,
-  trafficAllocation: 0.1  // 10% of conversations
-});
-```
+- **Analytics**: Monitor conversation performance in WIIL Console
+- **A/B Testing**: Test different instruction configurations
+- **Custom Integrations**: Connect to your business systems
 
 ---
 
-## Complete Setup Script
-
-Here's the complete script combining all steps:
-
-```typescript
-import { WiilClient } from 'wiil-js';
-
-async function setupWiilAgent() {
-  // Initialize
-  const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
-
-  // Step 1: Verify organization
-  const org = await client.organizations.get();
-  console.log(`Organization: ${org.companyName}`);
-
-  // Step 2: Create project
-  const project = await client.projects.create({
-    name: 'Customer Support',
-    description: 'Customer support deployments'
-  });
-
-  // Step 3: Create instruction config (required for agent)
-  const instructions = await client.instructionConfigs.create({
-    instructionName: 'support-agent',
-    role: 'Customer Support Specialist',
-    introductionMessage: 'Hello! How can I help you today?',
-    instructions: 'You are a helpful customer support agent for ACME Corporation...',
-    guardrails: 'Never share sensitive customer information...'
-  });
-
-  // Step 4: Get support models
-  const defaultModel = await client.supportModels.getDefaultMultiMode();
-  const defaultTTS = await client.supportModels.getDefaultTTS();
-  const defaultSTT = await client.supportModels.getDefaultSTT();
-
-  if (!defaultModel) {
-    throw new Error('No default multi-mode model available');
-  }
-
-  console.log(`Using Model: ${defaultModel.name} (${defaultModel.modelId})`);
-
-  // Step 5: Create agent config
-  const agent = await client.agentConfigs.create({
-    name: 'Support Agent',
-    modelId: defaultModel.modelId,
-    instructionConfigurationId: instructions.id
-  });
-
-  // Step 6: Create deployment channel
-  const channel = await client.deploymentChannels.create({
-    channelName: 'Web Chat',
-    deploymentType: 'WEB',
-    channelIdentifier: 'web-chat-01',
-    recordingEnabled: true,
-    configuration: {
-      communicationType: 'TEXT',
-      customCssUrl: null,
-      widgetConfiguration: {
-        position: 'right',
-        theme: 'light',
-        customTheme: {}
-      }
-    }
-  });
-
-  // Step 7: Create deployment configuration
-  const deployment = await client.deploymentConfigs.create({
-    projectId: project.id,
-    deploymentChannelId: channel.id,
-    agentConfigurationId: agent.id,
-    instructionConfigurationId: instructions.id,
-    deploymentName: 'Customer Support Deployment',
-    isActive: true,
-    deploymentStatus: 'pending',
-    provisioningType: 'direct'
-  });
-
-  console.log('✓ Setup complete!');
-  console.log(`Channel ID: ${channel.id}`);
-}
-
-setupWiilAgent().catch(console.error);
-```
-
----
-
-## Troubleshooting
-
-### Issue: "Invalid API Key"
-
-**Solution**: Verify your API key in `.env` file and WIIL Console.
-
-```typescript
-// Test API key
-try {
-  const org = await client.organizations.get();
-  console.log('✓ API key is valid');
-} catch (error) {
-  console.error('✗ Invalid API key:', error.message);
-}
-```
-
-### Issue: "Channel not appearing on website"
-
-**Solutions**:
-1. Verify channel is active: `channel.isActive === true`
-2. Check channel ID in integration code
-3. Ensure script loads: Check browser console for errors
-4. Clear browser cache
-
-### Issue: "Agent not responding"
-
-**Solutions**:
-1. Verify deployment is active: `deployment.isActive === true`
-2. Check agent model is valid
-3. Review instruction configuration for errors
-4. Check WIIL Console for error logs
-
-### Issue: "Conversations immediately escalate"
-
-**Solution**: Review escalation triggers in the guardrails section - may be too sensitive. Update the instruction configuration's guardrails to adjust escalation keywords and conditions.
-
----
 
 ## Support & Resources
 

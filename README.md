@@ -170,10 +170,14 @@ const projects = await client.projects.list({
 #### Agent Configurations
 
 ```typescript
+// Get default multi-mode model
+const defaultModel = await client.supportModels.getDefaultMultiMode();
+
 // Create an agent configuration
 const agent = await client.agentConfigs.create({
-  name: 'Customer Support Agent',
-  description: 'AI agent for customer support'
+  agentName: 'Customer Support Agent',
+  modelId: defaultModel.modelId,
+  instructionConfigurationId: 'instruction_123'
 });
 
 // Get agent configuration
@@ -182,7 +186,7 @@ const agent = await client.agentConfigs.get('agent_123');
 // Update agent configuration
 const updated = await client.agentConfigs.update({
   id: 'agent_123',
-  name: 'Updated Agent Name'
+  agentName: 'Updated Agent Name'
 });
 
 // Delete agent configuration
@@ -195,17 +199,31 @@ const agents = await client.agentConfigs.list({ page: 1, pageSize: 20 });
 #### Deployment Channels
 
 ```typescript
-// Create a deployment channel
-const channel = await client.deploymentChannels.create({
-  name: 'Phone Channel',
-  type: 'PHONE'
+// Create a web chat channel
+const webChannel = await client.deploymentChannels.create({
+  channelName: 'Website Live Chat',
+  deploymentType: 'WEB',
+  channelIdentifier: 'https://example.com',
+  recordingEnabled: true,
+  configuration: {
+    communicationType: 'TEXT',
+    widgetConfiguration: {
+      position: 'right'
+    }
+  }
 });
 
+// Get channel by ID
+const channel = await client.deploymentChannels.get(webChannel.id);
+
 // List channels by type
-const phoneChannels = await client.deploymentChannels.listByType('PHONE', {
+const webChannels = await client.deploymentChannels.listByType('WEB', {
   page: 1,
   pageSize: 20
 });
+
+// Note: Voice channels (CALLS) are automatically created when you purchase a phone number
+// via client.phoneConfigs.purchase() - see Voice Channels guide for details
 ```
 
 #### Conversation Configurations
@@ -234,18 +252,24 @@ const sources = await client.knowledgeSources.list();
 
 ```typescript
 // Create a business service
-const service = await client.businessServices.create({
-  name: 'Hair Cut',
-  description: '30-minute hair cut service',
-  duration: 30,
-  price: 50.00
+const service = await client.services.create({
+  name: 'Hair Styling',
+  description: 'Professional hair styling service',
+  duration: 60,
+  bufferTime: 15,
+  price: 75.00,
+  isBookable: true,
+  isActive: true
 });
 
 // Get service
-const service = await client.businessServices.get('service_123');
+const service = await client.services.get('service_123');
 
 // List services
-const services = await client.businessServices.list();
+const services = await client.services.list({
+  page: 1,
+  pageSize: 20
+});
 ```
 
 #### Customers
@@ -271,19 +295,35 @@ const customers = await client.customers.list();
 // Create a menu category
 const category = await client.menus.createCategory({
   name: 'Appetizers',
+  description: 'Start your meal right',
   displayOrder: 1
 });
 
 // Create a menu item
 const item = await client.menus.createItem({
-  categoryId: 'cat_123',
   name: 'Caesar Salad',
-  description: 'Fresh romaine lettuce with Caesar dressing',
-  price: 12.99
+  description: 'Fresh romaine with house-made dressing',
+  price: 9.99,
+  categoryId: 'cat_123',
+  ingredients: ['romaine lettuce', 'parmesan', 'croutons', 'caesar dressing'],
+  allergens: ['dairy', 'gluten', 'eggs'],
+  nutritionalInfo: {
+    calories: 320,
+    protein: 8,
+    carbs: 22,
+    fat: 18
+  },
+  isAvailable: true,
+  preparationTime: 10,
+  isActive: true,
+  displayOrder: 1
 });
 
 // List menu categories
-const categories = await client.menus.listCategories();
+const categories = await client.menus.listCategories({
+  page: 1,
+  pageSize: 20
+});
 ```
 
 #### Products
@@ -292,20 +332,38 @@ const categories = await client.menus.listCategories();
 // Create a product category
 const category = await client.products.createCategory({
   name: 'Electronics',
-  description: 'Electronic devices and accessories'
+  description: 'Electronic devices and accessories',
+  displayOrder: 1
 });
 
 // Create a product
 const product = await client.products.create({
+  name: 'Wireless Mouse',
+  description: 'Ergonomic wireless mouse with 6 buttons',
+  price: 29.99,
+  sku: 'WM-2024-BLK',
+  barcode: '123456789012',
   categoryId: 'cat_123',
-  name: 'Wireless Headphones',
-  description: 'Premium noise-canceling headphones',
-  price: 299.99,
-  sku: 'WH-001'
+  brand: 'TechBrand',
+  trackInventory: true,
+  stockQuantity: 150,
+  lowStockThreshold: 20,
+  weight: 0.25,
+  dimensions: {
+    length: 4.5,
+    width: 2.8,
+    height: 1.6,
+    unit: 'inches'
+  },
+  isActive: true
 });
 
 // List products
-const products = await client.products.list();
+const products = await client.products.list({
+  page: 1,
+  pageSize: 50,
+  includeDeleted: false
+});
 ```
 
 #### Service Appointments
@@ -313,37 +371,63 @@ const products = await client.products.list();
 ```typescript
 // Create a service appointment
 const appointment = await client.serviceAppointments.create({
-  customerId: 'customer_123',
-  serviceId: 'service_123',
-  scheduledDate: '2025-01-15',
-  scheduledTime: '14:00',
-  notes: 'Customer prefers stylist Jane'
+  businessServiceId: 'service_123',
+  customerId: 'cust_456',
+  startTime: Date.now() + 3600000,
+  endTime: Date.now() + 7200000,
+  duration: 60,
+  totalPrice: 75.00,
+  depositPaid: 0
 });
 
 // Get appointment
 const appointment = await client.serviceAppointments.get('appt_123');
 
+// Get appointments by customer
+const customerAppointments = await client.serviceAppointments.getByCustomer('cust_456', {
+  page: 1,
+  pageSize: 20
+});
+
 // List appointments
-const appointments = await client.serviceAppointments.list();
+const appointments = await client.serviceAppointments.list({
+  page: 1,
+  pageSize: 20
+});
 ```
 
 #### Reservations
 
 ```typescript
-// Create a reservation
+// Create a table reservation
 const reservation = await client.reservations.create({
-  customerId: 'customer_123',
-  resourceId: 'resource_123',
-  date: '2025-01-15',
-  time: '19:00',
-  partySize: 4
+  reservationType: 'table',
+  resourceId: 'resource_table5',
+  customerId: 'cust_123',
+  startTime: Date.now() + 3600000,
+  endTime: Date.now() + 7200000,
+  duration: 2,
+  personsNumber: 4,
+  totalPrice: 0,
+  depositPaid: 0,
+  notes: 'Window table preferred',
+  isResourceReservation: true
 });
 
 // Get reservation
 const reservation = await client.reservations.get('res_123');
 
+// Get reservations by customer
+const customerReservations = await client.reservations.getByCustomer('cust_123', {
+  page: 1,
+  pageSize: 20
+});
+
 // List reservations
-const reservations = await client.reservations.list();
+const reservations = await client.reservations.list({
+  page: 1,
+  pageSize: 20
+});
 ```
 
 #### Menu Orders
@@ -351,19 +435,48 @@ const reservations = await client.reservations.list();
 ```typescript
 // Create a menu order
 const order = await client.menuOrders.create({
-  customerId: 'customer_123',
+  type: 'takeout',
   items: [
-    { menuItemId: 'item_123', quantity: 2 },
-    { menuItemId: 'item_456', quantity: 1 }
+    {
+      menuItemId: 'item_123',
+      itemName: 'Cheeseburger',
+      quantity: 2,
+      unitPrice: 12.99,
+      totalPrice: 25.98
+    },
+    {
+      menuItemId: 'item_456',
+      itemName: 'Caesar Salad',
+      quantity: 1,
+      unitPrice: 9.99,
+      totalPrice: 9.99
+    }
   ],
-  orderType: 'DELIVERY'
+  customerId: 'cust_123',
+  pricing: {
+    subtotal: 35.97,
+    tax: 3.60,
+    tip: 7.00,
+    total: 46.57
+  },
+  orderDate: Date.now(),
+  source: 'web'
 });
 
 // Get order
 const order = await client.menuOrders.get('order_123');
 
+// Get orders by customer
+const customerOrders = await client.menuOrders.getByCustomer('cust_123', {
+  page: 1,
+  pageSize: 20
+});
+
 // List orders
-const orders = await client.menuOrders.list();
+const orders = await client.menuOrders.list({
+  page: 1,
+  pageSize: 20
+});
 ```
 
 #### Product Orders
@@ -371,42 +484,91 @@ const orders = await client.menuOrders.list();
 ```typescript
 // Create a product order
 const order = await client.productOrders.create({
-  customerId: 'customer_123',
   items: [
-    { productId: 'prod_123', quantity: 1 },
-    { productId: 'prod_456', quantity: 2 }
+    {
+      productId: 'prod_123',
+      itemName: 'Wireless Headphones',
+      sku: 'WH-2024-BLK',
+      quantity: 2,
+      unitPrice: 79.99,
+      totalPrice: 159.98,
+      selectedVariant: 'Black'
+    },
+    {
+      productId: 'prod_456',
+      itemName: 'Phone Case',
+      sku: 'PC-2024-CLR',
+      quantity: 1,
+      unitPrice: 19.99,
+      totalPrice: 19.99
+    }
   ],
+  customerId: 'cust_789',
+  pricing: {
+    subtotal: 179.97,
+    tax: 14.40,
+    shippingAmount: 9.99,
+    total: 204.36
+  },
+  orderDate: Date.now(),
   shippingAddress: {
-    street: '123 Main St',
-    city: 'San Francisco',
-    state: 'CA',
-    zipCode: '94102'
-  }
+    street: '456 Delivery St',
+    city: 'Brooklyn',
+    state: 'NY',
+    postalCode: '11201',
+    country: 'US'
+  },
+  shippingMethod: 'Standard',
+  source: 'web'
 });
 
 // Get order
 const order = await client.productOrders.get('order_123');
 
+// Get orders by customer
+const customerOrders = await client.productOrders.getByCustomer('cust_789', {
+  page: 1,
+  pageSize: 20
+});
+
 // List orders
-const orders = await client.productOrders.list();
+const orders = await client.productOrders.list({
+  page: 1,
+  pageSize: 20
+});
 ```
 
 #### Reservable Resources
 
 ```typescript
-// Create a reservable resource
-const resource = await client.reservationResources.create({
+// Create a table resource
+const table = await client.reservationResources.create({
+  resourceType: 'table',
   name: 'Table 5',
-  type: 'TABLE',
+  description: 'Window-side table for 4 guests',
   capacity: 4,
-  location: 'Main Dining Room'
+  isAvailable: true,
+  location: 'Main dining area',
+  amenities: ['Window view', 'Booth seating'],
+  reservationDuration: 2,
+  reservationDurationUnit: 'hours',
+  syncEnabled: false
 });
 
 // Get resource
 const resource = await client.reservationResources.get('resource_123');
 
+// Get resources by type
+const tables = await client.reservationResources.getByType('table', {
+  page: 1,
+  pageSize: 20
+});
+
 // List resources
-const resources = await client.reservationResources.list();
+const resources = await client.reservationResources.list({
+  page: 1,
+  pageSize: 20
+});
 ```
 
 ## Error Handling
