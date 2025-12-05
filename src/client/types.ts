@@ -119,18 +119,14 @@ export interface APIResponse<T> {
  * ```typescript
  * const errorResponse: APIErrorResponse = {
  *   success: false,
- *   error: {
- *     code: 'VALIDATION_ERROR',
- *     message: 'Invalid organization name',
- *     details: {
- *       field: 'companyName',
- *       issue: 'Must be at least 2 characters'
- *     }
+ *   status: 400,
+ *   code: 'VALIDATION_ERROR',
+ *   message: 'Invalid organization name',
+ *   meta: {
+ *     field: 'companyName',
+ *     issue: 'Must be at least 2 characters'
  *   },
- *   metadata: {
- *     timestamp: 1704067200000,
- *     version: 'v1'
- *   }
+ *   timestamp: '2024-01-01T00:00:00.000Z'
  * };
  * ```
  */
@@ -141,37 +137,27 @@ export interface APIErrorResponse {
   success: false;
 
   /**
-   * Error details.
+   * HTTP status code.
    */
-  error: {
-    /**
-     * Error code for programmatic handling.
-     */
-    code: string;
-
-    /**
-     * Human-readable error message.
-     */
-    message: string;
-
-    /**
-     * Additional error details.
-     */
-    details?: unknown;
-  };
+  status: number;
 
   /**
-   * Response metadata.
+   * Error code for programmatic handling.
    */
-  metadata: {
-    /**
-     * Unix timestamp when the error occurred.
-     */
-    timestamp: number;
+  code: string;
 
-    /**
-     * API version.
-     */
-    version: string;
-  };
+  /**
+   * Human-readable error message.
+   */
+  message: string;
+
+  /**
+   * Additional error metadata.
+   */
+  meta?: Record<string, any>;
+
+  /**
+   * ISO timestamp when the error occurred.
+   */
+  timestamp: string;
 }

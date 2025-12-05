@@ -72,7 +72,21 @@ export class HttpClient {
 
     // Response interceptor
     this.client.interceptors.response.use(
-      (response) => response,
+      (response) => {
+        // Check if the response has success: false even with 2xx status code
+        if (response.data && !response.data.success) {
+          // Create an error from the successful HTTP response with unsuccessful API result
+          const errorData = response.data as APIErrorResponse;
+          const error = new WiilAPIError(
+            errorData.message || 'Request failed',
+            errorData.status || response.status,
+            errorData.code || 'API_ERROR',
+            errorData.meta
+          );
+          return Promise.reject(error);
+        }
+        return response;
+      },
       (error) => {
         return Promise.reject(this.handleError(error));
       }
@@ -111,12 +125,12 @@ export class HttpClient {
       // API errors (response received with error status)
       const { status, data } = axiosError.response;
 
-      if (data && !data.success && data.error) {
+      if (data && !data.success) {
         return new WiilAPIError(
-          data.error.message,
-          status,
-          data.error.code,
-          data.error.details
+          data.message || 'Request failed',
+          data.status || status,
+          data.code || 'API_ERROR',
+          data.meta
         );
       }
 
@@ -155,6 +169,18 @@ export class HttpClient {
     config?: AxiosRequestConfig
   ): Promise<T> {
     const response = await this.client.get<APIResponse<T>>(path, config);
+
+    // Check if the response was successful
+    if (!response.data.success) {
+      // This should have been caught by the interceptor, but handle it just in case
+      throw new WiilAPIError(
+        'Request failed',
+        response.status,
+        'REQUEST_FAILED',
+        response.data
+      );
+    }
+
     return response.data.data;
   }
 
@@ -197,6 +223,18 @@ export class HttpClient {
       data,
       config
     );
+
+    // Check if the response was successful
+    if (!response.data.success) {
+      // This should have been caught by the interceptor, but handle it just in case
+      throw new WiilAPIError(
+        'Request failed',
+        response.status,
+        'REQUEST_FAILED',
+        response.data
+      );
+    }
+
     return response.data.data;
   }
 
@@ -239,6 +277,18 @@ export class HttpClient {
       data,
       config
     );
+
+    // Check if the response was successful
+    if (!response.data.success) {
+      // This should have been caught by the interceptor, but handle it just in case
+      throw new WiilAPIError(
+        'Request failed',
+        response.status,
+        'REQUEST_FAILED',
+        response.data
+      );
+    }
+
     return response.data.data;
   }
 
@@ -279,6 +329,18 @@ export class HttpClient {
       data,
       config
     );
+
+    // Check if the response was successful
+    if (!response.data.success) {
+      // This should have been caught by the interceptor, but handle it just in case
+      throw new WiilAPIError(
+        'Request failed',
+        response.status,
+        'REQUEST_FAILED',
+        response.data
+      );
+    }
+
     return response.data.data;
   }
 
@@ -299,6 +361,18 @@ export class HttpClient {
     config?: AxiosRequestConfig
   ): Promise<TResponse> {
     const response = await this.client.delete<APIResponse<TResponse>>(path, config);
+
+    // Check if the response was successful
+    if (!response.data.success) {
+      // This should have been caught by the interceptor, but handle it just in case
+      throw new WiilAPIError(
+        'Request failed',
+        response.status,
+        'REQUEST_FAILED',
+        response.data
+      );
+    }
+
     return response.data.data;
   }
 }
