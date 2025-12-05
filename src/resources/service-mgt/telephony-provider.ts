@@ -29,18 +29,20 @@ export interface PhoneNumberSearchOptions {
  *
  * @example
  * ```typescript
+ * import { ProviderType } from 'wiil-core-js';
+ *
  * const client = new TravnexClient({ apiKey: 'your-api-key' });
  *
  * // Get available regions for SignalWire
- * const regions = await client.telephonyProvider.getRegions('SIGNALWIRE');
+ * const regions = await client.telephonyProvider.getRegions(ProviderType.SIGNALWIRE);
  *
  * // Search for phone numbers in a specific region
- * const numbers = await client.telephonyProvider.getPhoneNumbers('SIGNALWIRE', 'US', {
+ * const numbers = await client.telephonyProvider.getPhoneNumbers(ProviderType.SIGNALWIRE, 'US', {
  *   areaCode: '206'
  * });
  *
  * // Get pricing for a region
- * const pricing = await client.telephonyProvider.getPricing('SIGNALWIRE', 'US');
+ * const pricing = await client.telephonyProvider.getPricing(ProviderType.SIGNALWIRE, 'US');
  * ```
  */
 export class TelephonyProviderResource {
@@ -69,10 +71,10 @@ export class TelephonyProviderResource {
    *
    * @example
    * ```typescript
-   * const regions = await client.telephonyProvider.getRegions('SIGNALWIRE');
+   * const regions = await client.telephonyProvider.getRegions(ProviderType.SIGNALWIRE);
    * console.log(`Found ${regions.length} regions`);
    * regions.forEach(region => {
-   *   console.log(`- ${region.name} (${region.code})`);
+   *   console.log(`- ${region.regionName} (${region.regionId})`);
    * });
    * ```
    */
@@ -98,15 +100,15 @@ export class TelephonyProviderResource {
    * @example
    * ```typescript
    * // Search for phone numbers in US
-   * const numbers = await client.telephonyProvider.getPhoneNumbers('SIGNALWIRE', 'US');
+   * const numbers = await client.telephonyProvider.getPhoneNumbers(ProviderType.SIGNALWIRE, 'US');
    *
    * // Search with area code filter
-   * const seattleNumbers = await client.telephonyProvider.getPhoneNumbers('SIGNALWIRE', 'US', {
+   * const seattleNumbers = await client.telephonyProvider.getPhoneNumbers(ProviderType.SIGNALWIRE, 'US', {
    *   areaCode: '206'
    * });
    *
    * // Search for specific number pattern
-   * const customNumbers = await client.telephonyProvider.getPhoneNumbers('SIGNALWIRE', 'US', {
+   * const customNumbers = await client.telephonyProvider.getPhoneNumbers(ProviderType.SIGNALWIRE, 'US', {
    *   contains: '555',
    *   postalCode: '98101'
    * });
@@ -144,10 +146,10 @@ export class TelephonyProviderResource {
    *
    * @example
    * ```typescript
-   * const pricing = await client.telephonyProvider.getPricing('SIGNALWIRE', 'US');
+   * const pricing = await client.telephonyProvider.getPricing(ProviderType.SIGNALWIRE, 'US');
    * pricing.forEach(price => {
-   *   console.log(`Number Type: ${price.numberType}`);
-   *   console.log(`Base Price: $${price.currentPrice}`);
+   *   console.log(`Number Type: ${price.number_type}`);
+   *   console.log(`Price: $${price.price}`);
    * });
    * ```
    */
