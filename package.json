@@ -1,6 +1,6 @@
 {
   "name": "wiil-js",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Official JavaScript/TypeScript SDK for WIIL Platform - AI-powered conversational services for intelligent customer interactions, voice processing, real-time translation, and business management",
   "license": "MIT",
   "author": "WIIL",
