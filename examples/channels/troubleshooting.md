@@ -524,7 +524,7 @@ try {
 ```typescript
 // Test connectivity
 try {
-  await client.deploymentChannels.list({ limit: 1 });
+  await client.deploymentChannels.list({ pageSize: 1 });
   console.log('✓ Network connection OK');
 } catch (error) {
   console.log('✗ Network connection failed');

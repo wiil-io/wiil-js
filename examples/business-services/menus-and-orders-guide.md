@@ -205,7 +205,7 @@ console.log('Items in category:', result.data.length);
 ```typescript
 const result = await client.menus.getPopularItems({
   page: 1,
-  limit: 10,
+  pageSize: 10,
 });
 
 console.log('Top items:', result.data.map(item => item.name));

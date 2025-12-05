@@ -155,13 +155,12 @@ export class MenusResource {
    * Retrieves popular menu items with optional pagination.
    */
   public async getPopularItems(
-    params?: Partial<PaginationRequest & { limit?: number }>
+    params?: Partial<PaginationRequest>
   ): Promise<PaginatedResultType<BusinessMenuItem>> {
     const queryParams = new URLSearchParams();
 
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
 
     const path = `${this.resource_path}/items/popular${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
