@@ -25,6 +25,46 @@ Before purchasing:
 
 ---
 
+## Finding Available Phone Numbers
+
+Before purchasing, search for available phone numbers from your telephony provider.
+
+### Get Available Regions
+
+```typescript
+import { WiilClient } from 'wiil-js';
+import { ProviderType } from 'wiil-core-js';
+
+const client = new WiilClient({
+  apiKey: process.env.WIIL_API_KEY!
+});
+
+// Get available regions for SignalWire
+const regions = await client.telephonyProvider.getRegions(ProviderType.SIGNALWIRE);
+
+console.log(`Found ${regions.length} regions`);
+regions.forEach(region => {
+  console.log(`- ${region.regionName} (${region.regionId})`);
+});
+```
+
+### Search for Phone Numbers
+
+```typescript
+// Get all available phone numbers in the region
+const numbers = await client.telephonyProvider.getPhoneNumbers(
+  ProviderType.SIGNALWIRE,
+  'US'
+);
+
+console.log(`Found ${numbers.length} available numbers`);
+numbers.forEach(number => {
+  console.log(`${number.phoneNumber} - ${number.friendlyName}`);
+});
+```
+
+---
+
 ## Step-by-Step Purchase
 
 ### Step 1: Initialize Client

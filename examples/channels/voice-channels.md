@@ -26,6 +26,41 @@ Before setting up voice channels:
 
 ## Quick Start
 
+### Step 0: Find Available Phone Numbers
+
+Before purchasing, search for available phone numbers.
+
+```typescript
+import { WiilClient } from 'wiil-js';
+import { ProviderType } from 'wiil-core-js';
+
+const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
+
+// Get available regions
+const regions = await client.telephonyProvider.getRegions(ProviderType.SIGNALWIRE);
+
+// Select a region
+const usRegion = regions.find(r => r.countryCode === 'US');
+
+// Search for phone numbers
+const numbers = await client.telephonyProvider.getPhoneNumbers(
+  ProviderType.SIGNALWIRE,
+  usRegion.countryCode
+);
+
+console.log(`Found ${numbers.length} available numbers`);
+
+// Get pricing
+const pricing = await client.telephonyProvider.getPricing(
+  ProviderType.SIGNALWIRE,
+  usRegion.countryCode
+);
+
+console.log('Pricing:', pricing);
+```
+
+> **📖 See Full Guide**: [Phone Purchase Guide](./phone-purchase.md) for complete details on searching and purchasing phone numbers.
+
 ### Step 1: Purchase Phone Number
 
 Voice channels are created automatically when you purchase a phone number.

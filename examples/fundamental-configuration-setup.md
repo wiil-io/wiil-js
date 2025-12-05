@@ -15,11 +15,12 @@ This guide walks you through the complete, chronological steps to set up and con
 5. [Step 3: Create Instruction Configuration](#step-3-create-instruction-configuration)
 6. [Step 4: Get Wiil Support Models](#step-4-get-wiil-support-models)
 7. [Step 5: Create Agent Configuration](#step-5-create-agent-configuration)
-8. [Step 6: Create Deployment Channel](#step-6-create-deployment-channel)
-9. [Step 7: Create Deployment Configuration](#step-7-create-deployment-configuration)
-10. [Step 8: Deploy Agent](#step-8-deploy-agent)
-11. [Step 9: Verify Deployment](#step-9-verify-deployment)
-12. [Next Steps](#next-steps)
+8. [Step 5.1: Find Available Phone Numbers](#step-51-find-available-phone-numbers)
+9. [Step 6: Create Deployment Channel](#step-6-create-deployment-channel)
+10. [Step 7: Create Deployment Configuration](#step-7-create-deployment-configuration)
+11. [Step 8: Deploy Agent](#step-8-deploy-agent)
+12. [Step 9: Verify Deployment](#step-9-verify-deployment)
+13. [Next Steps](#next-steps)
 
 ---
 
@@ -413,6 +414,141 @@ Agent ID: a1b2c3d4e5
 Using Model: Gemini 2.0 Flash (Experimental) (abc123xyz)
 Using Instructions: customer-support-agent
 ```
+
+---
+
+## Step 5.1: Find Available Phone Numbers
+
+**Objective**: Search for available phone numbers for voice or SMS channels.
+
+> **📖 Full Guide**: For a complete phone number purchasing workflow, see the [Phone Purchase Guide](./channels/phone-purchase.md).
+
+### When to Use This
+
+Before purchasing a phone number for CALLS or SMS channels, use this API to:
+
+- Search available phone numbers by region/country
+- Filter by area code or postal code
+- Check pricing for different number types
+
+### Understanding Telephony Provider
+
+The Telephony Provider API allows you to:
+
+- Get available regions for phone number provisioning
+- Search for available phone numbers with filters
+- Get pricing information before purchase
+
+### Code
+
+```typescript
+import { ProviderType } from 'wiil-core-js';
+
+// Step 1: Get available regions
+const regions = await client.telephonyProvider.getRegions(ProviderType.SIGNALWIRE);
+console.log(`Found ${regions.length} available regions`);
+
+regions.forEach(region => {
+  console.log(`  - ${region.regionName} (${region.regionId}) - ${region.countryCode}`);
+});
+
+// Step 2: Select a region (e.g., United States)
+const usRegion = regions.find(r => r.countryCode === 'US');
+if (!usRegion) {
+  throw new Error('US region not available');
+}
+
+// Step 3: Search for phone numbers in the selected region
+const numbers = await client.telephonyProvider.getPhoneNumbers(
+  ProviderType.SIGNALWIRE,
+  usRegion.countryCode
+);
+
+console.log(`\nFound ${numbers.length} available phone numbers`);
+
+// Display first 5 numbers
+numbers.slice(0, 5).forEach(number => {
+  console.log(`  ${number.phoneNumber} - ${number.friendlyName}`);
+  if (number.locality) {
+    console.log(`    Location: ${number.locality}, ${number.region}`);
+  }
+});
+
+// Step 4: Get pricing information
+const pricing = await client.telephonyProvider.getPricing(
+  ProviderType.SIGNALWIRE,
+  usRegion.countryCode
+);
+
+console.log('\nPricing Information:');
+pricing.forEach(price => {
+  console.log(`  ${price.number_type}: $${price.price}/month`);
+});
+```
+
+### Expected Output
+
+```
+Found 12 available regions
+  - United States (us-east-1) - US
+  - Canada (ca-central-1) - CA
+  - United Kingdom (eu-west-2) - GB
+  ...
+
+Found 150 available phone numbers
+  +12065551234 - (206) 555-1234
+    Location: Seattle, WA
+  +12065551235 - (206) 555-1235
+    Location: Seattle, WA
+  +12125551000 - (212) 555-1000
+    Location: New York, NY
+  ...
+
+Pricing Information:
+  local: $1.00/month
+  toll-free: $2.00/month
+```
+
+### Search with Filters
+
+You can narrow your search using optional filters:
+
+```typescript
+// Search for numbers in a specific area code
+const seattleNumbers = await client.telephonyProvider.getPhoneNumbers(
+  ProviderType.SIGNALWIRE,
+  usRegion.countryCode,
+  { areaCode: '206' }  // Seattle area code
+);
+
+// Search for numbers with specific pattern and postal code
+const customNumbers = await client.telephonyProvider.getPhoneNumbers(
+  ProviderType.SIGNALWIRE,
+  usRegion.countryCode,
+  {
+    contains: '555',
+    postalCode: '98101'
+  }
+);
+```
+
+### Next: Purchase Phone Number
+
+Once you've found a suitable number, purchase it using the Phone Configurations API:
+
+```typescript
+const phonePurchase = await client.phoneConfigs.purchase({
+  friendlyName: 'Customer Support Line',
+  phoneNumber: '+12065551234',  // Number from search results
+  providerType: ProviderType.SIGNALWIRE,
+  numberType: PhoneNumberType.LOCAL
+});
+
+console.log(`Purchase ID: ${phonePurchase.id}`);
+console.log(`Status: ${phonePurchase.status}`);
+```
+
+See the [Phone Purchase Guide](./channels/phone-purchase.md) for complete phone number purchasing workflow.
 
 ---
 
