@@ -28,6 +28,7 @@ import {
   TranslationSessionsResource,
   KnowledgeSourcesResource,
   SupportModelsResource,
+  TelephonyProviderResource,
 } from '../resources/service-mgt';
 import { WiilConfigurationError } from '../errors/WiilError';
 
@@ -219,6 +220,29 @@ export class WiilClient {
    */
   public readonly supportModels: SupportModelsResource;
 
+  /**
+   * Telephony Provider resource for managing phone numbers and telephony services.
+   *
+   * @remarks
+   * Provides methods for retrieving available regions, searching for phone numbers,
+   * and getting pricing information from various telephony providers.
+   *
+   * @example
+   * ```typescript
+   * // Get available regions
+   * const regions = await client.telephonyProvider.getRegions('SIGNALWIRE');
+   *
+   * // Search for phone numbers
+   * const numbers = await client.telephonyProvider.getPhoneNumbers('SIGNALWIRE', 'US', {
+   *   areaCode: '206'
+   * });
+   *
+   * // Get pricing
+   * const pricing = await client.telephonyProvider.getPricing('SIGNALWIRE', 'US');
+   * ```
+   */
+  public readonly telephonyProvider: TelephonyProviderResource;
+
   private readonly http: HttpClient;
 
   /**
@@ -282,6 +306,7 @@ export class WiilClient {
     this.translationSessions = new TranslationSessionsResource(this.http);
     this.knowledgeSources = new KnowledgeSourcesResource(this.http);
     this.supportModels = new SupportModelsResource(this.http);
+    this.telephonyProvider = new TelephonyProviderResource(this.http);
   }
 
   /**

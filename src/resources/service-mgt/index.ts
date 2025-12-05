@@ -13,3 +13,4 @@ export * from './conversation-configs';
 export * from './translation-sessions';
 export * from './knowledge-sources';
 export * from './support-models';
+export * from './telephony-provider';
