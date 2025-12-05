@@ -40,7 +40,6 @@ export class HttpClient {
       baseURL: config.baseUrl,
       timeout: config.timeout,
       headers: {
-        'Content-Type': 'application/json',
         'X-WIIL-API-Key': this.apiKey,
       },
     });
@@ -221,7 +220,13 @@ export class HttpClient {
     const response = await this.client.post<APIResponse<TResponse>>(
       path,
       data,
-      config
+      {
+        ...config,
+        headers: {
+          'Content-Type': 'application/json',
+          ...config?.headers,
+        },
+      }
     );
 
     // Check if the response was successful
@@ -275,7 +280,13 @@ export class HttpClient {
     const response = await this.client.put<APIResponse<TResponse>>(
       path,
       data,
-      config
+      {
+        ...config,
+        headers: {
+          'Content-Type': 'application/json',
+          ...config?.headers,
+        },
+      }
     );
 
     // Check if the response was successful
@@ -327,7 +338,13 @@ export class HttpClient {
     const response = await this.client.patch<APIResponse<TResponse>>(
       path,
       data,
-      config
+      {
+        ...config,
+        headers: {
+          'Content-Type': 'application/json',
+          ...config?.headers,
+        },
+      }
     );
 
     // Check if the response was successful
