@@ -67,8 +67,8 @@ export class MenuOrdersResource {
     );
   }
 
-  public async cancel(id: string, data: { cancelreason: string }): Promise<MenuOrder> {
-    return this.http.post<{ cancelreason: string }, MenuOrder>(
+  public async cancel(id: string, data: { cancelReason: string }): Promise<MenuOrder> {
+    return this.http.post<{ cancelReason: string }, MenuOrder>(
       `${this.resource_path}/${id}/cancel`,
       data
     );
