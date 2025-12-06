@@ -143,8 +143,8 @@ export class ServiceAppointmentsResource {
    * @throws {@link WiilAPIError} - When the appointment is not found or API returns an error
    * @throws {@link WiilNetworkError} - When network communication fails
    */
-  public async cancel(id: string, data: { reason?: string }): Promise<ServiceAppointment> {
-    return this.http.post<{ reason?: string }, ServiceAppointment>(
+  public async cancel(id: string, data: { cancelReason?: string }): Promise<ServiceAppointment> {
+    return this.http.post<{ cancelReason?: string }, ServiceAppointment>(
       `${this.resource_path}/${id}/cancel`,
       data
     );

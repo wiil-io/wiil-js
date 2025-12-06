@@ -194,8 +194,8 @@ export class ReservationsResource {
    * @throws {@link WiilAPIError} - When the reservation is not found or API returns an error
    * @throws {@link WiilNetworkError} - When network communication fails
    */
-  public async cancel(id: string, data: { reason?: string }): Promise<Reservation> {
-    return this.http.post<{ reason?: string }, Reservation>(
+  public async cancel(id: string, data: { cancelReason?: string }): Promise<Reservation> {
+    return this.http.post<{ cancelReason?: string }, Reservation>(
       `${this.resource_path}/${id}/cancel`,
       data
     );
