@@ -11,6 +11,7 @@ import {
   UpdateMenuOrderSchema,
   PaginatedResultType,
   PaginationRequest,
+  UpdateMenuOrderStatus,
 } from 'wiil-core-js';
 import { HttpClient } from '../../client/HttpClient';
 
@@ -59,15 +60,15 @@ export class MenuOrdersResource {
     );
   }
 
-  public async updateStatus(id: string, data: { status: string }): Promise<MenuOrder> {
+  public async updateStatus(id: string, data: UpdateMenuOrderStatus): Promise<MenuOrder> {
     return this.http.patch<{ status: string }, MenuOrder>(
       `${this.resource_path}/${id}/status`,
       data
     );
   }
 
-  public async cancel(id: string, data: { reason?: string }): Promise<MenuOrder> {
-    return this.http.post<{ reason?: string }, MenuOrder>(
+  public async cancel(id: string, data: { cancelreason: string }): Promise<MenuOrder> {
+    return this.http.post<{ cancelreason: string }, MenuOrder>(
       `${this.resource_path}/${id}/cancel`,
       data
     );

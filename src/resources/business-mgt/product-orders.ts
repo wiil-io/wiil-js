@@ -11,6 +11,7 @@ import {
   UpdateProductOrderSchema,
   PaginatedResultType,
   PaginationRequest,
+  UpdateProductOrderStatus,
 } from 'wiil-core-js';
 import { HttpClient } from '../../client/HttpClient';
 
@@ -59,15 +60,15 @@ export class ProductOrdersResource {
     );
   }
 
-  public async updateStatus(id: string, data: { status: string }): Promise<ProductOrder> {
+  public async updateStatus(id: string, data: UpdateProductOrderStatus): Promise<ProductOrder> {
     return this.http.patch<{ status: string }, ProductOrder>(
       `${this.resource_path}/${id}/status`,
       data
     );
   }
 
-  public async cancel(id: string, data: { reason?: string }): Promise<ProductOrder> {
-    return this.http.post<{ reason?: string }, ProductOrder>(
+  public async cancel(id: string, data: { cancelreason: string }): Promise<ProductOrder> {
+    return this.http.post<{ cancelreason: string }, ProductOrder>(
       `${this.resource_path}/${id}/cancel`,
       data
     );
