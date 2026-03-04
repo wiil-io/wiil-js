@@ -464,7 +464,7 @@ describe('MenuOrdersResource', () => {
       };
 
       nock(BASE_URL)
-        .patch('/menu-orders/order_123/status', { status: OrderStatus.PREPARING })
+        .patch('/menu-orders/order_123/status', { id: 'order_123', status: OrderStatus.PREPARING })
         .matchHeader('X-WIIL-API-Key', API_KEY)
         .reply(200, {
           success: true,
@@ -472,7 +472,7 @@ describe('MenuOrdersResource', () => {
           metadata: { timestamp: Date.now(), version: 'v1' },
         });
 
-      const result = await client.menuOrders.updateStatus('order_123', { status: OrderStatus.PREPARING });
+      const result = await client.menuOrders.updateStatus('order_123', { id: 'order_123', status: OrderStatus.PREPARING });
 
       expect(result.status).toBe(OrderStatus.PREPARING);
     });
@@ -516,7 +516,7 @@ describe('MenuOrdersResource', () => {
       };
 
       nock(BASE_URL)
-        .post('/menu-orders/order_123/cancel', { reason: 'Customer requested cancellation' })
+        .post('/menu-orders/order_123/cancel', { cancelReason: 'Customer requested cancellation' })
         .matchHeader('X-WIIL-API-Key', API_KEY)
         .reply(200, {
           success: true,
@@ -524,7 +524,7 @@ describe('MenuOrdersResource', () => {
           metadata: { timestamp: Date.now(), version: 'v1' },
         });
 
-      const result = await client.menuOrders.cancel('order_123', { reason: 'Customer requested cancellation' });
+      const result = await client.menuOrders.cancel('order_123', { cancelReason: 'Customer requested cancellation' });
 
       expect(result.status).toBe(OrderStatus.CANCELLED);
       expect(result.cancelReason).toBe('Customer requested cancellation');

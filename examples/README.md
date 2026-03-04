@@ -6,6 +6,8 @@ This directory contains comprehensive examples and guides for building AI-powere
 
 - [Getting Started](#getting-started)
 - [Quick Start Guide](#quick-start-guide)
+  - [Fundamental Configuration Setup](#fundamental-configuration-setup)
+  - [Dynamic Agent Setup](#dynamic-agent-setup)
 - [Core Guides](#core-guides)
 - [Business Service Guides](#business-service-guides)
 - [Configuration Flow](#configuration-flow)
@@ -70,6 +72,22 @@ This is the **recommended starting point** for all new users. It covers:
 9. **Verify Deployment** (test and monitor)
 
 [📖 Read the Full Guide](./fundamental-configuration-setup.md)
+
+### Dynamic Agent Setup
+
+**File**: [dynamic-agent-setup-guide.md](./dynamic-agent-setup-guide.md)
+
+Simplified, single-call agent deployment for rapid prototyping.
+
+**Choose this guide when you want simplicity over granular control.** It covers:
+
+- Dynamic Phone Agent setup
+- Dynamic Web Agent setup
+- Voice configuration (STT/TTS)
+- Role templates and capabilities
+- Quick deployment for demos and MVPs
+
+[📖 Read the Dynamic Setup Guide](./dynamic-agent-setup-guide.md)
 
 ---
 
@@ -139,6 +157,18 @@ Resource reservation management:
 - Customer reservations and bookings
 - Capacity management
 - Calendar sync
+
+### Property Management
+
+**File**: [property-management-guide.md](./business-services/property-management-guide.md)
+
+Real estate property and inquiry management:
+
+- Property categories and listings
+- Property addresses and verification
+- Listing types (sale, rent, both)
+- Customer inquiries and lead tracking
+- Viewing scheduling and follow-ups
 
 ---
 

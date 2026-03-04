@@ -16,6 +16,8 @@ import {
   ReservationResourcesResource,
   ReservationsResource,
   ServiceAppointmentsResource,
+  PropertyConfigResource,
+  PropertyInquiryResource,
 } from '../resources/business-mgt';
 import {
   AgentConfigurationsResource,
@@ -29,6 +31,9 @@ import {
   KnowledgeSourcesResource,
   SupportModelsResource,
   TelephonyProviderResource,
+  DynamicPhoneAgentResource,
+  DynamicWebAgentResource,
+  DynamicAgentStatusResource,
 } from '../resources/service-mgt';
 import { WiilConfigurationError } from '../errors/WiilError';
 
@@ -157,6 +162,16 @@ export class WiilClient {
   public readonly serviceAppointments: ServiceAppointmentsResource;
 
   /**
+   * Property Configuration resource for managing property listings, categories, and addresses.
+   */
+  public readonly propertyConfig: PropertyConfigResource;
+
+  /**
+   * Property Inquiries resource for managing property leads and inquiries.
+   */
+  public readonly propertyInquiries: PropertyInquiryResource;
+
+  /**
    * Agent Configurations resource for managing AI agent configurations.
    */
   public readonly agentConfigs: AgentConfigurationsResource;
@@ -243,6 +258,79 @@ export class WiilClient {
    */
   public readonly telephonyProvider: TelephonyProviderResource;
 
+  /**
+   * Dynamic Phone Agent resource for provisioning phone-based AI agents.
+   *
+   * @remarks
+   * Provides methods for creating, retrieving, updating, and deleting dynamic
+   * phone agents with configurable STT/TTS capabilities.
+   *
+   * @example
+   * ```typescript
+   * // Create a phone agent
+   * const result = await client.dynamicPhoneAgent.create({
+   *   assistantName: 'Customer Service',
+   *   language: 'en-US',
+   *   phoneConfigurationId: 'phone_config_123'
+   * });
+   * console.log('Phone number:', result.phoneNumber);
+   * ```
+   */
+  public readonly dynamicPhoneAgent: DynamicPhoneAgentResource;
+
+  /**
+   * Dynamic Web Agent resource for provisioning web-based AI agents.
+   *
+   * @remarks
+   * Provides methods for creating, retrieving, updating, and deleting dynamic
+   * web agents with configurable communication types and integration snippets.
+   *
+   * @example
+   * ```typescript
+   * import { OttCommunicationType } from 'wiil-core-js';
+   *
+   * // Create a web agent
+   * const result = await client.dynamicWebAgent.create({
+   *   assistantName: 'Website Support',
+   *   websiteUrl: 'https://example.com',
+   *   communicationType: OttCommunicationType.TEXT
+   * });
+   * console.log('Integration snippets:', result.integrationSnippets);
+   * ```
+   */
+  public readonly dynamicWebAgent: DynamicWebAgentResource;
+
+  /**
+   * Dynamic Agent Status resource for polling agent setup progress.
+   *
+   * @remarks
+   * Provides methods for checking and polling the status of dynamic agent setup
+   * operations. Supports both phone and web agent configurations.
+   *
+   * @example
+   * ```typescript
+   * // Create a dynamic agent
+   * const result = await client.dynamicPhoneAgent.create({
+   *   assistantName: 'Support Agent',
+   *   capabilities: [BusinessSupportServices.APPOINTMENT_MANAGEMENT],
+   * });
+   *
+   * // Poll until setup completes
+   * const final = await client.dynamicAgentStatus.poll(result.id, {
+   *   interval: 2000,
+   *   timeout: 60000,
+   *   onProgress: (state) => {
+   *     console.log(`${state.progressPercentage}% - ${state.message}`);
+   *   }
+   * });
+   *
+   * if (final.success) {
+   *   console.log('Agent ready:', final.agentConfigurationId);
+   * }
+   * ```
+   */
+  public readonly dynamicAgentStatus: DynamicAgentStatusResource;
+
   private readonly http: HttpClient;
 
   /**
@@ -294,6 +382,8 @@ export class WiilClient {
     this.reservationResources = new ReservationResourcesResource(this.http);
     this.reservations = new ReservationsResource(this.http);
     this.serviceAppointments = new ServiceAppointmentsResource(this.http);
+    this.propertyConfig = new PropertyConfigResource(this.http);
+    this.propertyInquiries = new PropertyInquiryResource(this.http);
 
     // Service Management resources
     this.agentConfigs = new AgentConfigurationsResource(this.http);
@@ -307,6 +397,9 @@ export class WiilClient {
     this.knowledgeSources = new KnowledgeSourcesResource(this.http);
     this.supportModels = new SupportModelsResource(this.http);
     this.telephonyProvider = new TelephonyProviderResource(this.http);
+    this.dynamicPhoneAgent = new DynamicPhoneAgentResource(this.http);
+    this.dynamicWebAgent = new DynamicWebAgentResource(this.http);
+    this.dynamicAgentStatus = new DynamicAgentStatusResource(this.http);
   }
 
   /**

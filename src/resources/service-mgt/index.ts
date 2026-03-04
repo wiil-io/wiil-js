@@ -14,3 +14,6 @@ export * from './translation-sessions';
 export * from './knowledge-sources';
 export * from './support-models';
 export * from './telephony-provider';
+export * from './dynamic-phone-agent';
+export * from './dynamic-web-agent';
+export * from './dynamic-agent-status';

@@ -561,7 +561,7 @@ describe('ProductOrdersResource', () => {
       };
 
       nock(BASE_URL)
-        .patch('/product-orders/order_123/status', { status: OrderStatus.OUT_FOR_DELIVERY })
+        .patch('/product-orders/order_123/status', { id: 'order_123', status: OrderStatus.OUT_FOR_DELIVERY })
         .matchHeader('X-WIIL-API-Key', API_KEY)
         .reply(200, {
           success: true,
@@ -569,7 +569,7 @@ describe('ProductOrdersResource', () => {
           metadata: { timestamp: Date.now(), version: 'v1' },
         });
 
-      const result = await client.productOrders.updateStatus('order_123', { status: OrderStatus.OUT_FOR_DELIVERY });
+      const result = await client.productOrders.updateStatus('order_123', { id: 'order_123', status: OrderStatus.OUT_FOR_DELIVERY });
 
       expect(result.status).toBe(OrderStatus.OUT_FOR_DELIVERY);
       expect(result.shippedDate).toBeDefined();
@@ -605,7 +605,7 @@ describe('ProductOrdersResource', () => {
       };
 
       nock(BASE_URL)
-        .post('/product-orders/order_123/cancel', { reason: 'Customer requested cancellation' })
+        .post('/product-orders/order_123/cancel', { cancelReason: 'Customer requested cancellation' })
         .matchHeader('X-WIIL-API-Key', API_KEY)
         .reply(200, {
           success: true,
@@ -613,7 +613,7 @@ describe('ProductOrdersResource', () => {
           metadata: { timestamp: Date.now(), version: 'v1' },
         });
 
-      const result = await client.productOrders.cancel('order_123', { reason: 'Customer requested cancellation' });
+      const result = await client.productOrders.cancel('order_123', { cancelReason: 'Customer requested cancellation' });
 
       expect(result.status).toBe(OrderStatus.CANCELLED);
       expect(result.cancelReason).toBe('Customer requested cancellation');
@@ -647,7 +647,7 @@ describe('ProductOrdersResource', () => {
       };
 
       nock(BASE_URL)
-        .post('/product-orders/order_456/cancel', {})
+        .post('/product-orders/order_456/cancel', { cancelReason: '' })
         .matchHeader('X-WIIL-API-Key', API_KEY)
         .reply(200, {
           success: true,
@@ -655,7 +655,7 @@ describe('ProductOrdersResource', () => {
           metadata: { timestamp: Date.now(), version: 'v1' },
         });
 
-      const result = await client.productOrders.cancel('order_456', {});
+      const result = await client.productOrders.cancel('order_456', { cancelReason: '' });
 
       expect(result.status).toBe(OrderStatus.CANCELLED);
     });

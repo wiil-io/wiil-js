@@ -12,3 +12,5 @@ export * from './products';
 export * from './reservation-resources';
 export * from './reservations';
 export * from './service-appointments';
+export * from './property-config';
+export * from './property-inquiry';
