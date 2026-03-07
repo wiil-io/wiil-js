@@ -12,7 +12,6 @@ import {
   BusinessSupportServices,
   AgentRoleTemplateIdentifier,
 } from 'wiil-core-js';
-import { WiilAPIError } from '../../errors/WiilError';
 
 const BASE_URL = 'https://api.wiil.io/v1';
 const API_KEY = 'test-api-key';
@@ -42,6 +41,11 @@ describe('DynamicPhoneAgentResource', () => {
       };
 
       const mockResponse: DynamicPhoneAgentSetupResult = {
+        id: 'setup_123',
+        processingState: {
+          status: 'completed',
+          progressPercentage: 100,
+        },
         success: true,
         agentConfigurationId: 'agent_123',
         instructionConfigurationId: 'instr_456',
@@ -57,7 +61,7 @@ describe('DynamicPhoneAgentResource', () => {
           metadata: { timestamp: Date.now(), version: 'v1' },
         });
 
-      const result = await client.dynamicPhoneAgent.create(input);
+      const result = await client.dynamicPhoneAgent.create(input, { pollUntilComplete: false });
 
       expect(result.success).toBe(true);
       expect(result.agentConfigurationId).toBe('agent_123');
@@ -85,6 +89,11 @@ describe('DynamicPhoneAgentResource', () => {
       };
 
       const mockResponse: DynamicPhoneAgentSetupResult = {
+        id: 'setup_456',
+        processingState: {
+          status: 'completed',
+          progressPercentage: 100,
+        },
         success: true,
         agentConfigurationId: 'agent_456',
         instructionConfigurationId: 'instr_789',
@@ -100,50 +109,11 @@ describe('DynamicPhoneAgentResource', () => {
           metadata: { timestamp: Date.now(), version: 'v1' },
         });
 
-      const result = await client.dynamicPhoneAgent.create(input);
+      const result = await client.dynamicPhoneAgent.create(input, { pollUntilComplete: false });
 
       expect(result.success).toBe(true);
       expect(result.agentConfigurationId).toBe('agent_456');
       expect(result.phoneNumber).toBe('+15559876543');
-    });
-  });
-
-  describe('get', () => {
-    it('should retrieve a phone agent configuration by ID', async () => {
-      const mockResponse: DynamicPhoneAgentSetupResult = {
-        success: true,
-        agentConfigurationId: 'agent_123',
-        instructionConfigurationId: 'instr_456',
-        phoneNumber: '+15551234567',
-      };
-
-      nock(BASE_URL)
-        .get('/dynamic-setup/phone-agent/agent_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
-        .reply(200, {
-          success: true,
-          data: mockResponse,
-          metadata: { timestamp: Date.now(), version: 'v1' },
-        });
-
-      const result = await client.dynamicPhoneAgent.get('agent_123');
-
-      expect(result.agentConfigurationId).toBe('agent_123');
-      expect(result.phoneNumber).toBe('+15551234567');
-    });
-
-    it('should throw API error when phone agent not found', async () => {
-      nock(BASE_URL)
-        .get('/dynamic-setup/phone-agent/invalid_id')
-        .reply(404, {
-          success: false,
-          error: { code: 'NOT_FOUND', message: 'Phone agent not found' },
-          metadata: { timestamp: Date.now(), version: 'v1' },
-        });
-
-      await expect(
-        client.dynamicPhoneAgent.get('invalid_id')
-      ).rejects.toThrow(WiilAPIError);
     });
   });
 
@@ -156,6 +126,11 @@ describe('DynamicPhoneAgentResource', () => {
       };
 
       const mockResponse: DynamicPhoneAgentSetupResult = {
+        id: 'setup_123',
+        processingState: {
+          status: 'completed',
+          progressPercentage: 100,
+        },
         success: true,
         agentConfigurationId: 'agent_123',
         instructionConfigurationId: 'instr_456',
@@ -188,6 +163,11 @@ describe('DynamicPhoneAgentResource', () => {
       };
 
       const mockResponse: DynamicPhoneAgentSetupResult = {
+        id: 'setup_123',
+        processingState: {
+          status: 'completed',
+          progressPercentage: 100,
+        },
         success: true,
         agentConfigurationId: 'agent_123',
         instructionConfigurationId: 'instr_456',
@@ -206,36 +186,6 @@ describe('DynamicPhoneAgentResource', () => {
       const result = await client.dynamicPhoneAgent.update(updateData);
 
       expect(result.success).toBe(true);
-    });
-  });
-
-  describe('delete', () => {
-    it('should delete a phone agent configuration', async () => {
-      nock(BASE_URL)
-        .delete('/dynamic-setup/phone-agent/agent_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
-        .reply(200, {
-          success: true,
-          data: true,
-          metadata: { timestamp: Date.now(), version: 'v1' },
-        });
-
-      const result = await client.dynamicPhoneAgent.delete('agent_123');
-      expect(result).toBe(true);
-    });
-
-    it('should throw API error when phone agent not found', async () => {
-      nock(BASE_URL)
-        .delete('/dynamic-setup/phone-agent/invalid_id')
-        .reply(404, {
-          success: false,
-          error: { code: 'NOT_FOUND', message: 'Phone agent not found' },
-          metadata: { timestamp: Date.now(), version: 'v1' },
-        });
-
-      await expect(
-        client.dynamicPhoneAgent.delete('invalid_id')
-      ).rejects.toThrow(WiilAPIError);
     });
   });
 });

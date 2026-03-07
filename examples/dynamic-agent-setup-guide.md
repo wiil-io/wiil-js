@@ -80,7 +80,7 @@ const client = new WiilClient({
 });
 
 const result = await client.dynamicPhoneAgent.create({
-  assistantName: 'Customer Support',
+  assistantName: 'Sarah',
   capabilities: [BusinessSupportServices.APPOINTMENT_MANAGEMENT],
 });
 
@@ -99,7 +99,7 @@ const client = new WiilClient({
 });
 
 const result = await client.dynamicWebAgent.create({
-  assistantName: 'Website Assistant',
+  assistantName: 'Emma',
   websiteUrl: 'https://example.com',
   capabilities: [BusinessSupportServices.APPOINTMENT_MANAGEMENT],
 });
@@ -155,7 +155,7 @@ const client = new WiilClient({
 
 const result = await client.dynamicPhoneAgent.create({
   // Required
-  assistantName: 'Premium Support Agent',
+  assistantName: 'Marcus',
   capabilities: [
     BusinessSupportServices.APPOINTMENT_MANAGEMENT,
     BusinessSupportServices.PRODUCT_ORDER_MANAGEMENT
@@ -213,7 +213,7 @@ const agent = await client.dynamicPhoneAgent.get('agent_123');
 // Update (partial)
 const updated = await client.dynamicPhoneAgent.update({
   id: 'agent_123',
-  assistantName: 'Updated Name'
+  assistantName: 'Nathan'
 });
 
 // Delete
@@ -283,7 +283,7 @@ const client = new WiilClient({
 
 const result = await client.dynamicWebAgent.create({
   // Required
-  assistantName: 'Voice-Enabled Web Agent',
+  assistantName: 'Olivia',
   websiteUrl: 'https://example.com',
   capabilities: [BusinessSupportServices.APPOINTMENT_MANAGEMENT],
 
@@ -363,7 +363,7 @@ const agent = await client.dynamicWebAgent.get('agent_123');
 // Update (partial)
 const updated = await client.dynamicWebAgent.update({
   id: 'agent_123',
-  assistantName: 'Updated Name',
+  assistantName: 'Sophia',
   communicationType: OttCommunicationType.TEXT
 });
 
@@ -386,7 +386,7 @@ Both phone and web agents support partial updates. Only include the fields you w
 // Update phone agent
 const updatedPhone = await client.dynamicPhoneAgent.update({
   id: 'agent_123',
-  assistantName: 'New Agent Name',
+  assistantName: 'Carlos',
   language: 'es-MX'
 });
 
@@ -527,7 +527,7 @@ BusinessSupportServices.NONE                      // No business services
 
 ```typescript
 const result = await client.dynamicWebAgent.create({
-  assistantName: 'E-commerce Support',
+  assistantName: 'Ava',
   websiteUrl: 'https://shop.example.com',
   capabilities: [
     BusinessSupportServices.PRODUCT_ORDER_MANAGEMENT,
@@ -541,7 +541,7 @@ const result = await client.dynamicWebAgent.create({
 
 ```typescript
 const result = await client.dynamicPhoneAgent.create({
-  assistantName: 'Restaurant Reservations',
+  assistantName: 'Mia',
   capabilities: [
     BusinessSupportServices.RESERVATION_MANAGEMENT,
     BusinessSupportServices.MENU_ORDER_MANAGEMENT
@@ -565,7 +565,7 @@ import {
 
 try {
   const result = await client.dynamicPhoneAgent.create({
-    assistantName: 'Support Agent',
+    assistantName: 'Liam',
     capabilities: [BusinessSupportServices.APPOINTMENT_MANAGEMENT]
   });
 } catch (error) {
@@ -620,17 +620,18 @@ Both configurations must be provided together or neither:
 
 ### 1. Naming Conventions
 
-Use descriptive, consistent names:
+Use actual personal names for a natural, human-like experience:
 
 ```typescript
 // Good
-assistantName: 'Customer Support - Premium Tier'
-assistantName: 'Sales Bot - Lead Qualification'
-assistantName: 'Booking Assistant - Restaurant'
+assistantName: 'Sarah'
+assistantName: 'Alex'
+assistantName: 'Emma'
 
 // Avoid
 assistantName: 'bot1'
 assistantName: 'test'
+assistantName: 'Customer Support - Premium Tier'
 ```
 
 ### 2. Choose Appropriate Capabilities

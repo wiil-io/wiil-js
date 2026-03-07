@@ -54,8 +54,8 @@ export interface WebAgentCreateOptions {
  * Resource class for managing dynamic web agent provisioning in the WIIL Platform.
  *
  * @remarks
- * Provides methods for creating, retrieving, updating, and deleting dynamic web agent
- * configurations. Dynamic web agents enable AI-powered web interactions with configurable
+ * Provides methods for creating and updating dynamic web agent configurations.
+ * Dynamic web agents enable AI-powered web interactions with configurable
  * STT (speech-to-text) and TTS (text-to-speech) capabilities. Setup results include
  * integration snippets for embedding the agent on websites. All methods require proper
  * authentication via API key.
@@ -68,7 +68,7 @@ export interface WebAgentCreateOptions {
  *
  * // Create a new dynamic web agent (waits for completion with progress logging)
  * const result = await client.dynamicWebAgent.create({
- *   assistantName: 'Website Assistant',
+ *   assistantName: 'Emma',
  *   websiteUrl: 'https://example.com',
  *   communicationType: OttCommunicationType.TEXT,
  *   language: 'en-US',
@@ -124,7 +124,7 @@ export class DynamicWebAgentResource {
    *
    * // Create with default behavior (polls until complete, logs progress)
    * const result = await client.dynamicWebAgent.create({
-   *   assistantName: 'Support Chat Agent',
+   *   assistantName: 'Olivia',
    *   websiteUrl: 'https://example.com',
    *   communicationType: OttCommunicationType.UNIFIED,
    *   language: 'en-US',
@@ -238,26 +238,6 @@ export class DynamicWebAgentResource {
   }
 
   /**
-   * Retrieves a dynamic web agent configuration by ID.
-   *
-   * @param id - Web agent configuration ID
-   * @returns Promise resolving to the web agent setup result
-   *
-   * @throws {@link WiilAPIError} - When the web agent is not found or API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   *
-   * @example
-   * ```typescript
-   * const agent = await client.dynamicWebAgent.get('agent_123');
-   * console.log('Agent Config ID:', agent.agentConfigurationId);
-   * console.log('Integration snippets:', agent.integrationSnippets);
-   * ```
-   */
-  public async get(id: string): Promise<DynamicWebAgentSetupResult> {
-    return this.http.get<DynamicWebAgentSetupResult>(`${this.resource_path}/${id}`);
-  }
-
-  /**
    * Updates an existing dynamic web agent configuration.
    *
    * @param data - Web agent update data (must include id)
@@ -271,7 +251,7 @@ export class DynamicWebAgentResource {
    * ```typescript
    * const updated = await client.dynamicWebAgent.update({
    *   id: 'agent_123',
-   *   assistantName: 'Updated Support Agent',
+   *   assistantName: 'Sophia',
    *   websiteUrl: 'https://new-example.com'
    * });
    * console.log('Updated agent:', updated.agentConfigurationId);
@@ -285,56 +265,6 @@ export class DynamicWebAgentResource {
       this.resource_path,
       data
     );
-  }
-
-  /**
-   * Deletes a dynamic web agent configuration.
-   *
-   * @param id - Web agent configuration ID
-   * @returns Promise resolving to boolean indicating deletion success
-   *
-   * @throws {@link WiilAPIError} - When the web agent is not found or API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   *
-   * @remarks
-   * This operation is irreversible. The integration snippets associated with this
-   * agent will no longer function. Ensure you have proper authorization before deleting.
-   *
-   * @example
-   * ```typescript
-   * const deleted = await client.dynamicWebAgent.delete('agent_123');
-   * if (deleted) {
-   *   console.log('Web agent deleted successfully');
-   * }
-   * ```
-   */
-  public async delete(id: string): Promise<boolean> {
-    return this.http.delete<boolean>(`${this.resource_path}/${id}`);
-  }
-
-  /**
-   * Retrieves integration snippets for a web agent.
-   *
-   * @param id - Web agent configuration ID
-   * @returns Promise resolving to an array of integration code snippets
-   *
-   * @throws {@link WiilAPIError} - When the web agent is not found or API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   *
-   * @remarks
-   * Returns code snippets that can be embedded in websites to enable the AI agent.
-   * The snippets typically include script tags and initialization code.
-   *
-   * @example
-   * ```typescript
-   * const snippets = await client.dynamicWebAgent.getIntegrationSnippets('agent_123');
-   * snippets.forEach((snippet, index) => {
-   *   console.log(`Snippet ${index + 1}:`, snippet);
-   * });
-   * ```
-   */
-  public async getIntegrationSnippets(id: string): Promise<string[]> {
-    return this.http.get<string[]>(`${this.resource_path}/${id}/snippets`);
   }
 
   /**

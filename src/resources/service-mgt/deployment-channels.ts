@@ -11,17 +11,19 @@ import {
   PaginatedResultType,
   PaginationRequest,
   UpdateDeploymentChannel,
+  DeploymentType,
 } from 'wiil-core-js';
 import { HttpClient } from '../../client/HttpClient';
 
 /**
- * Deployment type enum for filtering channels
+ * Options for deleting a deployment channel.
  */
-export enum DeploymentType {
-  CALLS = 'CALLS',
-  SMS = 'SMS',
-  WEB = 'WEB',
-  MOBILE = 'MOBILE'
+export interface DeleteDeploymentChannelOptions {
+  /**
+   * Whether to also delete the associated phone configuration.
+   * @default false
+   */
+  deletePhoneConfig?: boolean;
 }
 
 /**
@@ -134,13 +136,31 @@ export class DeploymentChannelsResource {
    * Deletes a deployment channel.
    *
    * @param id - Deployment channel ID
+   * @param options - Delete options
    * @returns Promise resolving to boolean indicating deletion success
    *
    * @throws {@link WiilAPIError} - When the deployment channel is not found or API returns an error
    * @throws {@link WiilNetworkError} - When network communication fails
+   *
+   * @example
+   * ```typescript
+   * // Delete channel only
+   * await client.channels.delete('channel_123');
+   *
+   * // Delete channel and associated phone configuration
+   * await client.channels.delete('channel_123', { deletePhoneConfig: true });
+   * ```
    */
-  public async delete(id: string): Promise<boolean> {
-    return this.http.delete<boolean>(`${this.resource_path}/${id}`);
+  public async delete(id: string, options?: DeleteDeploymentChannelOptions): Promise<boolean> {
+    const queryParams = new URLSearchParams();
+
+    if (options?.deletePhoneConfig) {
+      queryParams.append('deletePhoneConfig', 'true');
+    }
+
+    const path = `${this.resource_path}/${id}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+
+    return this.http.delete<boolean>(path);
   }
 
   /**

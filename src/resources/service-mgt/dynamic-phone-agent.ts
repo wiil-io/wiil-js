@@ -54,8 +54,8 @@ export interface PhoneAgentCreateOptions {
  * Resource class for managing dynamic phone agent provisioning in the WIIL Platform.
  *
  * @remarks
- * Provides methods for creating, retrieving, updating, and deleting dynamic phone agent
- * configurations. Dynamic phone agents enable AI-powered phone interactions with configurable
+ * Provides methods for creating and updating dynamic phone agent configurations.
+ * Dynamic phone agents enable AI-powered phone interactions with configurable
  * STT (speech-to-text) and TTS (text-to-speech) capabilities. All methods require proper
  * authentication via API key.
  *
@@ -67,7 +67,7 @@ export interface PhoneAgentCreateOptions {
  *
  * // Create a new dynamic phone agent (waits for completion with progress logging)
  * const result = await client.dynamicPhoneAgent.create({
- *   assistantName: 'Sales Agent',
+ *   assistantName: 'Alex',
  *   language: 'en-US',
  *   capabilities: [BusinessSupportServices.APPOINTMENT_MANAGEMENT],
  *   role_template_identifier: AgentRoleTemplateIdentifier.SALES_REPRESENTATIVE,
@@ -114,7 +114,7 @@ export class DynamicPhoneAgentResource {
    *
    * // Create with default behavior (polls until complete, logs progress)
    * const result = await client.dynamicPhoneAgent.create({
-   *   assistantName: 'Customer Service Agent',
+   *   assistantName: 'Sarah',
    *   language: 'en-US',
    *   capabilities: [BusinessSupportServices.APPOINTMENT_MANAGEMENT],
    *   role_template_identifier: AgentRoleTemplateIdentifier.CUSTOMER_SUPPORT_GENERAL,
@@ -227,26 +227,6 @@ export class DynamicPhoneAgentResource {
   }
 
   /**
-   * Retrieves a dynamic phone agent configuration by ID.
-   *
-   * @param id - Phone agent configuration ID
-   * @returns Promise resolving to the phone agent setup result
-   *
-   * @throws {@link WiilAPIError} - When the phone agent is not found or API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   *
-   * @example
-   * ```typescript
-   * const agent = await client.dynamicPhoneAgent.get('agent_123');
-   * console.log('Phone Number:', agent.phoneNumber);
-   * console.log('Agent Config ID:', agent.agentConfigurationId);
-   * ```
-   */
-  public async get(id: string): Promise<DynamicPhoneAgentSetupResult> {
-    return this.http.get<DynamicPhoneAgentSetupResult>(`${this.resource_path}/${id}`);
-  }
-
-  /**
    * Updates an existing dynamic phone agent configuration.
    *
    * @param data - Phone agent update data (must include id)
@@ -260,7 +240,7 @@ export class DynamicPhoneAgentResource {
    * ```typescript
    * const updated = await client.dynamicPhoneAgent.update({
    *   id: 'agent_123',
-   *   assistantName: 'Updated Customer Service Agent',
+   *   assistantName: 'Marcus',
    *   language: 'es-MX'
    * });
    * console.log('Updated agent:', updated.agentConfigurationId);
@@ -274,31 +254,6 @@ export class DynamicPhoneAgentResource {
       this.resource_path,
       data
     );
-  }
-
-  /**
-   * Deletes a dynamic phone agent configuration.
-   *
-   * @param id - Phone agent configuration ID
-   * @returns Promise resolving to boolean indicating deletion success
-   *
-   * @throws {@link WiilAPIError} - When the phone agent is not found or API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   *
-   * @remarks
-   * This operation is irreversible. The provisioned phone number associated with this
-   * agent will be released. Ensure you have proper authorization before deleting.
-   *
-   * @example
-   * ```typescript
-   * const deleted = await client.dynamicPhoneAgent.delete('agent_123');
-   * if (deleted) {
-   *   console.log('Phone agent deleted successfully');
-   * }
-   * ```
-   */
-  public async delete(id: string): Promise<boolean> {
-    return this.http.delete<boolean>(`${this.resource_path}/${id}`);
   }
 
   /**
