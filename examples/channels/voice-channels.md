@@ -239,7 +239,7 @@ Configure your agent to support multiple languages:
 ```typescript
 // In your Agent Configuration
 const agentConfig = await client.agentConfigs.create({
-  agentName: 'Multilingual Support Agent',
+  agentName: 'Sofia',
   voiceId: 'shimmer', // Supports multiple languages
   language: 'en-US', // Default language
   // Agent will auto-detect and respond in caller's language
@@ -289,7 +289,7 @@ Choose from available voices in your Agent Configuration:
 
 ```typescript
 const agentConfig = await client.agentConfigs.create({
-  agentName: 'Support Agent',
+  agentName: 'Rachel',
   voiceId: 'alloy',    // Options: alloy, echo, fable, onyx, nova, shimmer
   language: 'en-US'
 });

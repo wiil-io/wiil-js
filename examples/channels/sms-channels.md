@@ -256,7 +256,7 @@ Optimize your agent for concise SMS responses:
 
 ```typescript
 const agentConfig = await client.agentConfigs.create({
-  agentName: 'SMS Support Agent',
+  agentName: 'Jordan',
   temperature: 0.7,
   maxTokens: 150, // Keep responses under 160 characters
   // Configure agent to be concise
@@ -274,7 +274,7 @@ Configure your agent to support multiple languages:
 ```typescript
 // In your Agent Configuration
 const agentConfig = await client.agentConfigs.create({
-  agentName: 'Multilingual SMS Agent',
+  agentName: 'Luna',
   language: 'en-US', // Default language
   // Agent will auto-detect and respond in sender's language
 });
