@@ -5,9 +5,9 @@
 
 import {
   PhoneConfiguration,
-  PhoneNumberPurchase,
-  CreatePhoneNumberPurchaseSchema,
-  CreatePhoneNumberPurchase,
+  // PhoneNumberPurchase,
+  // CreatePhoneNumberPurchaseSchema,
+  // CreatePhoneNumberPurchase,
   UpdatePhoneConfigurationSchema,
   UpdatePhoneConfiguration,
   PaginatedResultType,
@@ -19,7 +19,7 @@ import { HttpClient } from '../../client/HttpClient';
  * Resource class for managing phone configurations in the WIIL Platform.
  *
  * @remarks
- * Provides methods for creating, retrieving, updating, deleting, and listing
+ * Provides methods for retrieving, updating, deleting, and listing
  * phone configurations. Phone configurations manage phone numbers and telephony
  * settings for voice-based AI deployments. All methods require proper
  * authentication via API key.
@@ -27,13 +27,6 @@ import { HttpClient } from '../../client/HttpClient';
  * @example
  * ```typescript
  * const client = new WiilClient({ apiKey: 'your-api-key' });
- *
- * // Purchase a new phone number
- * const purchase = await client.phoneConfigs.purchase({
- *   phoneNumber: '+1234567890',
- *   countryCode: 'US',
- *   capabilities: ['voice', 'sms']
- * });
  *
  * // Get a phone configuration by ID
  * const config = await client.phoneConfigs.get('phone_123');
@@ -63,23 +56,23 @@ export class PhoneConfigurationsResource {
     this.http = http;
   }
 
-  /**
-   * Purchases a new phone number and creates a phone configuration.
-   *
-   * @param data - Phone number purchase data
-   * @returns Promise resolving to the phone number purchase result
-   *
-   * @throws {@link WiilValidationError} - When input validation fails
-   * @throws {@link WiilAPIError} - When the API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   */
-  public async purchase(data: CreatePhoneNumberPurchase): Promise<PhoneNumberPurchase> {
-    return this.http.post<CreatePhoneNumberPurchase, PhoneNumberPurchase>(
-      `${this.resource_path}/purchase`,
-      data,
-      CreatePhoneNumberPurchaseSchema
-    );
-  }
+  // /**
+  //  * Purchases a new phone number and creates a phone configuration.
+  //  *
+  //  * @param data - Phone number purchase data
+  //  * @returns Promise resolving to the phone number purchase result
+  //  *
+  //  * @throws {@link WiilValidationError} - When input validation fails
+  //  * @throws {@link WiilAPIError} - When the API returns an error
+  //  * @throws {@link WiilNetworkError} - When network communication fails
+  //  */
+  // public async purchase(data: CreatePhoneNumberPurchase): Promise<PhoneNumberPurchase> {
+  //   return this.http.post<CreatePhoneNumberPurchase, PhoneNumberPurchase>(
+  //     `${this.resource_path}/purchase`,
+  //     data,
+  //     CreatePhoneNumberPurchaseSchema
+  //   );
+  // }
 
   /**
    * Retrieves a phone configuration by ID.

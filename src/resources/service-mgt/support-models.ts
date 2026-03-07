@@ -312,4 +312,38 @@ export class SupportModelsResource {
       `${this.resource_path}/lookup/proprietor-provider/${proprietor}/${providerModelId}`
     );
   }
+
+  /**
+   * Checks if a model is supported by proprietor and provider model ID.
+   *
+   * @param proprietor - Model proprietor (e.g., 'OpenAI', 'Anthropic', 'Google', 'Deepgram')
+   * @param providerModelId - Provider-specific model identifier (e.g., 'gpt-4-turbo', 'nova-2')
+   * @returns Promise resolving to true if the model is supported, false otherwise
+   *
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   *
+   * @example
+   * ```typescript
+   * // Check if a specific model is supported
+   * const isSupported = await client.supportModels.isSupported('OpenAI', 'gpt-4-turbo');
+   * if (isSupported) {
+   *   console.log('Model is supported');
+   * } else {
+   *   console.log('Model is not supported');
+   * }
+   *
+   * // Validate before using in configuration
+   * const sttSupported = await client.supportModels.isSupported('Deepgram', 'nova-2');
+   * const ttsSupported = await client.supportModels.isSupported('ElevenLabs', 'eleven_turbo_v2');
+   * ```
+   */
+  public async isSupported(
+    proprietor: string,
+    providerModelId: string
+  ): Promise<boolean> {
+    return this.http.get<boolean>(
+      `/supports/${proprietor}/${providerModelId}`
+    );
+  }
 }

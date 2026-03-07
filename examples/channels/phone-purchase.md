@@ -27,39 +27,53 @@ Before purchasing:
 
 ## Finding Available Phone Numbers
 
-Before purchasing, search for available phone numbers from your telephony provider.
+Before purchasing, search for available phone numbers.
 
-### Get Available Regions
+### Search for Phone Numbers
 
 ```typescript
 import { WiilClient } from 'wiil-js';
-import { ProviderType } from 'wiil-core-js';
 
 const client = new WiilClient({
   apiKey: process.env.WIIL_API_KEY!
 });
 
-// Get available regions for SignalWire
-const regions = await client.telephonyProvider.getRegions(ProviderType.SIGNALWIRE);
-
-console.log(`Found ${regions.length} regions`);
-regions.forEach(region => {
-  console.log(`- ${region.regionName} (${region.regionId})`);
-});
-```
-
-### Search for Phone Numbers
-
-```typescript
-// Get all available phone numbers in the region
-const numbers = await client.telephonyProvider.getPhoneNumbers(
-  ProviderType.SIGNALWIRE,
-  'US'
-);
+// Get all available phone numbers
+const numbers = await client.telephonyProvider.getPhoneNumbers();
 
 console.log(`Found ${numbers.length} available numbers`);
 numbers.forEach(number => {
   console.log(`${number.phoneNumber} - ${number.friendlyName}`);
+});
+```
+
+### Search with Filters
+
+```typescript
+// Search with area code filter
+const seattleNumbers = await client.telephonyProvider.getPhoneNumbers({
+  areaCode: '206'
+});
+
+// Search with pattern filter
+const customNumbers = await client.telephonyProvider.getPhoneNumbers({
+  contains: '555',
+  postalCode: '98101'
+});
+
+seattleNumbers.forEach(number => {
+  console.log(`${number.phoneNumber} - ${number.locality}, ${number.region}`);
+});
+```
+
+### Get Pricing
+
+```typescript
+const pricing = await client.telephonyProvider.getPricing();
+
+pricing.forEach(price => {
+  console.log(`Number Type: ${price.number_type}`);
+  console.log(`Price: $${price.price}`);
 });
 ```
 
@@ -80,17 +94,9 @@ const client = new WiilClient({
 ### Step 2: Submit Purchase Request
 
 ```typescript
-import {
-  ProviderType,
-  PhoneNumberType,
-  PhonePurchaseStatus
-} from 'wiil-js';
-
-const phonePurchase = await client.phoneConfigs.purchase({
-  friendlyName: 'Customer Support Line',
+const phonePurchase = await client.telephonyProvider.purchase({
   phoneNumber: '+12125551234',
-  providerType: ProviderType.SIGNALWIRE,
-  numberType: PhoneNumberType.LOCAL
+  friendlyName: 'Customer Support Line' // Optional
 });
 
 console.log('Purchase submitted!');
@@ -100,7 +106,8 @@ console.log(`Purchase ID: ${phonePurchase.id}`);
 ```
 
 **Output**:
-```
+
+```text
 Purchase submitted!
 Phone: +12125551234
 Status: PENDING
@@ -114,20 +121,22 @@ Phone purchases process in **under 5 minutes**. The status changes from `PENDING
 #### Option A: Poll for Status
 
 ```typescript
+import { PhonePurchaseStatus } from 'wiil-core-js';
+
 async function waitForPurchaseCompletion(purchaseId: string) {
   let attempts = 0;
   const maxAttempts = 60; // 5 minutes (5s intervals)
 
   while (attempts < maxAttempts) {
-    const purchase = await client.phoneConfigs.getByRequestId(purchaseId);
+    const config = await client.phoneConfigs.getByRequestId(purchaseId);
 
-    if (purchase.status === PhonePurchaseStatus.COMPLETED) {
+    if (config.status === PhonePurchaseStatus.COMPLETED) {
       console.log('✓ Purchase completed!');
-      return purchase;
+      return config;
     }
 
-    if (purchase.status === PhonePurchaseStatus.FAILED) {
-      throw new Error(`Purchase failed: ${purchase.statusDetails}`);
+    if (config.status === PhonePurchaseStatus.FAILED) {
+      throw new Error(`Purchase failed`);
     }
 
     console.log(`Waiting... (${attempts * 5}s elapsed)`);
@@ -151,17 +160,16 @@ const phoneConfig = await client.phoneConfigs.getByPhoneNumber('+12125551234');
 console.log('Phone Configuration:');
 console.log(`  Phone: ${phoneConfig.phoneNumber}`);
 console.log(`  Status: ${phoneConfig.status}`);
-console.log(`  Provider: ${phoneConfig.providerType}`);
 console.log(`  Voice Channel: ${phoneConfig.voiceChannelId}`);
 console.log(`  SMS Channel: ${phoneConfig.smsChannelId}`);
 ```
 
 **Output**:
-```
+
+```text
 Phone Configuration:
   Phone: +12125551234
   Status: ACTIVE
-  Provider: SIGNALWIRE
   Voice Channel: 2s3t4u5v6w7x8y9z0a1b
   SMS Channel: 3t4u5v6w7x8y9z0a1b2c
 ```
@@ -174,44 +182,27 @@ Phone Configuration:
 
 ### Required Fields
 
-| Field | Type | Description | Example |
-|-------|------|-------------|---------|
-| `phoneNumber` | string | Phone number in E.164 format | "+12125551234" |
-| `friendlyName` | string | Human-readable display name | "Support Line" |
-| `providerType` | enum | Telephony provider | `ProviderType.SIGNALWIRE` |
+| Field         | Type   | Description                   | Example          |
+|---------------|--------|-------------------------------|------------------|
+| `phoneNumber` | string | Phone number in E.164 format  | "+12125551234"   |
 
-### Optional Fields (with defaults)
+### Optional Fields
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `numberType` | enum | `PhoneNumberType.LOCAL` | Type of phone number (LOCAL, TOLL_FREE) |
+| Field          | Type   | Description                                        |
+|----------------|--------|----------------------------------------------------|
+| `friendlyName` | string | Human-readable display name (e.g., "Support Line") |
 
 ---
 
-## Provider Types
+## Search Options
 
 ```typescript
-enum ProviderType {
-  SIGNALWIRE = 'SIGNALWIRE',
-  TWILIO = 'TWILIO',
-  VONAGE = 'VONAGE'
+interface PhoneNumberSearchOptions {
+  areaCode?: string;    // Area code filter (e.g., '206', '415')
+  contains?: string;    // Number pattern to search for
+  postalCode?: string;  // Postal code filter
 }
 ```
-
-**Recommended**: `ProviderType.SIGNALWIRE`
-
----
-
-## Number Types
-
-```typescript
-enum PhoneNumberType {
-  LOCAL = 'LOCAL',           // Geographic numbers (e.g., +1-212-xxx-xxxx)
-  TOLL_FREE = 'TOLL_FREE'    // 1-800 numbers
-}
-```
-
-**Most Common**: `PhoneNumberType.LOCAL`
 
 ---
 
@@ -231,22 +222,29 @@ enum PhonePurchaseStatus {
 ## Complete Example
 
 ```typescript
-import {
-  WiilClient,
-  ProviderType,
-  PhoneNumberType,
-  PhonePurchaseStatus
-} from 'wiil-js';
+import { WiilClient } from 'wiil-js';
+import { PhonePurchaseStatus } from 'wiil-core-js';
 
 async function purchasePhoneNumber() {
   const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
 
+  // Search for available numbers
+  const availableNumbers = await client.telephonyProvider.getPhoneNumbers({
+    areaCode: '212'
+  });
+
+  if (availableNumbers.length === 0) {
+    throw new Error('No numbers available');
+  }
+
+  // Select first available number
+  const selectedNumber = availableNumbers[0].phoneNumber;
+  console.log(`Selected: ${selectedNumber}`);
+
   // Submit purchase
-  const purchase = await client.phoneConfigs.purchase({
-    friendlyName: 'Customer Support Line',
-    phoneNumber: '+12125551234',
-    providerType: ProviderType.SIGNALWIRE,
-    numberType: PhoneNumberType.LOCAL
+  const purchase = await client.telephonyProvider.purchase({
+    phoneNumber: selectedNumber,
+    friendlyName: 'Customer Support Line'
   });
 
   console.log(`Purchase ID: ${purchase.id}`);
@@ -256,7 +254,7 @@ async function purchasePhoneNumber() {
   await new Promise(resolve => setTimeout(resolve, 300000)); // 5 minutes
 
   // Get phone configuration
-  const phoneConfig = await client.phoneConfigs.getByPhoneNumber('+12125551234');
+  const phoneConfig = await client.phoneConfigs.getByPhoneNumber(selectedNumber);
 
   console.log('✓ Purchase complete!');
   console.log(`Voice Channel ID: ${phoneConfig.voiceChannelId}`);

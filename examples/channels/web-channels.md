@@ -24,7 +24,8 @@ Web channels enable AI agents to interact with customers through a chat widget e
 ### Step 1: Create Web Channel
 
 ```typescript
-import { WiilClient, DeploymentType, OttCommunicationType } from 'wiil-js';
+import { WiilClient } from 'wiil-js';
+import { DeploymentType, OttCommunicationType } from 'wiil-core-js';
 
 const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
 
@@ -47,7 +48,7 @@ console.log(`Channel ID: ${webChannel.id}`);
 ### Step 2: Create Deployment
 
 ```typescript
-import { DeploymentStatus, DeploymentProvisioningType } from 'wiil-js';
+import { DeploymentStatus, DeploymentProvisioningType } from 'wiil-core-js';
 
 const deployment = await client.deploymentConfigs.create({
   projectId: 'YOUR_PROJECT_ID',
@@ -154,13 +155,13 @@ widgetConfiguration: {
 ## Complete Example
 
 ```typescript
+import { WiilClient } from 'wiil-js';
 import {
-  WiilClient,
   DeploymentType,
   OttCommunicationType,
   DeploymentStatus,
   DeploymentProvisioningType
-} from 'wiil-js';
+} from 'wiil-core-js';
 
 async function setupWebChat() {
   const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });

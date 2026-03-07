@@ -32,29 +32,21 @@ Before purchasing, search for available phone numbers.
 
 ```typescript
 import { WiilClient } from 'wiil-js';
-import { ProviderType } from 'wiil-core-js';
 
 const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
 
-// Get available regions
-const regions = await client.telephonyProvider.getRegions(ProviderType.SIGNALWIRE);
-
-// Select a region
-const usRegion = regions.find(r => r.countryCode === 'US');
-
 // Search for phone numbers
-const numbers = await client.telephonyProvider.getPhoneNumbers(
-  ProviderType.SIGNALWIRE,
-  usRegion.countryCode
-);
+const numbers = await client.telephonyProvider.getPhoneNumbers();
 
 console.log(`Found ${numbers.length} available numbers`);
 
+// Search with filters
+const filteredNumbers = await client.telephonyProvider.getPhoneNumbers({
+  areaCode: '212'
+});
+
 // Get pricing
-const pricing = await client.telephonyProvider.getPricing(
-  ProviderType.SIGNALWIRE,
-  usRegion.countryCode
-);
+const pricing = await client.telephonyProvider.getPricing();
 
 console.log('Pricing:', pricing);
 ```
@@ -66,20 +58,13 @@ console.log('Pricing:', pricing);
 SMS channels are created automatically when you purchase a phone number.
 
 ```typescript
-import {
-  WiilClient,
-  ProviderType,
-  PhoneNumberType,
-  PhonePurchaseStatus
-} from 'wiil-js';
+import { WiilClient } from 'wiil-js';
 
 const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
 
-const phonePurchase = await client.phoneConfigs.purchase({
-  friendlyName: 'Customer Support SMS',
+const phonePurchase = await client.telephonyProvider.purchase({
   phoneNumber: '+12125551234',
-  providerType: ProviderType.SIGNALWIRE,
-  numberType: PhoneNumberType.LOCAL
+  friendlyName: 'Customer Support SMS' // Optional
 });
 
 console.log(`Purchase ID: ${phonePurchase.id}`);
@@ -115,10 +100,7 @@ Phone Configuration:
 ### Step 3: Create SMS Deployment
 
 ```typescript
-import {
-  DeploymentStatus,
-  DeploymentProvisioningType
-} from 'wiil-js';
+import { DeploymentStatus, DeploymentProvisioningType } from 'wiil-core-js';
 
 const deployment = await client.deploymentConfigs.create({
   projectId: 'YOUR_PROJECT_ID',
@@ -166,7 +148,7 @@ console.log(`  Recording: ${smsChannel.recordingEnabled}`);
 ### Get Channel by Phone Number
 
 ```typescript
-import { DeploymentType } from 'wiil-js';
+import { DeploymentType } from 'wiil-core-js';
 
 const smsChannel = await client.deploymentChannels.getByIdentifier(
   '+12125551234',
@@ -181,25 +163,17 @@ console.log(`SMS Channel ID: ${smsChannel.id}`);
 ## Complete Example
 
 ```typescript
-import {
-  WiilClient,
-  ProviderType,
-  PhoneNumberType,
-  PhonePurchaseStatus,
-  DeploymentStatus,
-  DeploymentProvisioningType
-} from 'wiil-js';
+import { WiilClient } from 'wiil-js';
+import { DeploymentStatus, DeploymentProvisioningType } from 'wiil-core-js';
 
 async function setupSMSChannel() {
   const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
 
   // 1. Purchase phone number
   console.log('1. Purchasing phone number...');
-  const purchase = await client.phoneConfigs.purchase({
-    friendlyName: 'Customer Support SMS',
+  const purchase = await client.telephonyProvider.purchase({
     phoneNumber: '+12125551234',
-    providerType: ProviderType.SIGNALWIRE,
-    numberType: PhoneNumberType.LOCAL
+    friendlyName: 'Customer Support SMS'
   });
 
   console.log(`Purchase ID: ${purchase.id}`);
@@ -365,11 +339,9 @@ Use toll-free numbers for verified business messaging.
 ### Purchase Toll-Free Number
 
 ```typescript
-const phonePurchase = await client.phoneConfigs.purchase({
-  friendlyName: 'Business SMS Line',
+const phonePurchase = await client.telephonyProvider.purchase({
   phoneNumber: '+18005551234',
-  providerType: ProviderType.SIGNALWIRE,
-  numberType: PhoneNumberType.TOLL_FREE
+  friendlyName: 'Business SMS Line'
 });
 ```
 
@@ -414,34 +386,6 @@ const phonePurchase = await client.phoneConfigs.purchase({
 3. ✅ Avoid spam trigger words
 4. ✅ Include opt-out instructions
 5. ✅ Monitor user engagement
-
----
-
-## Providers
-
-### SignalWire (Recommended)
-
-```typescript
-providerType: ProviderType.SIGNALWIRE
-```
-
-**Benefits**:
-- High deliverability
-- Competitive pricing
-- Advanced features
-- Excellent support
-
-### Twilio
-
-```typescript
-providerType: ProviderType.TWILIO
-```
-
-**Benefits**:
-- Global coverage
-- Established provider
-- Wide number selection
-- Strong deliverability
 
 ---
 

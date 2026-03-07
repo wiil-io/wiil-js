@@ -8,8 +8,11 @@ import {
   UpdateDynamicPhoneAgent,
   DynamicPhoneAgentSetupResult,
   DynamicAgentProcessingState,
+  DynamicSTTModelConfiguration,
+  DynamicTTSModelConfiguration,
 } from 'wiil-core-js';
 import { HttpClient } from '../../client/HttpClient';
+import { WiilValidationError } from '../../errors/WiilError';
 import { PollTimeoutError } from './dynamic-agent-status';
 
 /**
@@ -150,6 +153,9 @@ export class DynamicPhoneAgentResource {
     const startTime = Date.now();
     const agentName = data.assistantName;
 
+    // Validate model configurations before proceeding
+    await this.validateModelConfigurations(data.sttConfiguration, data.ttsConfiguration);
+
     // Log initial creation
     if (!silent) {
       this.log(`Creating agent "${agentName}"...`);
@@ -261,6 +267,9 @@ export class DynamicPhoneAgentResource {
    * ```
    */
   public async update(data: UpdateDynamicPhoneAgent): Promise<DynamicPhoneAgentSetupResult> {
+    // Validate model configurations before proceeding
+    await this.validateModelConfigurations(data.sttConfiguration, data.ttsConfiguration);
+
     return this.http.patch<UpdateDynamicPhoneAgent, DynamicPhoneAgentSetupResult>(
       this.resource_path,
       data
@@ -385,5 +394,72 @@ export class DynamicPhoneAgentResource {
    */
   private sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Validates STT and TTS model configurations against the support registry.
+   *
+   * @param sttConfig - Optional STT configuration to validate
+   * @param ttsConfig - Optional TTS configuration to validate
+   *
+   * @throws {@link WiilValidationError} - When a model is not supported
+   *
+   * @private
+   */
+  private async validateModelConfigurations(
+    sttConfig?: DynamicSTTModelConfiguration | null,
+    ttsConfig?: DynamicTTSModelConfiguration | null
+  ): Promise<void> {
+    const validationPromises: Promise<void>[] = [];
+
+    if (sttConfig?.providerType && sttConfig?.providerModelId) {
+      validationPromises.push(
+        this.validateModel(
+          sttConfig.providerType,
+          sttConfig.providerModelId,
+          'STT'
+        )
+      );
+    }
+
+    if (ttsConfig?.providerType && ttsConfig?.providerModelId) {
+      validationPromises.push(
+        this.validateModel(
+          ttsConfig.providerType,
+          ttsConfig.providerModelId,
+          'TTS'
+        )
+      );
+    }
+
+    await Promise.all(validationPromises);
+  }
+
+  /**
+   * Validates a single model against the support registry.
+   *
+   * @param providerType - The model provider (e.g., 'Deepgram', 'ElevenLabs')
+   * @param providerModelId - The provider-specific model identifier
+   * @param modelType - Label for error messages ('STT' or 'TTS')
+   *
+   * @throws {@link WiilValidationError} - When the model is not supported
+   *
+   * @private
+   */
+  private async validateModel(
+    providerType: string,
+    providerModelId: string,
+    modelType: string
+  ): Promise<void> {
+    const isSupported = await this.http.get<boolean>(
+      `/supports/${providerType}/${providerModelId}`
+    );
+
+    if (!isSupported) {
+      throw new WiilValidationError(
+        `Unsupported ${modelType} model: ${providerType}/${providerModelId}. ` +
+        `Please verify the model is available in the support registry.`
+      );
+    }
   }
 }

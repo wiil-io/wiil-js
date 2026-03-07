@@ -32,29 +32,21 @@ Before purchasing, search for available phone numbers.
 
 ```typescript
 import { WiilClient } from 'wiil-js';
-import { ProviderType } from 'wiil-core-js';
 
 const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
 
-// Get available regions
-const regions = await client.telephonyProvider.getRegions(ProviderType.SIGNALWIRE);
-
-// Select a region
-const usRegion = regions.find(r => r.countryCode === 'US');
-
 // Search for phone numbers
-const numbers = await client.telephonyProvider.getPhoneNumbers(
-  ProviderType.SIGNALWIRE,
-  usRegion.countryCode
-);
+const numbers = await client.telephonyProvider.getPhoneNumbers();
 
 console.log(`Found ${numbers.length} available numbers`);
 
+// Search with filters
+const filteredNumbers = await client.telephonyProvider.getPhoneNumbers({
+  areaCode: '212'
+});
+
 // Get pricing
-const pricing = await client.telephonyProvider.getPricing(
-  ProviderType.SIGNALWIRE,
-  usRegion.countryCode
-);
+const pricing = await client.telephonyProvider.getPricing();
 
 console.log('Pricing:', pricing);
 ```
@@ -66,20 +58,13 @@ console.log('Pricing:', pricing);
 Voice channels are created automatically when you purchase a phone number.
 
 ```typescript
-import {
-  WiilClient,
-  ProviderType,
-  PhoneNumberType,
-  PhonePurchaseStatus
-} from 'wiil-js';
+import { WiilClient } from 'wiil-js';
 
 const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
 
-const phonePurchase = await client.phoneConfigs.purchase({
-  friendlyName: 'Customer Support Line',
+const phonePurchase = await client.telephonyProvider.purchase({
   phoneNumber: '+12125551234',
-  providerType: ProviderType.SIGNALWIRE,
-  numberType: PhoneNumberType.LOCAL
+  friendlyName: 'Customer Support Line' // Optional
 });
 
 console.log(`Purchase ID: ${phonePurchase.id}`);
@@ -115,10 +100,7 @@ Phone Configuration:
 ### Step 3: Create Voice Deployment
 
 ```typescript
-import {
-  DeploymentStatus,
-  DeploymentProvisioningType
-} from 'wiil-js';
+import { DeploymentStatus, DeploymentProvisioningType } from 'wiil-core-js';
 
 const deployment = await client.deploymentConfigs.create({
   projectId: 'YOUR_PROJECT_ID',
@@ -165,7 +147,7 @@ console.log(`  Recording: ${voiceChannel.recordingEnabled}`);
 ### Get Channel by Phone Number
 
 ```typescript
-import { DeploymentType } from 'wiil-js';
+import { DeploymentType } from 'wiil-core-js';
 
 const voiceChannel = await client.deploymentChannels.getByIdentifier(
   '+12125551234',
@@ -180,25 +162,17 @@ console.log(`Voice Channel ID: ${voiceChannel.id}`);
 ## Complete Example
 
 ```typescript
-import {
-  WiilClient,
-  ProviderType,
-  PhoneNumberType,
-  PhonePurchaseStatus,
-  DeploymentStatus,
-  DeploymentProvisioningType
-} from 'wiil-js';
+import { WiilClient } from 'wiil-js';
+import { DeploymentStatus, DeploymentProvisioningType } from 'wiil-core-js';
 
 async function setupVoiceChannel() {
   const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
 
   // 1. Purchase phone number
   console.log('1. Purchasing phone number...');
-  const purchase = await client.phoneConfigs.purchase({
-    friendlyName: 'Customer Support Line',
+  const purchase = await client.telephonyProvider.purchase({
     phoneNumber: '+12125551234',
-    providerType: ProviderType.SIGNALWIRE,
-    numberType: PhoneNumberType.LOCAL
+    friendlyName: 'Customer Support Line'
   });
 
   console.log(`Purchase ID: ${purchase.id}`);
@@ -346,32 +320,6 @@ const agentConfig = await client.agentConfigs.create({
 2. ✅ Wait a few minutes for processing
 3. ✅ Check WIIL Console recordings section
 4. ✅ Verify call completed successfully
-
----
-
-## Providers
-
-### SignalWire (Recommended)
-
-```typescript
-providerType: ProviderType.SIGNALWIRE
-```
-
-**Benefits**:
-- Competitive pricing
-- 99.99% uptime SLA
-- Advanced features
-
-### Twilio
-
-```typescript
-providerType: ProviderType.TWILIO
-```
-
-**Benefits**:
-- Global coverage
-- Established provider
-- Wide number selection
 
 ---
 

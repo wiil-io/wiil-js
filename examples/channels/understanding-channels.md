@@ -160,8 +160,7 @@ Each channel type has specific configuration options:
 ```typescript
 {
   phoneConfigurationId: string,      // Links to PhoneConfiguration
-  hasForwardingEnabled: boolean,     // Enable call forwarding
-  forwardingPhoneNumber?: string     // Forward destination
+  hasForwardingEnabled: boolean      // Enable call forwarding
 }
 ```
 

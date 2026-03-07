@@ -4,7 +4,12 @@
  */
 
 
-import { BasePhoneNumberInfo, PhoneNumberPricing, PhoneProviderRegion, ProviderType } from 'wiil-core-js';
+import {
+  BasePhoneNumberInfo,
+  PhoneNumberPricing,
+  BusinessPhoneNumberPurchaseRequest,
+  PhoneNumberPurchase,
+} from 'wiil-core-js';
 import { HttpClient } from '../../client/HttpClient';
 
 /**
@@ -20,29 +25,28 @@ export interface PhoneNumberSearchOptions {
 }
 
 /**
- * Resource class for managing telephony provider services in the Travnex Platform.
+ * Resource class for managing telephony provider services in the WIIL Platform.
  *
  * @remarks
- * Provides methods for retrieving available regions, searching for phone numbers,
- * and getting pricing information from various telephony providers (SignalWire, Twilio, etc.).
- * All methods require proper authentication via API key.
+ * Provides methods for searching for phone numbers, getting pricing information,
+ * and purchasing phone numbers. All methods require proper authentication via API key.
  *
  * @example
  * ```typescript
- * import { ProviderType } from 'wiil-core-js';
+ * const client = new WiilClient({ apiKey: 'your-api-key' });
  *
- * const client = new TravnexClient({ apiKey: 'your-api-key' });
- *
- * // Get available regions for SignalWire
- * const regions = await client.telephonyProvider.getRegions(ProviderType.SIGNALWIRE);
- *
- * // Search for phone numbers in a specific region
- * const numbers = await client.telephonyProvider.getPhoneNumbers(ProviderType.SIGNALWIRE, 'US', {
+ * // Search for phone numbers
+ * const numbers = await client.telephonyProvider.getPhoneNumbers({
  *   areaCode: '206'
  * });
  *
- * // Get pricing for a region
- * const pricing = await client.telephonyProvider.getPricing(ProviderType.SIGNALWIRE, 'US');
+ * // Get pricing
+ * const pricing = await client.telephonyProvider.getPricing();
+ *
+ * // Purchase a phone number
+ * const purchase = await client.telephonyProvider.purchase({
+ *   phoneNumber: '+12065551234'
+ * });
  * ```
  */
 export class TelephonyProviderResource {
@@ -60,57 +64,49 @@ export class TelephonyProviderResource {
     this.http = http;
   }
 
-  /**
-   * Retrieves available regions for phone numbers by provider.
-   *
-   * @param provider - Telephony provider (e.g., 'SIGNALWIRE', 'TWILIO')
-   * @returns Promise resolving to array of available regions
-   *
-   * @throws {@link TravnexAPIError} - When the API returns an error
-   * @throws {@link TravnexNetworkError} - When network communication fails
-   *
-   * @example
-   * ```typescript
-   * const regions = await client.telephonyProvider.getRegions(ProviderType.SIGNALWIRE);
-   * console.log(`Found ${regions.length} regions`);
-   * regions.forEach(region => {
-   *   console.log(`- ${region.regionName} (${region.regionId})`);
-   * });
-   * ```
-   */
-  public async getRegions(
-    provider: ProviderType
-  ): Promise<PhoneProviderRegion[]> {
-    return this.http.get<PhoneProviderRegion[]>(
-      `${this.resource_path}/${provider}/regions`
-    );
-  }
+  // /**
+  //  * Retrieves available regions for phone numbers by provider.
+  //  *
+  //  * @param provider - Telephony provider (e.g., 'SIGNALWIRE', 'TWILIO')
+  //  * @returns Promise resolving to array of available regions
+  //  *
+  //  * @throws {@link TravnexAPIError} - When the API returns an error
+  //  * @throws {@link TravnexNetworkError} - When network communication fails
+  //  *
+  //  * @example
+  //  * ```typescript
+  //  * const regions = await client.telephonyProvider.getRegions(ProviderType.SIGNALWIRE);
+  //  * console.log(`Found ${regions.length} regions`);
+  //  * regions.forEach(region => {
+  //  *   console.log(`- ${region.regionName} (${region.regionId})`);
+  //  * });
+  //  * ```
+  //  */
+  // public async getRegions(
+  //   provider: ProviderType
+  // ): Promise<PhoneProviderRegion[]> {
+  //   return this.http.get<PhoneProviderRegion[]>(
+  //     `${this.resource_path}/${provider}/regions`
+  //   );
+  // }
 
   /**
-   * Retrieves available phone numbers for a specific provider and region.
+   * Retrieves available phone numbers.
    *
-   * @param provider - Telephony provider (e.g., 'SIGNALWIRE', 'TWILIO')
-   * @param countryCode - Country code (e.g., 'US', 'CA')
    * @param options - Optional search filters
    * @returns Promise resolving to array of available phone numbers
    *
-   * @throws {@link TravnexAPIError} - When the API returns an error
-   * @throws {@link TravnexNetworkError} - When network communication fails
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
    *
    * @example
    * ```typescript
-   * // Search for phone numbers in US
-   * const numbers = await client.telephonyProvider.getPhoneNumbers(ProviderType.SIGNALWIRE, 'US');
+   * // Search for phone numbers
+   * const numbers = await client.telephonyProvider.getPhoneNumbers();
    *
    * // Search with area code filter
-   * const seattleNumbers = await client.telephonyProvider.getPhoneNumbers(ProviderType.SIGNALWIRE, 'US', {
+   * const seattleNumbers = await client.telephonyProvider.getPhoneNumbers({
    *   areaCode: '206'
-   * });
-   *
-   * // Search for specific number pattern
-   * const customNumbers = await client.telephonyProvider.getPhoneNumbers(ProviderType.SIGNALWIRE, 'US', {
-   *   contains: '555',
-   *   postalCode: '98101'
    * });
    *
    * numbers.forEach(number => {
@@ -119,48 +115,67 @@ export class TelephonyProviderResource {
    * ```
    */
   public async getPhoneNumbers(
-    provider: ProviderType,
-    countryCode: string,
     options?: PhoneNumberSearchOptions
   ): Promise<BasePhoneNumberInfo[]> {
-    const queryParams = new URLSearchParams({ countryCode });
+    const queryParams = new URLSearchParams();
 
     if (options?.areaCode) queryParams.append('areaCode', options.areaCode);
     if (options?.contains) queryParams.append('contains', options.contains);
     if (options?.postalCode) queryParams.append('postalCode', options.postalCode);
 
+    const query = queryParams.toString();
     return this.http.get<BasePhoneNumberInfo[]>(
-      `${this.resource_path}/${provider}/numbers?${queryParams.toString()}`
+      `${this.resource_path}/numbers${query ? `?${query}` : ''}`
     );
   }
 
   /**
-   * Retrieves pricing information for phone numbers by provider and region.
+   * Retrieves pricing information for phone numbers.
    *
-   * @param provider - Telephony provider (e.g., 'SIGNALWIRE', 'TWILIO')
-   * @param countryCode - Country code (e.g., 'US', 'CA')
    * @returns Promise resolving to array of pricing information
    *
-   * @throws {@link TravnexAPIError} - When the API returns an error
-   * @throws {@link TravnexNetworkError} - When network communication fails
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
    *
    * @example
    * ```typescript
-   * const pricing = await client.telephonyProvider.getPricing(ProviderType.SIGNALWIRE, 'US');
+   * const pricing = await client.telephonyProvider.getPricing();
    * pricing.forEach(price => {
    *   console.log(`Number Type: ${price.number_type}`);
    *   console.log(`Price: $${price.price}`);
    * });
    * ```
    */
-  public async getPricing(
-    provider: ProviderType,
-    countryCode: string
-  ): Promise<PhoneNumberPricing[]> {
-    const queryParams = new URLSearchParams({ countryCode });
-
+  public async getPricing(): Promise<PhoneNumberPricing[]> {
     return this.http.get<PhoneNumberPricing[]>(
-      `${this.resource_path}/${provider}/pricing?${queryParams.toString()}`
+      `${this.resource_path}/pricing`
+    );
+  }
+
+  /**
+   * Purchases a phone number.
+   *
+   * @param data - Phone number purchase request data
+   * @returns Promise resolving to the phone number purchase result
+   *
+   * @throws {@link WiilValidationError} - When input validation fails
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   *
+   * @example
+   * ```typescript
+   * const purchase = await client.telephonyProvider.purchase({
+   *   phoneNumber: '+12065551234'
+   * });
+   * console.log('Purchased:', purchase.phoneNumber);
+   * ```
+   */
+  public async purchase(
+    data: BusinessPhoneNumberPurchaseRequest
+  ): Promise<PhoneNumberPurchase> {
+    return this.http.post<BusinessPhoneNumberPurchaseRequest, PhoneNumberPurchase>(
+      `${this.resource_path}/purchase`,
+      data
     );
   }
 }
