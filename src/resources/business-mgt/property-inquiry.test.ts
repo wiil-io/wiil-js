@@ -36,7 +36,6 @@ describe('PropertyInquiryResource', () => {
   describe('create', () => {
     it('should create a new property inquiry', async () => {
       const input = {
-        organizationId: 'org_123',
         propertyId: 'property_123',
         customerId: 'cust_456',
         customer: {
@@ -62,7 +61,6 @@ describe('PropertyInquiryResource', () => {
 
       const mockResponse = {
         id: 'inquiry_123',
-        organizationId: 'org_123',
         propertyId: 'property_123',
         customerId: 'cust_456',
         customer: {
@@ -108,7 +106,6 @@ describe('PropertyInquiryResource', () => {
 
     it('should create an inquiry with rental interest', async () => {
       const input = {
-        organizationId: 'org_123',
         propertyId: 'property_456',
         customerId: 'cust_789',
         customer: {
@@ -132,7 +129,6 @@ describe('PropertyInquiryResource', () => {
 
       const mockResponse = {
         id: 'inquiry_456',
-        organizationId: 'org_123',
         propertyId: 'property_456',
         customerId: 'cust_789',
         customer: {
@@ -177,7 +173,6 @@ describe('PropertyInquiryResource', () => {
     it('should retrieve a property inquiry by ID', async () => {
       const mockResponse = {
         id: 'inquiry_123',
-        organizationId: 'org_123',
         propertyId: 'property_123',
         customerId: 'cust_456',
         customer: {
@@ -236,8 +231,7 @@ describe('PropertyInquiryResource', () => {
       const mockInquiries = [
         {
           id: 'inquiry_1',
-          organizationId: 'org_123',
-          propertyId: 'property_123',
+            propertyId: 'property_123',
           customerId: 'cust_001',
           customer: { id: 'cust_001', firstname: 'User', lastname: 'A', phone_number: '+11111111111' },
           inquiryType: PropertyInquiryType.OFFER,
@@ -252,8 +246,7 @@ describe('PropertyInquiryResource', () => {
         },
         {
           id: 'inquiry_2',
-          organizationId: 'org_123',
-          propertyId: 'property_123',
+            propertyId: 'property_123',
           customerId: 'cust_002',
           customer: { id: 'cust_002', firstname: 'User', lastname: 'B', phone_number: '+12222222222' },
           inquiryType: PropertyInquiryType.GENERAL,
@@ -333,8 +326,7 @@ describe('PropertyInquiryResource', () => {
       const mockInquiries = [
         {
           id: 'inquiry_1',
-          organizationId: 'org_123',
-          propertyId: 'property_111',
+            propertyId: 'property_111',
           customerId: 'cust_456',
           customer: { id: 'cust_456', firstname: 'John', lastname: 'Doe', phone_number: '+12125551234' },
           inquiryType: PropertyInquiryType.OFFER,
@@ -349,8 +341,7 @@ describe('PropertyInquiryResource', () => {
         },
         {
           id: 'inquiry_2',
-          organizationId: 'org_123',
-          propertyId: 'property_222',
+            propertyId: 'property_222',
           customerId: 'cust_456',
           customer: { id: 'cust_456', firstname: 'John', lastname: 'Doe', phone_number: '+12125551234' },
           inquiryType: PropertyInquiryType.OFFER,
@@ -437,7 +428,6 @@ describe('PropertyInquiryResource', () => {
 
       const mockResponse = {
         id: 'inquiry_123',
-        organizationId: 'org_123',
         propertyId: 'property_123',
         customerId: 'cust_456',
         customer: { id: 'cust_456', firstname: 'John', lastname: 'Doe', phone_number: '+12125551234' },
@@ -483,7 +473,6 @@ describe('PropertyInquiryResource', () => {
 
       const mockResponse = {
         id: 'inquiry_123',
-        organizationId: 'org_123',
         propertyId: 'property_123',
         customerId: 'cust_456',
         customer: { id: 'cust_456', firstname: 'John', lastname: 'Doe', phone_number: '+12125551234' },
@@ -526,7 +515,6 @@ describe('PropertyInquiryResource', () => {
 
       const mockResponse = {
         id: 'inquiry_456',
-        organizationId: 'org_123',
         propertyId: 'property_456',
         customerId: 'cust_789',
         customer: { id: 'cust_789', firstname: 'Jane', lastname: 'Smith', phone_number: '+13105559876' },
@@ -568,7 +556,6 @@ describe('PropertyInquiryResource', () => {
 
       const mockResponse = {
         id: 'inquiry_789',
-        organizationId: 'org_123',
         propertyId: 'property_789',
         customerId: 'cust_111',
         customer: { id: 'cust_111', firstname: 'Bob', lastname: 'Wilson', phone_number: '+14155551111' },
@@ -637,8 +624,7 @@ describe('PropertyInquiryResource', () => {
       const mockInquiries = [
         {
           id: 'inquiry_1',
-          organizationId: 'org_123',
-          propertyId: 'property_111',
+            propertyId: 'property_111',
           customerId: 'cust_001',
           customer: { id: 'cust_001', firstname: 'User', lastname: 'A', phone_number: '+11111111111' },
           inquiryType: PropertyInquiryType.OFFER,
@@ -653,8 +639,7 @@ describe('PropertyInquiryResource', () => {
         },
         {
           id: 'inquiry_2',
-          organizationId: 'org_123',
-          propertyId: 'property_222',
+            propertyId: 'property_222',
           customerId: 'cust_002',
           customer: { id: 'cust_002', firstname: 'User', lastname: 'B', phone_number: '+12222222222' },
           inquiryType: PropertyInquiryType.GENERAL,

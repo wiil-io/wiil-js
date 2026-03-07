@@ -39,20 +39,16 @@ describe('PropertyConfigResource', () => {
     describe('createCategory', () => {
       it('should create a new property category', async () => {
         const input = {
-          organizationId: 'org_123',
           name: 'Luxury Homes',
           description: 'High-end residential properties',
           propertyType: PropertyType.RESIDENTIAL,
-          isDefault: false,
         };
 
         const mockResponse: PropertyCategory = {
           id: 'category_123',
-          organizationId: 'org_123',
           name: 'Luxury Homes',
           description: 'High-end residential properties',
           propertyType: PropertyType.RESIDENTIAL,
-          isDefault: false,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         };
@@ -75,18 +71,14 @@ describe('PropertyConfigResource', () => {
 
       it('should create a default category', async () => {
         const input = {
-          organizationId: 'org_123',
           name: 'Uncategorized',
           propertyType: PropertyType.RESIDENTIAL,
-          isDefault: true,
         };
 
         const mockResponse: PropertyCategory = {
           id: 'category_default',
-          organizationId: 'org_123',
           name: 'Uncategorized',
           propertyType: PropertyType.RESIDENTIAL,
-          isDefault: true,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         };
@@ -103,7 +95,6 @@ describe('PropertyConfigResource', () => {
         const result = await client.propertyConfig.createCategory(input);
 
         expect(result.name).toBe('Uncategorized');
-        expect(result.isDefault).toBe(true);
       });
     });
 
@@ -111,12 +102,10 @@ describe('PropertyConfigResource', () => {
       it('should retrieve a property category by ID', async () => {
         const mockResponse: PropertyCategory = {
           id: 'category_123',
-          organizationId: 'org_123',
           name: 'Commercial Offices',
           description: 'Office spaces and commercial buildings',
           propertyType: PropertyType.COMMERCIAL,
           displayOrder: 1,
-          isDefault: false,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         };
@@ -154,22 +143,18 @@ describe('PropertyConfigResource', () => {
 
     describe('listCategories', () => {
       it('should list property categories with pagination', async () => {
-        const mockCategories: PropertyCategory[] = [
+        const mockCategories = [
           {
             id: 'category_1',
-            organizationId: 'org_123',
             name: 'Residential',
             propertyType: PropertyType.RESIDENTIAL,
-            isDefault: true,
             createdAt: Date.now(),
             updatedAt: Date.now(),
           },
           {
             id: 'category_2',
-            organizationId: 'org_123',
             name: 'Commercial',
             propertyType: PropertyType.COMMERCIAL,
-            isDefault: false,
             createdAt: Date.now(),
             updatedAt: Date.now(),
           },
@@ -246,11 +231,9 @@ describe('PropertyConfigResource', () => {
 
         const mockResponse: PropertyCategory = {
           id: 'category_123',
-          organizationId: 'org_123',
           name: 'Updated Luxury Homes',
           description: 'Premium residential properties',
           propertyType: PropertyType.RESIDENTIAL,
-          isDefault: false,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         };
@@ -306,7 +289,6 @@ describe('PropertyConfigResource', () => {
     describe('createAddress', () => {
       it('should create a new property address', async () => {
         const input = {
-          organizationId: 'org_123',
           street: '123 Main Street',
           city: 'Los Angeles',
           state: 'CA',
@@ -318,7 +300,6 @@ describe('PropertyConfigResource', () => {
 
         const mockResponse: PropertyAddress = {
           id: 'address_123',
-          organizationId: 'org_123',
           street: '123 Main Street',
           city: 'Los Angeles',
           state: 'CA',
@@ -348,7 +329,6 @@ describe('PropertyConfigResource', () => {
 
       it('should create address with coordinates', async () => {
         const input = {
-          organizationId: 'org_123',
           street: '456 Ocean Ave',
           city: 'Miami',
           state: 'FL',
@@ -363,7 +343,6 @@ describe('PropertyConfigResource', () => {
 
         const mockResponse: PropertyAddress = {
           id: 'address_456',
-          organizationId: 'org_123',
           street: '456 Ocean Ave',
           city: 'Miami',
           state: 'FL',
@@ -398,7 +377,6 @@ describe('PropertyConfigResource', () => {
       it('should retrieve a property address by ID', async () => {
         const mockResponse: PropertyAddress = {
           id: 'address_123',
-          organizationId: 'org_123',
           street: '789 Park Avenue',
           city: 'New York',
           state: 'NY',
@@ -447,7 +425,6 @@ describe('PropertyConfigResource', () => {
         const mockAddresses: PropertyAddress[] = [
           {
             id: 'address_1',
-            organizationId: 'org_123',
             street: '100 First St',
             city: 'San Francisco',
             state: 'CA',
@@ -458,7 +435,6 @@ describe('PropertyConfigResource', () => {
           },
           {
             id: 'address_2',
-            organizationId: 'org_123',
             street: '200 Second St',
             city: 'San Francisco',
             state: 'CA',
@@ -507,7 +483,6 @@ describe('PropertyConfigResource', () => {
 
         const mockResponse: PropertyAddress = {
           id: 'address_123',
-          organizationId: 'org_123',
           street: '123 Updated Street',
           unit: 'Suite 100',
           city: 'Los Angeles',
@@ -554,7 +529,6 @@ describe('PropertyConfigResource', () => {
       it('should verify a property address', async () => {
         const mockResponse: PropertyAddress = {
           id: 'address_123',
-          organizationId: 'org_123',
           street: '123 Main Street',
           city: 'Los Angeles',
           state: 'CA',
@@ -586,7 +560,6 @@ describe('PropertyConfigResource', () => {
     describe('create', () => {
       it('should create a new property listing', async () => {
         const input = {
-          organizationId: 'org_123',
           categoryId: 'category_123',
           title: 'Beautiful Downtown Condo',
           description: 'Modern 2BR condo with stunning views',
@@ -617,7 +590,6 @@ describe('PropertyConfigResource', () => {
 
         const mockResponse: Property = {
           id: 'property_123',
-          organizationId: 'org_123',
           categoryId: 'category_123',
           title: 'Beautiful Downtown Condo',
           description: 'Modern 2BR condo with stunning views',
@@ -667,7 +639,6 @@ describe('PropertyConfigResource', () => {
 
       it('should create a rental property', async () => {
         const input = {
-          organizationId: 'org_123',
           categoryId: 'category_123',
           title: 'Cozy Studio Apartment',
           propertyType: PropertyType.RESIDENTIAL,
@@ -689,7 +660,6 @@ describe('PropertyConfigResource', () => {
 
         const mockResponse: Property = {
           id: 'property_456',
-          organizationId: 'org_123',
           categoryId: 'category_123',
           title: 'Cozy Studio Apartment',
           propertyType: PropertyType.RESIDENTIAL,
@@ -732,7 +702,6 @@ describe('PropertyConfigResource', () => {
       it('should retrieve a property by ID', async () => {
         const mockResponse: Property = {
           id: 'property_123',
-          organizationId: 'org_123',
           categoryId: 'category_123',
           title: 'Luxury Villa',
           propertyType: PropertyType.RESIDENTIAL,
@@ -789,7 +758,6 @@ describe('PropertyConfigResource', () => {
         const mockProperties: Property[] = [
           {
             id: 'property_1',
-            organizationId: 'org_123',
             categoryId: 'category_1',
             title: 'Property A',
             propertyType: PropertyType.RESIDENTIAL,
@@ -811,7 +779,6 @@ describe('PropertyConfigResource', () => {
           },
           {
             id: 'property_2',
-            organizationId: 'org_123',
             categoryId: 'category_1',
             title: 'Property B',
             propertyType: PropertyType.COMMERCIAL,
@@ -900,7 +867,6 @@ describe('PropertyConfigResource', () => {
         const mockProperties: Property[] = [
           {
             id: 'property_1',
-            organizationId: 'org_123',
             categoryId: 'category_residential',
             title: 'House A',
             propertyType: PropertyType.RESIDENTIAL,
@@ -986,7 +952,6 @@ describe('PropertyConfigResource', () => {
       it('should retrieve property by address ID', async () => {
         const mockResponse: Property = {
           id: 'property_123',
-          organizationId: 'org_123',
           categoryId: 'category_123',
           title: 'Property at Address',
           propertyType: PropertyType.RESIDENTIAL,
@@ -1028,7 +993,6 @@ describe('PropertyConfigResource', () => {
         const mockProperties: Property[] = [
           {
             id: 'property_1',
-            organizationId: 'org_123',
             categoryId: 'category_1',
             title: 'Beachfront Villa',
             description: 'Beautiful beachfront property',
@@ -1123,7 +1087,6 @@ describe('PropertyConfigResource', () => {
 
         const mockResponse: Property = {
           id: 'property_123',
-          organizationId: 'org_123',
           categoryId: 'category_123',
           title: 'Updated Property Title',
           propertyType: PropertyType.RESIDENTIAL,
@@ -1175,7 +1138,6 @@ describe('PropertyConfigResource', () => {
 
         const mockResponse: Property = {
           id: 'property_456',
-          organizationId: 'org_123',
           categoryId: 'category_123',
           title: 'Property',
           propertyType: PropertyType.RESIDENTIAL,
