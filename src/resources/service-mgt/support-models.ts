@@ -343,7 +343,7 @@ export class SupportModelsResource {
     providerModelId: string
   ): Promise<boolean> {
     return this.http.get<boolean>(
-      `/supports/${proprietor}/${providerModelId}`
+      `${this.resource_path}/supports/${proprietor}/${providerModelId}`
     );
   }
 }

@@ -9,6 +9,7 @@ import {
   PhoneNumberPricing,
   BusinessPhoneNumberPurchaseRequest,
   PhoneNumberPurchase,
+  PhonePurchaseStatus,
 } from 'wiil-core-js';
 import { HttpClient } from '../../client/HttpClient';
 
@@ -153,29 +154,100 @@ export class TelephonyProviderResource {
   }
 
   /**
-   * Purchases a phone number.
+   * Purchases a phone number and polls until the purchase completes.
    *
    * @param data - Phone number purchase request data
-   * @returns Promise resolving to the phone number purchase result
+   * @returns Promise resolving to the completed phone number purchase result
    *
    * @throws {@link WiilValidationError} - When input validation fails
    * @throws {@link WiilAPIError} - When the API returns an error
    * @throws {@link WiilNetworkError} - When network communication fails
+   * @throws {@link Error} - When polling times out before completion
+   *
+   * @remarks
+   * This method initiates a phone number purchase and automatically polls
+   * until the purchase reaches a terminal state (completed, failed, or cancelled).
+   * The polling interval is 5 seconds with a maximum timeout of 2 minutes.
    *
    * @example
    * ```typescript
    * const purchase = await client.telephonyProvider.purchase({
    *   phoneNumber: '+12065551234'
    * });
+   * console.log('Purchase status:', purchase.status);
    * console.log('Purchased:', purchase.phoneNumber);
    * ```
    */
   public async purchase(
     data: BusinessPhoneNumberPurchaseRequest
   ): Promise<PhoneNumberPurchase> {
-    return this.http.post<BusinessPhoneNumberPurchaseRequest, PhoneNumberPurchase>(
+    const POLL_INTERVAL = 5000; // 5 seconds
+    const POLL_TIMEOUT = 120000; // 2 minutes
+
+    const initialResult = await this.http.post<BusinessPhoneNumberPurchaseRequest, PhoneNumberPurchase>(
       `${this.resource_path}/purchase`,
       data
+    );
+
+    const terminalStates = [
+      PhonePurchaseStatus.COMPLETED,
+      PhonePurchaseStatus.FAILED,
+      PhonePurchaseStatus.CANCELLED,
+    ];
+
+    if (terminalStates.includes(initialResult.status as PhonePurchaseStatus)) {
+      return initialResult;
+    }
+
+    const startTime = Date.now();
+
+    while (Date.now() - startTime < POLL_TIMEOUT) {
+      await this.sleep(POLL_INTERVAL);
+
+      const status = await this.getPurchaseStatus(initialResult.id);
+
+      if (terminalStates.includes(status.status as PhonePurchaseStatus)) {
+        return status;
+      }
+    }
+
+    throw new Error(
+      `Phone number purchase timed out after ${POLL_TIMEOUT}ms. Last status: ${initialResult.status}`
+    );
+  }
+
+  /**
+   * Utility method to sleep for a specified duration.
+   * @private
+   */
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Retrieves the status of a phone number purchase request.
+   *
+   * @param requestId - The purchase request ID returned from the purchase() method
+   * @returns Promise resolving to the phone number purchase details
+   *
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   *
+   * @example
+   * ```typescript
+   * // After initiating a purchase
+   * const purchase = await client.telephonyProvider.purchase({
+   *   phoneNumber: '+12065551234'
+   * });
+   *
+   * // Poll for completion
+   * const status = await client.telephonyProvider.getPurchaseStatus(purchase.id);
+   * console.log('Purchase status:', status.status);
+   * ```
+   */
+  public async getPurchaseStatus(requestId: string): Promise<PhoneNumberPurchase> {
+    return this.http.get<PhoneNumberPurchase>(
+      `${this.resource_path}/purchase-request/${requestId}`
     );
   }
 }
