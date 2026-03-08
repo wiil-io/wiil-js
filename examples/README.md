@@ -6,8 +6,8 @@ This directory contains comprehensive examples and guides for building AI-powere
 
 - [Getting Started](#getting-started)
 - [Quick Start Guide](#quick-start-guide)
-  - [Fundamental Configuration Setup](#fundamental-configuration-setup)
-  - [Dynamic Agent Setup](#dynamic-agent-setup)
+  - [Dynamic Agent Setup (Recommended)](#dynamic-agent-setup-recommended)
+  - [Fundamental Configuration Setup (Traditional)](#fundamental-configuration-setup-traditional)
 - [Core Guides](#core-guides)
 - [Business Service Guides](#business-service-guides)
 - [Configuration Flow](#configuration-flow)
@@ -53,41 +53,56 @@ WIIL_API_KEY=your-api-key-here
 
 ## Quick Start Guide
 
-### Fundamental Configuration Setup
-
-**File**: [fundamental-configuration-setup.md](./fundamental-configuration-setup.md)
-
-Complete walkthrough from signup to deploying your first AI agent.
-
-This is the **recommended starting point** for all new users. It covers:
-
-1. **Initialize Client & Verify Organization**
-2. **Create or Select Project**
-3. **Create Instruction Configuration** (agent behavior and guidelines)
-4. **Get AI Models** from Wiil Support Model Registry
-5. **Create Agent Configuration** (link instructions + model)
-6. **Create Deployment Channel** (web, phone, SMS)
-7. **Create Deployment Configuration** (link everything together)
-8. **Deploy Agent** (integrate into your application)
-9. **Verify Deployment** (test and monitor)
-
-[📖 Read the Full Guide](./fundamental-configuration-setup.md)
-
-### Dynamic Agent Setup
+### Dynamic Agent Setup (Recommended)
 
 **File**: [dynamic-agent-setup-guide.md](./dynamic-agent-setup-guide.md)
 
-Simplified, single-call agent deployment for rapid prototyping.
+**The fastest way to deploy AI agents** - single-call deployment instead of 7+ API calls.
 
-**Choose this guide when you want simplicity over granular control.** It covers:
+This is the **recommended starting point** for most users. It covers:
 
-- Dynamic Phone Agent setup
-- Dynamic Web Agent setup
-- Voice configuration (STT/TTS)
-- Role templates and capabilities
-- Quick deployment for demos and MVPs
+- **Phone Agent** - Deploy a voice-capable AI agent with automatic phone provisioning
+- **Web Agent** - Deploy a web chat widget with integration snippets
+- **Chained Configuration** - STT (Speech-to-Text) and TTS (Text-to-Speech)
+- **Role Templates** - Pre-configured agent personas
+- **Business Capabilities** - Enable appointment booking, orders, reservations
+
+```typescript
+// Deploy a phone agent in a single call
+const result = await client.dynamicPhoneAgent.create({
+  assistantName: 'Sarah',
+  capabilities: [BusinessSupportServices.APPOINTMENT_MANAGEMENT],
+});
+console.log('Phone number:', result.phoneNumber);
+```
 
 [📖 Read the Dynamic Setup Guide](./dynamic-agent-setup-guide.md)
+
+### Fundamental Configuration Setup (Traditional)
+
+**File**: [fundamental-configuration-setup.md](./fundamental-configuration-setup.md)
+
+**For fine-grained control** - complete walkthrough of the multi-step configuration process.
+
+Choose this guide when you need:
+
+- Custom instruction configurations with detailed guidelines
+- Complex multi-agent deployments
+- Advanced deployment channel configurations
+- Granular control over each component
+
+Setup steps:
+
+1. Initialize Client & Verify Organization
+2. Create or Select Project
+3. Create Instruction Configuration (agent behavior)
+4. Get AI Models from Support Model Registry
+5. Create Agent Configuration (link instructions + model)
+6. Create Deployment Channel (web, phone, SMS)
+7. Create Deployment Configuration (link everything)
+8. Deploy & Verify
+
+[📖 Read the Full Guide](./fundamental-configuration-setup.md)
 
 ---
 
@@ -503,7 +518,9 @@ Found an issue or want to add a new example? Please submit a pull request or ope
 
 ## Ready to Get Started?
 
-Begin with the [Fundamental Configuration Setup Guide](./fundamental-configuration-setup.md) to deploy your first AI agent! 🚀
+Begin with the [Dynamic Agent Setup Guide](./dynamic-agent-setup-guide.md) to deploy your first AI agent in a single API call! 🚀
+
+For fine-grained control, see the [Fundamental Configuration Setup Guide](./fundamental-configuration-setup.md).
 
 ---
 

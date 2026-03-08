@@ -36,103 +36,145 @@ import { WiilClient } from 'wiil-js';
 
 // Initialize the client with your API key
 const client = new WiilClient({
-  apiKey: 'your-api-key'
-});
-
-// Get your organization
-const organization = await client.organizations.get();
-console.log('Organization:', organization.companyName);
-
-// Create a project
-const project = await client.projects.create({
-  name: 'Production Environment',
-  description: 'Main production deployment'
-});
-
-console.log('Project created:', project.id);
-```
-
-## Platform Overview
-
-The WIIL Platform provides comprehensive APIs for building AI-powered conversational services across four integrated domains:
-
-### 1. Service Configuration
-
-Deploy and manage AI agents with customizable behavior:
-
-- **Agent Configurations** - Define AI agent capabilities and characteristics
-- **Instruction Configurations** - The heart of agent behavior with prompts, guidelines, and compliance rules
-- **Deployment Configurations** - Combine agents and instructions into deployable units
-- **Phone Configurations** - Configure telephony settings for voice calls
-- **Deployment Channels** - Manage OTT Chat, Telephony, SMS, and Email channels
-
-### 2. Advanced Service Configuration
-
-Enable voice-powered conversations with end-to-end processing:
-
-- **Provisioning Chain Configurations** - STT → Agent → TTS voice processing pipelines
-- **Speech-to-Text (STT)** - Convert voice to text using Deepgram, OpenAI Whisper, Cartesia
-- **Text-to-Speech (TTS)** - Generate natural voice using ElevenLabs, Cartesia, OpenAI
-
-### 3. Translation Services
-
-Real-time multilingual voice translation:
-
-- **Translation Sessions** - Enable live voice-to-voice translation
-- **Bidirectional Translation** - Two-way communication between languages
-- **Multi-Participant Support** - Sessions with multiple participants, each in their native language
-- **Conversation Configurations** - Configure translation session parameters
-- **Knowledge Sources** - Manage knowledge bases for translation accuracy
-
-### 4. Business Management
-
-Catalog management and AI-powered transactional operations:
-
-- **Business Services** - Manage bookable services (appointments, consultations)
-- **Customers** - Customer information and relationship management
-- **Reservable Resources** - Define reservable assets (tables, rooms, equipment)
-- **Menus** - Food and beverage catalog management
-- **Products** - Retail product catalog management
-- **Service Appointments** - AI-powered appointment booking through conversations
-- **Reservations** - AI-powered resource reservation through conversations
-- **Menu Orders** - AI-powered food/beverage ordering through conversations
-- **Product Orders** - AI-powered product ordering through conversations
-
-## Configuration
-
-### Basic Configuration
-
-```typescript
-const client = new WiilClient({
-  apiKey: 'your-api-key'
-});
-```
-
-### Advanced Configuration
-
-```typescript
-const client = new WiilClient({
-  apiKey: 'your-api-key',
-  baseUrl: 'https://api.wiil.io/v1', // Custom base URL
-  timeout: 60000 // Request timeout in milliseconds (default: 30000)
+  apiKey: process.env.WIIL_API_KEY!
 });
 ```
 
 ## Usage Examples
 
-### Account Management
+### 1. Dynamic Agent Setup (Recommended)
 
-#### Organizations
+The Dynamic Agent Setup API is the fastest way to deploy AI agents. Instead of making 7+ separate API calls, deploy a fully functional agent with a single call.
+
+#### Phone Agent - Single Call Deployment
+
+```typescript
+import { WiilClient } from 'wiil-js';
+import { BusinessSupportServices } from 'wiil-core-js';
+
+const client = new WiilClient({
+  apiKey: process.env.WIIL_API_KEY!
+});
+
+const result = await client.dynamicPhoneAgent.create({
+  assistantName: 'Sarah',
+  capabilities: [BusinessSupportServices.APPOINTMENT_MANAGEMENT],
+});
+
+console.log('Phone number:', result.phoneNumber);
+console.log('Agent ID:', result.agentConfigurationId);
+```
+
+#### Web Agent - Single Call Deployment
+
+```typescript
+import { WiilClient } from 'wiil-js';
+import { BusinessSupportServices } from 'wiil-core-js';
+
+const client = new WiilClient({
+  apiKey: process.env.WIIL_API_KEY!
+});
+
+const result = await client.dynamicWebAgent.create({
+  assistantName: 'Emma',
+  websiteUrl: 'https://example.com',
+  capabilities: [BusinessSupportServices.APPOINTMENT_MANAGEMENT],
+});
+
+console.log('Integration snippets:', result.integrationSnippets);
+console.log('Agent ID:', result.agentConfigurationId);
+```
+
+#### Dynamic Agent with Chained Configuration
+
+Chained configuration (STT/TTS) works for both phone and web agents.
+
+```typescript
+import { WiilClient } from 'wiil-js';
+import {
+  BusinessSupportServices,
+  AgentRoleTemplateIdentifier,
+  SupportedProprietor
+} from 'wiil-core-js';
+
+const client = new WiilClient({
+  apiKey: process.env.WIIL_API_KEY!
+});
+
+// Chained configuration options (same for phone and web)
+const chainedConfig = {
+  // Required
+  assistantName: 'Marcus',
+  capabilities: [
+    BusinessSupportServices.APPOINTMENT_MANAGEMENT,
+    BusinessSupportServices.PRODUCT_ORDER_MANAGEMENT
+  ],
+
+  // Optional - Role & Language
+  role_template_identifier: AgentRoleTemplateIdentifier.CUSTOMER_SUPPORT_GENERAL,
+  language: 'en-US',
+
+  // Optional - Chained Configuration (STT/TTS)
+  sttConfiguration: {
+    providerType: SupportedProprietor.DEEPGRAM,
+    providerModelId: 'nova-2',
+    languageId: 'en-US'
+  },
+  ttsConfiguration: {
+    providerType: SupportedProprietor.ELEVENLABS,
+    providerModelId: 'eleven_turbo_v2',
+    languageId: 'en-US',
+    voiceId: 'voice_rachel'
+  }
+};
+
+// Phone Agent with chained config
+const phoneAgent = await client.dynamicPhoneAgent.create(chainedConfig);
+console.log('Phone number:', phoneAgent.phoneNumber);
+
+// Web Agent with chained config
+const webAgent = await client.dynamicWebAgent.create({
+  ...chainedConfig,
+  websiteUrl: 'https://example.com'
+});
+console.log('Widget snippets:', webAgent.integrationSnippets);
+```
+
+#### Dynamic Agent Operations
+
+```typescript
+// Create
+const created = await client.dynamicPhoneAgent.create({ ... });
+
+// Update (partial)
+const updated = await client.dynamicPhoneAgent.update({
+  id: 'agent_123',
+  assistantName: 'Nathan'
+});
+
+// Delete
+const deleted = await client.dynamicPhoneAgent.delete('agent_123');
+```
+
+For complete Dynamic Agent Setup documentation, see the [Dynamic Agent Setup Guide](./examples/dynamic-agent-setup-guide.md).
+
+---
+
+### 2. Service Configuration (Traditional Setup)
+
+For fine-grained control over each configuration component, use the traditional multi-step setup.
+
+#### Account Management
+
+##### Organizations
 
 ```typescript
 // Get your organization (read-only)
 const org = await client.organizations.get();
 console.log('Organization:', org.companyName);
-console.log('Business Vertical:', org.businessVerticalId);
-console.log('Service Status:', org.serviceStatus);
 ```
 
-#### Projects
+##### Projects
 
 ```typescript
 // Create a project
@@ -164,8 +206,6 @@ const projects = await client.projects.list({
   sortDirection: 'asc'
 });
 ```
-
-### Service Configuration
 
 #### Agent Configurations
 
@@ -221,12 +261,9 @@ const webChannels = await client.deploymentChannels.listByType('WEB', {
   page: 1,
   pageSize: 20
 });
-
-// Note: Voice channels (CALLS) are automatically created when you purchase a phone number
-// via client.phoneConfigs.purchase() - see Voice Channels guide for details
 ```
 
-#### Conversation Configurations
+#### Conversation & Knowledge Sources
 
 ```typescript
 // Get conversation configuration
@@ -234,11 +271,7 @@ const config = await client.conversationConfigs.get('config_123');
 
 // List conversation configurations
 const configs = await client.conversationConfigs.list();
-```
 
-#### Knowledge Sources
-
-```typescript
 // Get knowledge source
 const source = await client.knowledgeSources.get('source_123');
 
@@ -246,7 +279,11 @@ const source = await client.knowledgeSources.get('source_123');
 const sources = await client.knowledgeSources.list();
 ```
 
-### Business Management
+---
+
+### 3. Business Management
+
+Catalog management and AI-powered transactional operations.
 
 #### Business Services
 
@@ -388,12 +425,6 @@ const customerAppointments = await client.serviceAppointments.getByCustomer('cus
   page: 1,
   pageSize: 20
 });
-
-// List appointments
-const appointments = await client.serviceAppointments.list({
-  page: 1,
-  pageSize: 20
-});
 ```
 
 #### Reservations
@@ -416,18 +447,6 @@ const reservation = await client.reservations.create({
 
 // Get reservation
 const reservation = await client.reservations.get('res_123');
-
-// Get reservations by customer
-const customerReservations = await client.reservations.getByCustomer('cust_123', {
-  page: 1,
-  pageSize: 20
-});
-
-// List reservations
-const reservations = await client.reservations.list({
-  page: 1,
-  pageSize: 20
-});
 ```
 
 #### Menu Orders
@@ -443,39 +462,16 @@ const order = await client.menuOrders.create({
       quantity: 2,
       unitPrice: 12.99,
       totalPrice: 25.98
-    },
-    {
-      menuItemId: 'item_456',
-      itemName: 'Caesar Salad',
-      quantity: 1,
-      unitPrice: 9.99,
-      totalPrice: 9.99
     }
   ],
   customerId: 'cust_123',
   pricing: {
-    subtotal: 35.97,
-    tax: 3.60,
-    tip: 7.00,
-    total: 46.57
+    subtotal: 25.98,
+    tax: 2.60,
+    total: 28.58
   },
   orderDate: Date.now(),
   source: 'web'
-});
-
-// Get order
-const order = await client.menuOrders.get('order_123');
-
-// Get orders by customer
-const customerOrders = await client.menuOrders.getByCustomer('cust_123', {
-  page: 1,
-  pageSize: 20
-});
-
-// List orders
-const orders = await client.menuOrders.list({
-  page: 1,
-  pageSize: 20
 });
 ```
 
@@ -489,26 +485,17 @@ const order = await client.productOrders.create({
       productId: 'prod_123',
       itemName: 'Wireless Headphones',
       sku: 'WH-2024-BLK',
-      quantity: 2,
-      unitPrice: 79.99,
-      totalPrice: 159.98,
-      selectedVariant: 'Black'
-    },
-    {
-      productId: 'prod_456',
-      itemName: 'Phone Case',
-      sku: 'PC-2024-CLR',
       quantity: 1,
-      unitPrice: 19.99,
-      totalPrice: 19.99
+      unitPrice: 79.99,
+      totalPrice: 79.99
     }
   ],
   customerId: 'cust_789',
   pricing: {
-    subtotal: 179.97,
-    tax: 14.40,
+    subtotal: 79.99,
+    tax: 6.40,
     shippingAmount: 9.99,
-    total: 204.36
+    total: 96.38
   },
   orderDate: Date.now(),
   shippingAddress: {
@@ -518,23 +505,7 @@ const order = await client.productOrders.create({
     postalCode: '11201',
     country: 'US'
   },
-  shippingMethod: 'Standard',
   source: 'web'
-});
-
-// Get order
-const order = await client.productOrders.get('order_123');
-
-// Get orders by customer
-const customerOrders = await client.productOrders.getByCustomer('cust_789', {
-  page: 1,
-  pageSize: 20
-});
-
-// List orders
-const orders = await client.productOrders.list({
-  page: 1,
-  pageSize: 20
 });
 ```
 
@@ -554,20 +525,145 @@ const table = await client.reservationResources.create({
   reservationDurationUnit: 'hours',
   syncEnabled: false
 });
+```
 
-// Get resource
-const resource = await client.reservationResources.get('resource_123');
+#### Property Management
 
-// Get resources by type
-const tables = await client.reservationResources.getByType('table', {
-  page: 1,
-  pageSize: 20
+```typescript
+import {
+  PropertyType,
+  PropertySubType,
+  ListingType,
+  ListingStatus,
+  PropertyInquiryType
+} from 'wiil-core-js';
+
+// Create a property category
+const category = await client.propertyConfig.createCategory({
+  name: 'Luxury Homes',
+  description: 'Premium residential properties',
+  displayOrder: 1
 });
 
-// List resources
-const resources = await client.reservationResources.list({
+// Create a property address
+const address = await client.propertyConfig.createAddress({
+  streetAddress: '123 Ocean View Drive',
+  city: 'Malibu',
+  stateProvince: 'CA',
+  postalCode: '90265',
+  country: 'US'
+});
+
+// Create a property listing
+const property = await client.propertyConfig.createProperty({
+  title: 'Luxury Beachfront Villa',
+  description: 'Stunning 5-bedroom villa with panoramic ocean views',
+  categoryId: category.id,
+  addressId: address.id,
+  propertyType: PropertyType.RESIDENTIAL,
+  propertySubType: PropertySubType.VILLA,
+  listingType: ListingType.FOR_SALE,
+  listingStatus: ListingStatus.ACTIVE,
+  price: 4500000,
+  currency: 'USD',
+  bedrooms: 5,
+  bathrooms: 4,
+  squareFootage: 4200,
+  yearBuilt: 2020,
+  features: ['Ocean view', 'Pool', 'Home theater', 'Wine cellar'],
+  amenities: ['Beach access', 'Security system', 'Smart home']
+});
+
+// Create a property inquiry
+const inquiry = await client.propertyInquiries.create({
+  propertyId: property.id,
+  customerId: 'cust_123',
+  inquiryType: PropertyInquiryType.VIEWING_REQUEST,
+  message: 'I would like to schedule a viewing this weekend',
+  preferredContactMethod: 'phone'
+});
+
+// List properties with filters
+const properties = await client.propertyConfig.listProperties({
   page: 1,
-  pageSize: 20
+  pageSize: 20,
+  listingType: ListingType.FOR_SALE,
+  minPrice: 1000000,
+  maxPrice: 5000000
+});
+
+// Get property inquiries by customer
+const inquiries = await client.propertyInquiries.getByCustomer('cust_123', {
+  page: 1,
+  pageSize: 10
+});
+```
+
+## Platform Overview
+
+The WIIL Platform provides comprehensive APIs for building AI-powered conversational services across four integrated domains:
+
+### 1. Service Configuration
+
+Deploy and manage AI agents with customizable behavior:
+
+- **Agent Configurations** - Define AI agent capabilities and characteristics
+- **Instruction Configurations** - The heart of agent behavior with prompts, guidelines, and compliance rules
+- **Deployment Configurations** - Combine agents and instructions into deployable units
+- **Phone Configurations** - Configure telephony settings for voice calls
+- **Deployment Channels** - Manage OTT Chat, Telephony, SMS, and Email channels
+
+### 2. Advanced Service Configuration
+
+Enable voice-powered conversations with end-to-end processing:
+
+- **Provisioning Chain Configurations** - STT → Agent → TTS voice processing pipelines
+- **Speech-to-Text (STT)** - Convert voice to text using Deepgram, OpenAI Whisper, Cartesia
+- **Text-to-Speech (TTS)** - Generate natural voice using ElevenLabs, Cartesia, OpenAI
+
+### 3. Translation Services
+
+Real-time multilingual voice translation:
+
+- **Translation Sessions** - Enable live voice-to-voice translation
+- **Bidirectional Translation** - Two-way communication between languages
+- **Multi-Participant Support** - Sessions with multiple participants, each in their native language
+- **Conversation Configurations** - Configure translation session parameters
+- **Knowledge Sources** - Manage knowledge bases for translation accuracy
+
+### 4. Business Management
+
+Catalog management and AI-powered transactional operations:
+
+- **Business Services** - Manage bookable services (appointments, consultations)
+- **Customers** - Customer information and relationship management
+- **Reservable Resources** - Define reservable assets (tables, rooms, equipment)
+- **Menus** - Food and beverage catalog management
+- **Products** - Retail product catalog management
+- **Property Management** - Real estate listings, categories, and addresses
+- **Service Appointments** - AI-powered appointment booking through conversations
+- **Reservations** - AI-powered resource reservation through conversations
+- **Menu Orders** - AI-powered food/beverage ordering through conversations
+- **Product Orders** - AI-powered product ordering through conversations
+- **Property Inquiries** - AI-powered property inquiry handling through conversations
+
+## Configuration
+
+### Basic Configuration
+
+```typescript
+const client = new WiilClient({
+  apiKey: 'your-api-key'
+});
+```
+
+### Advanced Configuration
+
+```typescript
+const client = new WiilClient({
+  apiKey: 'your-api-key',
+  baseUrl: 'https://api.wiil.io/v1', // Custom base URL
+  timeout: 60000 // Request timeout in milliseconds (default: 30000)
 });
 ```
 
@@ -614,6 +710,11 @@ try {
 
 The SDK provides access to the following resources organized by domain:
 
+**Dynamic Agent Setup (Recommended):**
+
+- `client.dynamicPhoneAgent` - Single-call phone agent deployment
+- `client.dynamicWebAgent` - Single-call web agent deployment
+
 **Account Management:**
 
 - `client.organizations` - Organization management (read-only)
@@ -630,6 +731,8 @@ The SDK provides access to the following resources organized by domain:
 - `client.conversationConfigs` - Conversation configurations
 - `client.translationSessions` - Translation sessions
 - `client.knowledgeSources` - Knowledge source management
+- `client.supportModels` - AI model registry (read-only)
+- `client.telephonyProvider` - Phone number search and purchase
 
 **Business Management:**
 
@@ -642,6 +745,8 @@ The SDK provides access to the following resources organized by domain:
 - `client.menuOrders` - Menu orders
 - `client.productOrders` - Product orders
 - `client.reservationResources` - Reservable resources
+- `client.propertyConfig` - Property categories, addresses, and listings
+- `client.propertyInquiries` - Property inquiry management
 
 ## TypeScript Support
 
@@ -793,6 +898,7 @@ The platform integrates two core architectural domains through the **Conversatio
 | **Reservation Management** | Reservable Assets (Resources) | Reservations |
 | **Menu Management** | Menu Categories & Items | Menu Orders |
 | **Product Management** | Product Categories & Products | Product Orders |
+| **Property Management** | Property Categories, Addresses & Listings | Property Inquiries |
 
 **Business Catalogs**:
 
@@ -800,6 +906,7 @@ The platform integrates two core architectural domains through the **Conversatio
 - **Reservable Assets** - Bookable resources (tables, rooms, equipment)
 - **Menu Categories & Items** - Food and beverage offerings
 - **Product Categories & Products** - Retail products
+- **Property Listings** - Real estate properties (residential, commercial, land)
 
 **Transactional Operations** (AI-Powered):
 
@@ -807,8 +914,9 @@ The platform integrates two core architectural domains through the **Conversatio
 - **Reservations** - Created through AI conversations
 - **Menu Orders** - Created through AI conversations
 - **Product Orders** - Created through AI conversations
+- **Property Inquiries** - Created through AI conversations
 
-**SDK Resources**: `businessServices`, `reservationResources`, `menus`, `products`, `customers`, `serviceAppointments`, `reservations`, `menuOrders`, `productOrders`
+**SDK Resources**: `businessServices`, `reservationResources`, `menus`, `products`, `customers`, `serviceAppointments`, `reservations`, `menuOrders`, `productOrders`, `propertyConfig`, `propertyInquiries`
 
 ### Integration Hub: Conversations
 
