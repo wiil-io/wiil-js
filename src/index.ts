@@ -31,9 +31,14 @@
 
 // Main client
 export { WiilClient } from './client/WiilClient';
+export { WillService } from './client/WillService';
 
 // Configuration types
+export type { WillServiceConfig } from './client/WillService';
 export type { WiilClientConfig, APIResponse, APIErrorResponse } from './client/types';
+
+// Service layer
+export * from './services';
 
 // Error classes
 export {

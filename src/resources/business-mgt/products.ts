@@ -18,6 +18,10 @@ import {
   PaginationRequest,
 } from 'wiil-core-js';
 import { HttpClient } from '../../client/HttpClient';
+import { WiilValidationError } from '../../errors/WiilError';
+
+const CATEGORY_BATCH_LIMIT = 50;
+const PRODUCT_BATCH_LIMIT = 100;
 
 /**
  * Resource class for managing products in the WIIL Platform.
@@ -144,5 +148,77 @@ export class ProductsResource {
 
   public async delete(id: string): Promise<boolean> {
     return this.http.delete<boolean>(`${this.resource_path}/products/${id}`);
+  }
+
+  /**
+   * Creates multiple product categories in a single batch request.
+   *
+   * @param data - Array of product category data (maximum 50 items)
+   * @returns Promise resolving to paginated result of created product categories
+   *
+   * @throws {@link WiilValidationError} - When input validation fails or batch limit exceeded
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   */
+  public async createCategoryBatch(
+    data: CreateProductCategory[]
+  ): Promise<PaginatedResultType<ProductCategory>> {
+    if (data.length > CATEGORY_BATCH_LIMIT) {
+      throw new WiilValidationError(
+        `Batch size exceeds maximum limit of ${CATEGORY_BATCH_LIMIT}`,
+        [{ path: ['data'], message: `Array length ${data.length} exceeds maximum of ${CATEGORY_BATCH_LIMIT}` }]
+      );
+    }
+
+    for (let i = 0; i < data.length; i++) {
+      const validation = CreateProductCategorySchema.safeParse(data[i]);
+      if (!validation.success) {
+        throw new WiilValidationError(
+          `Validation failed for item at index ${i}`,
+          validation.error.issues
+        );
+      }
+    }
+
+    return this.http.post<CreateProductCategory[], PaginatedResultType<ProductCategory>>(
+      `${this.resource_path}/categories/batch`,
+      data
+    );
+  }
+
+  /**
+   * Creates multiple products in a single batch request.
+   *
+   * @param data - Array of product data (maximum 100 items)
+   * @returns Promise resolving to paginated result of created products
+   *
+   * @throws {@link WiilValidationError} - When input validation fails or batch limit exceeded
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   */
+  public async createBatch(
+    data: CreateBusinessProduct[]
+  ): Promise<PaginatedResultType<BusinessProduct>> {
+    if (data.length > PRODUCT_BATCH_LIMIT) {
+      throw new WiilValidationError(
+        `Batch size exceeds maximum limit of ${PRODUCT_BATCH_LIMIT}`,
+        [{ path: ['data'], message: `Array length ${data.length} exceeds maximum of ${PRODUCT_BATCH_LIMIT}` }]
+      );
+    }
+
+    for (let i = 0; i < data.length; i++) {
+      const validation = CreateBusinessProductSchema.safeParse(data[i]);
+      if (!validation.success) {
+        throw new WiilValidationError(
+          `Validation failed for item at index ${i}`,
+          validation.error.issues
+        );
+      }
+    }
+
+    return this.http.post<CreateBusinessProduct[], PaginatedResultType<BusinessProduct>>(
+      `${this.resource_path}/products/batch`,
+      data
+    );
   }
 }

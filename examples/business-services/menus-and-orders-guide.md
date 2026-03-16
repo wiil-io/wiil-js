@@ -231,6 +231,90 @@ const deleted = await client.menus.deleteItem('item_123');
 console.log('Deleted:', deleted);
 ```
 
+## Batch Operations
+
+Batch operations allow you to create multiple resources in a single API request, improving performance for bulk data imports.
+
+### Batch Create Categories
+
+Create up to 50 menu categories in a single request:
+
+```typescript
+const categories = await client.menus.createCategoryBatch([
+  { name: 'Appetizers', description: 'Start your meal', displayOrder: 1 },
+  { name: 'Main Courses', description: 'Signature entrees', displayOrder: 2 },
+  { name: 'Desserts', description: 'Sweet treats', displayOrder: 3 },
+  { name: 'Beverages', description: 'Drinks and refreshments', displayOrder: 4 },
+]);
+
+console.log(`Created ${categories.data.length} categories`);
+categories.data.forEach(cat => {
+  console.log(`- ${cat.name}: ${cat.id}`);
+});
+```
+
+### Batch Create Menu Items
+
+Create up to 100 menu items in a single request:
+
+```typescript
+const items = await client.menus.createItemBatch([
+  {
+    name: 'Buffalo Wings',
+    description: 'Crispy wings with hot sauce',
+    price: 11.99,
+    categoryId: 'cat_appetizers',
+    ingredients: ['chicken wings', 'buffalo sauce'],
+    allergens: ['dairy'],
+    isAvailable: true,
+    preparationTime: 20,
+    isActive: true,
+  },
+  {
+    name: 'Caesar Salad',
+    description: 'Fresh romaine with house dressing',
+    price: 9.99,
+    categoryId: 'cat_appetizers',
+    ingredients: ['romaine', 'parmesan', 'croutons'],
+    allergens: ['dairy', 'gluten'],
+    isAvailable: true,
+    preparationTime: 10,
+    isActive: true,
+  },
+  {
+    name: 'Classic Burger',
+    description: 'Angus beef with all the fixings',
+    price: 14.99,
+    categoryId: 'cat_main',
+    ingredients: ['beef', 'lettuce', 'tomato', 'onion'],
+    allergens: ['gluten'],
+    isAvailable: true,
+    preparationTime: 15,
+    isActive: true,
+  },
+]);
+
+console.log(`Created ${items.data.length} menu items`);
+```
+
+### Batch Limits
+
+| Resource     | Maximum per Batch |
+|--------------|-------------------|
+| Categories   | 50                |
+| Menu Items   | 100               |
+
+**Note:** Batch operations validate each item individually. If validation fails for any item, the entire batch request fails with an error indicating the index of the failing item.
+
+```typescript
+try {
+  const items = await client.menus.createItemBatch(menuItems);
+} catch (error) {
+  // Error message includes the index: "Validation failed for item at index 2"
+  console.error('Batch creation failed:', error.message);
+}
+```
+
 ## Menu Orders
 
 ### Order Schema

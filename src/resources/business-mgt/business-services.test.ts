@@ -52,7 +52,7 @@ describe('BusinessServicesResource', () => {
 
       nock(BASE_URL)
         .post('/business-services', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -85,7 +85,7 @@ describe('BusinessServicesResource', () => {
 
       nock(BASE_URL)
         .get('/business-services/service_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -141,7 +141,7 @@ describe('BusinessServicesResource', () => {
           name: 'Premium Massage Therapy',
           price: 90.00,
         })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -159,7 +159,7 @@ describe('BusinessServicesResource', () => {
     it('should delete a business service', async () => {
       nock(BASE_URL)
         .delete('/business-services/service_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: true,
@@ -228,7 +228,7 @@ describe('BusinessServicesResource', () => {
 
       nock(BASE_URL)
         .get('/business-services')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -259,7 +259,7 @@ describe('BusinessServicesResource', () => {
       nock(BASE_URL)
         .get('/business-services')
         .query({ page: '2', pageSize: '50' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -289,7 +289,7 @@ describe('BusinessServicesResource', () => {
       nock(BASE_URL)
         .get('/business-services/qr-code/generate')
         .query({ serviceId: 'service_123' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -313,7 +313,7 @@ describe('BusinessServicesResource', () => {
 
       nock(BASE_URL)
         .get('/business-services/qr-code/generate')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,

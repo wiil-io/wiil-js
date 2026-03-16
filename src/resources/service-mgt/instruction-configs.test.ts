@@ -58,7 +58,7 @@ describe('InstructionConfigurationsResource', () => {
 
       nock(BASE_URL)
         .post('/instruction-configurations', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -93,7 +93,7 @@ describe('InstructionConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/instruction-configurations/instr_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -151,7 +151,7 @@ describe('InstructionConfigurationsResource', () => {
           introductionMessage: 'Hi there! How may I assist you today?',
           guardrails: 'Updated safety guidelines: Never share sensitive customer data.',
         })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -169,7 +169,7 @@ describe('InstructionConfigurationsResource', () => {
     it('should delete an instruction configuration', async () => {
       nock(BASE_URL)
         .delete('/instruction-configurations/instr_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: true,
@@ -242,7 +242,7 @@ describe('InstructionConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/instruction-configurations')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -272,7 +272,7 @@ describe('InstructionConfigurationsResource', () => {
       nock(BASE_URL)
         .get('/instruction-configurations')
         .query({ page: '2', pageSize: '50' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -325,7 +325,7 @@ describe('InstructionConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/instruction-configurations/supported-templates')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockTemplates,

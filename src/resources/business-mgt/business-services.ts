@@ -14,6 +14,9 @@ import {
   PaginationRequest,
 } from 'wiil-core-js';
 import { HttpClient } from '../../client/HttpClient';
+import { WiilValidationError } from '../../errors/WiilError';
+
+const BATCH_LIMIT = 50;
 
 /**
  * Resource class for managing business services in the WIIL Platform.
@@ -257,5 +260,50 @@ export class BusinessServicesResource {
     const path = `${this.resource_path}/qr-code/generate${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
     return this.http.get<ServiceQRCode>(path);
+  }
+
+  /**
+   * Creates multiple business services in a single batch request.
+   *
+   * @param data - Array of business service data (maximum 50 items)
+   * @returns Promise resolving to paginated result of created business services
+   *
+   * @throws {@link WiilValidationError} - When input validation fails or batch limit exceeded
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   *
+   * @example
+   * ```typescript
+   * const services = await client.businessServices.createBatch([
+   *   { name: 'Haircut', duration: 30, price: 25.00 },
+   *   { name: 'Massage', duration: 60, price: 80.00 }
+   * ]);
+   * console.log(`Created ${services.data.length} services`);
+   * ```
+   */
+  public async createBatch(
+    data: CreateBusinessService[]
+  ): Promise<PaginatedResultType<BusinessService>> {
+    if (data.length > BATCH_LIMIT) {
+      throw new WiilValidationError(
+        `Batch size exceeds maximum limit of ${BATCH_LIMIT}`,
+        [{ path: ['data'], message: `Array length ${data.length} exceeds maximum of ${BATCH_LIMIT}` }]
+      );
+    }
+
+    for (let i = 0; i < data.length; i++) {
+      const validation = CreateBusinessServiceSchema.safeParse(data[i]);
+      if (!validation.success) {
+        throw new WiilValidationError(
+          `Validation failed for item at index ${i}`,
+          validation.error.issues
+        );
+      }
+    }
+
+    return this.http.post<CreateBusinessService[], PaginatedResultType<BusinessService>>(
+      `${this.resource_path}/batch`,
+      data
+    );
   }
 }

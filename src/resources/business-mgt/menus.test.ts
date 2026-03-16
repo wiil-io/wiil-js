@@ -45,7 +45,7 @@ describe('MenusResource', () => {
 
         nock(BASE_URL)
           .post('/menu-management/categories', input)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -73,7 +73,7 @@ describe('MenusResource', () => {
 
         nock(BASE_URL)
           .post('/menu-management/categories', input)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -99,7 +99,7 @@ describe('MenusResource', () => {
 
         nock(BASE_URL)
           .get('/menu-management/categories/category_123')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -163,7 +163,7 @@ describe('MenusResource', () => {
 
         nock(BASE_URL)
           .get('/menu-management/categories')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -194,7 +194,7 @@ describe('MenusResource', () => {
         nock(BASE_URL)
           .get('/menu-management/categories')
           .query({ page: '2', pageSize: '10' })
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -231,7 +231,7 @@ describe('MenusResource', () => {
 
         nock(BASE_URL)
           .patch('/menu-management/categories', updateData)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -249,7 +249,7 @@ describe('MenusResource', () => {
       it('should delete a menu category', async () => {
         nock(BASE_URL)
           .delete('/menu-management/categories/category_123')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: true,
@@ -322,7 +322,7 @@ describe('MenusResource', () => {
 
         nock(BASE_URL)
           .post('/menu-management/items', input)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -361,7 +361,7 @@ describe('MenusResource', () => {
 
         nock(BASE_URL)
           .post('/menu-management/items', input)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -391,7 +391,7 @@ describe('MenusResource', () => {
 
         nock(BASE_URL)
           .get('/menu-management/items/item_123')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -461,7 +461,7 @@ describe('MenusResource', () => {
 
         nock(BASE_URL)
           .get('/menu-management/items')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -491,7 +491,7 @@ describe('MenusResource', () => {
         nock(BASE_URL)
           .get('/menu-management/items')
           .query({ page: '3', pageSize: '50' })
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -548,7 +548,7 @@ describe('MenusResource', () => {
 
         nock(BASE_URL)
           .get('/menu-management/items/by-category/category_appetizers')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -577,7 +577,7 @@ describe('MenusResource', () => {
         nock(BASE_URL)
           .get('/menu-management/items/by-category/category_desserts')
           .query({ page: '2', pageSize: '15' })
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -633,7 +633,7 @@ describe('MenusResource', () => {
 
         nock(BASE_URL)
           .get('/menu-management/items/popular')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -662,7 +662,7 @@ describe('MenusResource', () => {
         nock(BASE_URL)
           .get('/menu-management/items/popular')
           .query({ page: '1', pageSize: '5' })
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -702,7 +702,7 @@ describe('MenusResource', () => {
 
         nock(BASE_URL)
           .patch('/menu-management/items', updateData)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -746,7 +746,7 @@ describe('MenusResource', () => {
 
         nock(BASE_URL)
           .patch('/menu-management/items', updateData)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -764,7 +764,7 @@ describe('MenusResource', () => {
       it('should delete a menu item', async () => {
         nock(BASE_URL)
           .delete('/menu-management/items/item_123')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: true,

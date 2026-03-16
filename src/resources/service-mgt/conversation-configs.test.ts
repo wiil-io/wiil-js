@@ -43,7 +43,7 @@ describe('ConversationConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/cconversation-configurations/conv_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -117,7 +117,7 @@ describe('ConversationConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/cconversation-configurations')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,

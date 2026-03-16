@@ -4,4 +4,5 @@
  */
 
 export * from './WiilClient';
+export * from './WillService';
 export * from './types';

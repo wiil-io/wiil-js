@@ -58,7 +58,7 @@ describe('ReservationResourcesResource', () => {
 
       nock(BASE_URL)
         .post('/reservation-resources', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -124,7 +124,7 @@ describe('ReservationResourcesResource', () => {
 
       nock(BASE_URL)
         .post('/reservation-resources', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -180,7 +180,7 @@ describe('ReservationResourcesResource', () => {
 
       nock(BASE_URL)
         .post('/reservation-resources', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -226,7 +226,7 @@ describe('ReservationResourcesResource', () => {
 
       nock(BASE_URL)
         .post('/reservation-resources', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -261,7 +261,7 @@ describe('ReservationResourcesResource', () => {
 
       nock(BASE_URL)
         .get('/reservation-resources/resource_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -331,7 +331,7 @@ describe('ReservationResourcesResource', () => {
 
       nock(BASE_URL)
         .get('/reservation-resources/by-type/table')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -362,7 +362,7 @@ describe('ReservationResourcesResource', () => {
       nock(BASE_URL)
         .get('/reservation-resources/by-type/room')
         .query({ page: '2', pageSize: '15' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -408,7 +408,7 @@ describe('ReservationResourcesResource', () => {
 
       nock(BASE_URL)
         .patch('/reservation-resources', updateData)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -442,7 +442,7 @@ describe('ReservationResourcesResource', () => {
 
       nock(BASE_URL)
         .patch('/reservation-resources', updateData)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -489,7 +489,7 @@ describe('ReservationResourcesResource', () => {
 
       nock(BASE_URL)
         .patch('/reservation-resources', updateData)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -506,7 +506,7 @@ describe('ReservationResourcesResource', () => {
     it('should delete a resource', async () => {
       nock(BASE_URL)
         .delete('/reservation-resources/resource_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: true,
@@ -573,7 +573,7 @@ describe('ReservationResourcesResource', () => {
 
       nock(BASE_URL)
         .get('/reservation-resources')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -604,7 +604,7 @@ describe('ReservationResourcesResource', () => {
       nock(BASE_URL)
         .get('/reservation-resources')
         .query({ page: '3', pageSize: '25' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,

@@ -5,7 +5,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import nock from 'nock';
 import { WiilClient } from '../../client/WiilClient';
-import { ProvisioningConfigChain, TranslationChainConfig, PaginatedResultType } from 'wiil-core-js';
+import { ProvisioningConfigChain, TranslationChainConfig, PaginatedResultType, SupportedProprietor } from 'wiil-core-js';
 import { WiilAPIError } from '../../errors/WiilError';
 
 const BASE_URL = 'https://api.wiil.io/v1';
@@ -31,15 +31,19 @@ describe('ProvisioningConfigurationsResource', () => {
         chainName: 'voice-processing-chain',
         description: 'Voice processing chain for customer support',
         sttConfig: {
-          modelId: 'whisper-v3',
-          defaultLanguage: 'en-US',
+          providerType: SupportedProprietor.DEEPGRAM,
+          providerModelId: 'nova-2',
+          languageId: 'en-US',
         },
-        agentConfigurationId: 'agent-456',
+        processingConfig: {
+          providerType: SupportedProprietor.OPENAI,
+          providerModelId: 'gpt-4o-mini',
+        },
         ttsConfig: {
-          modelId: 'eleven-labs-v2',
+          providerType: SupportedProprietor.ELEVENLABS,
+          providerModelId: 'eleven_multilingual_v2',
           voiceId: 'adam',
-          defaultLanguage: 'en-US',
-          voiceSettings: { stability: 0.75, similarity_boost: 0.5 },
+          languageId: 'en-US',
         },
       };
 
@@ -64,7 +68,7 @@ describe('ProvisioningConfigurationsResource', () => {
 
       nock(BASE_URL)
         .post('/provisioning-configurations', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -87,14 +91,19 @@ describe('ProvisioningConfigurationsResource', () => {
         chainName: 'translation-chain-en-es',
         description: 'English to Spanish translation chain',
         sttConfig: {
-          modelId: 'whisper-v3',
-          defaultLanguage: 'en-US',
+          providerType: SupportedProprietor.DEEPGRAM,
+          providerModelId: 'nova-2',
+          languageId: 'en-US',
         },
-        processingModelId: 'gpt-4-translator',
+        processingConfig: {
+          providerType: SupportedProprietor.OPENAI,
+          providerModelId: 'gpt-4o-mini',
+        },
         ttsConfig: {
-          modelId: 'eleven-labs-v2',
+          providerType: SupportedProprietor.ELEVENLABS,
+          providerModelId: 'eleven_multilingual_v2',
           voiceId: 'spanish-voice',
-          defaultLanguage: 'es-ES',
+          languageId: 'es-ES',
         },
         isTranslation: true,
       };
@@ -120,7 +129,7 @@ describe('ProvisioningConfigurationsResource', () => {
 
       nock(BASE_URL)
         .post('/provisioning-configurations', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -158,7 +167,7 @@ describe('ProvisioningConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/provisioning-configurations/chain_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -208,7 +217,7 @@ describe('ProvisioningConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/provisioning-configurations/by-chain-name/voice-processing-chain')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -227,10 +236,15 @@ describe('ProvisioningConfigurationsResource', () => {
       const updateData = {
         id: 'chain_123',
         description: 'Updated description',
+        processingConfig: {
+          providerType: SupportedProprietor.OPENAI,
+          providerModelId: 'gpt-4.1-mini',
+        },
         ttsConfig: {
-          modelId: 'eleven-labs-v2',
+          providerType: SupportedProprietor.ELEVENLABS,
+          providerModelId: 'eleven_multilingual_v2',
           voiceId: 'rachel',
-          defaultLanguage: 'en-US',
+          languageId: 'en-US',
         },
       };
 
@@ -256,13 +270,18 @@ describe('ProvisioningConfigurationsResource', () => {
         .patch('/provisioning-configurations', {
           id: 'chain_123',
           description: 'Updated description',
+          processingConfig: {
+            providerType: 'OpenAI',
+            providerModelId: 'gpt-4.1-mini',
+          },
           ttsConfig: {
-            modelId: 'eleven-labs-v2',
+            providerType: 'ElevenLabs',
+            providerModelId: 'eleven_multilingual_v2',
             voiceId: 'rachel',
-            defaultLanguage: 'en-US',
+            languageId: 'en-US',
           },
         })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -280,7 +299,7 @@ describe('ProvisioningConfigurationsResource', () => {
     it('should delete a provisioning configuration', async () => {
       nock(BASE_URL)
         .delete('/provisioning-configurations/chain_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: true,
@@ -341,7 +360,7 @@ describe('ProvisioningConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/provisioning-configurations')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -390,7 +409,7 @@ describe('ProvisioningConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/provisioning-configurations/provisioning')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -441,7 +460,7 @@ describe('ProvisioningConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/provisioning-configurations/translations')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,

@@ -13,6 +13,9 @@ import {
   PaginationRequest,
 } from 'wiil-core-js';
 import { HttpClient } from '../../client/HttpClient';
+import { WiilValidationError } from '../../errors/WiilError';
+
+const BATCH_LIMIT = 50;
 
 /**
  * Resource class for managing customers in the WIIL Platform.
@@ -308,5 +311,50 @@ export class CustomersResource {
     const path = `${this.resource_path}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
     return this.http.get<PaginatedResultType<Customer>>(path);
+  }
+
+  /**
+   * Creates multiple customers in a single batch request.
+   *
+   * @param data - Array of customer data (maximum 50 items)
+   * @returns Promise resolving to paginated result of created customers
+   *
+   * @throws {@link WiilValidationError} - When input validation fails or batch limit exceeded
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   *
+   * @example
+   * ```typescript
+   * const customers = await client.customers.createBatch([
+   *   { firstName: 'John', lastName: 'Doe', email: 'john@example.com' },
+   *   { firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com' }
+   * ]);
+   * console.log(`Created ${customers.data.length} customers`);
+   * ```
+   */
+  public async createBatch(
+    data: CreateCustomer[]
+  ): Promise<PaginatedResultType<Customer>> {
+    if (data.length > BATCH_LIMIT) {
+      throw new WiilValidationError(
+        `Batch size exceeds maximum limit of ${BATCH_LIMIT}`,
+        [{ path: ['data'], message: `Array length ${data.length} exceeds maximum of ${BATCH_LIMIT}` }]
+      );
+    }
+
+    for (let i = 0; i < data.length; i++) {
+      const validation = CreateCustomerSchema.safeParse(data[i]);
+      if (!validation.success) {
+        throw new WiilValidationError(
+          `Validation failed for item at index ${i}`,
+          validation.error.issues
+        );
+      }
+    }
+
+    return this.http.post<CreateCustomer[], PaginatedResultType<Customer>>(
+      `${this.resource_path}/batch`,
+      data
+    );
   }
 }

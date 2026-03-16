@@ -45,7 +45,7 @@ describe('SupportModelsResource', () => {
 
       nock(BASE_URL)
         .get('/support-models/model_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -112,7 +112,7 @@ describe('SupportModelsResource', () => {
 
       nock(BASE_URL)
         .get('/support-models')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockModels,
@@ -147,7 +147,7 @@ describe('SupportModelsResource', () => {
 
       nock(BASE_URL)
         .get('/support-models/defaults/multi-mode')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -179,7 +179,7 @@ describe('SupportModelsResource', () => {
 
       nock(BASE_URL)
         .get('/support-models/defaults/sts')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -216,7 +216,7 @@ describe('SupportModelsResource', () => {
 
       nock(BASE_URL)
         .get('/support-models/defaults/tts')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -251,7 +251,7 @@ describe('SupportModelsResource', () => {
 
       nock(BASE_URL)
         .get('/support-models/defaults/stt')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -287,7 +287,7 @@ describe('SupportModelsResource', () => {
 
       nock(BASE_URL)
         .get('/support-models/defaults/transcribe')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -318,7 +318,7 @@ describe('SupportModelsResource', () => {
 
       nock(BASE_URL)
         .get('/support-models/defaults/batch')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -351,7 +351,7 @@ describe('SupportModelsResource', () => {
 
       nock(BASE_URL)
         .get('/support-models/defaults/translation-stt')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -384,7 +384,7 @@ describe('SupportModelsResource', () => {
 
       nock(BASE_URL)
         .get('/support-models/defaults/translation-tts')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -415,7 +415,7 @@ describe('SupportModelsResource', () => {
 
       nock(BASE_URL)
         .get('/support-models/lookup/type-proprietor/TEXT_PROCESSING/Anthropic')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -446,7 +446,7 @@ describe('SupportModelsResource', () => {
 
       nock(BASE_URL)
         .get('/support-models/lookup/proprietor-provider/Google/gemini-2.0-flash-exp')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,

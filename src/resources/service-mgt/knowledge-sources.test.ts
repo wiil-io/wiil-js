@@ -43,7 +43,7 @@ describe('KnowledgeSourcesResource', () => {
 
       nock(BASE_URL)
         .get('/knowledge-sources/ks_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -118,7 +118,7 @@ describe('KnowledgeSourcesResource', () => {
 
       nock(BASE_URL)
         .get('/knowledge-sources')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,

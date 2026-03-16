@@ -46,7 +46,7 @@ describe('ProjectsResource', () => {
 
       nock(BASE_URL)
         .post('/projects', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -85,7 +85,7 @@ describe('ProjectsResource', () => {
 
       nock(BASE_URL)
         .get('/projects/proj_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -137,7 +137,7 @@ describe('ProjectsResource', () => {
           name: 'Production Environment v2',
           description: 'Updated production deployment',
         })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -155,7 +155,7 @@ describe('ProjectsResource', () => {
     it('should delete a project', async () => {
       nock(BASE_URL)
         .delete('/projects/proj_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: true,
@@ -216,7 +216,7 @@ describe('ProjectsResource', () => {
 
       nock(BASE_URL)
         .get('/projects')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -246,7 +246,7 @@ describe('ProjectsResource', () => {
       nock(BASE_URL)
         .get('/projects')
         .query({ page: '2', pageSize: '50', sortBy: 'name', sortDirection: 'desc' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,

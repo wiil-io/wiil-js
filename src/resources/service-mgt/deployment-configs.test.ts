@@ -54,7 +54,7 @@ describe('DeploymentConfigurationsResource', () => {
 
       nock(BASE_URL)
         .post('/deployment-configurations', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -101,7 +101,7 @@ describe('DeploymentConfigurationsResource', () => {
 
       nock(BASE_URL)
         .post('/deployment-configurations', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -134,7 +134,7 @@ describe('DeploymentConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/deployment-configurations/deploy_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -181,7 +181,7 @@ describe('DeploymentConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/deployment-configurations/by-channel/channel_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -223,7 +223,7 @@ describe('DeploymentConfigurationsResource', () => {
           deploymentName: 'Updated Deployment Name',
           isActive: true,
         })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -242,7 +242,7 @@ describe('DeploymentConfigurationsResource', () => {
     it('should delete a deployment configuration', async () => {
       nock(BASE_URL)
         .delete('/deployment-configurations/deploy_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: true,
@@ -314,7 +314,7 @@ describe('DeploymentConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/deployment-configurations')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -361,7 +361,7 @@ describe('DeploymentConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/deployment-configurations/by-project/proj_789')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -407,7 +407,7 @@ describe('DeploymentConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/deployment-configurations/by-agent/agent_456')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -453,7 +453,7 @@ describe('DeploymentConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/deployment-configurations/by-instruction/instr_789')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,

@@ -4,7 +4,7 @@
  */
 
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios';
-import { ZodSchema } from 'zod';
+import { ZodType } from 'zod';
 import {
   WiilAPIError,
   WiilNetworkError,
@@ -40,7 +40,7 @@ export class HttpClient {
       baseURL: config.baseUrl,
       timeout: config.timeout,
       headers: {
-        'X-WIIL-API-Key': this.apiKey,
+        'X-Wiil-Api-Key': this.apiKey,
       },
     });
 
@@ -61,7 +61,7 @@ export class HttpClient {
     this.client.interceptors.request.use(
       (config) => {
         // Ensure API key is always present
-        config.headers['X-WIIL-API-Key'] = this.apiKey;
+        config.headers['X-Wiil-Api-Key'] = this.apiKey;
         return config;
       },
       (error) => {
@@ -203,7 +203,7 @@ export class HttpClient {
   public async post<TRequest, TResponse>(
     path: string,
     data: TRequest,
-    schema?: ZodSchema<TRequest>,
+    schema?: ZodType<TRequest>,
     config?: AxiosRequestConfig
   ): Promise<TResponse> {
     // Validate request if schema provided
@@ -263,7 +263,7 @@ export class HttpClient {
   public async put<TRequest, TResponse>(
     path: string,
     data: TRequest,
-    schema?: ZodSchema<TRequest>,
+    schema?: ZodType<TRequest>,
     config?: AxiosRequestConfig
   ): Promise<TResponse> {
     // Validate request if schema provided
@@ -321,7 +321,7 @@ export class HttpClient {
   public async patch<TRequest, TResponse>(
     path: string,
     data: TRequest,
-    schema?: ZodSchema<TRequest>,
+    schema?: ZodType<TRequest>,
     config?: AxiosRequestConfig
   ): Promise<TResponse> {
     // Validate request if schema provided

@@ -193,6 +193,8 @@ This is the **heart of your agent's behavior**. It includes:
 ### Code
 
 ```typescript
+import { BusinessSupportServices } from 'wiil-js';
+
 const instructionConfig = await client.instructionConfigs.create({
   // ========================================================================
   // INSTRUCTION NAME - System-readable identifier
@@ -276,7 +278,12 @@ Escalation Triggers:
 - Issue requires access to systems the agent cannot use
 - Customer is experiencing an emergency or urgent situation
 - Conversation exceeds 10 minutes without resolution
-- Customer is dissatisfied with the agent's responses`
+- Customer is dissatisfied with the agent's responses`,
+
+  // ========================================================================
+  // SUPPORTED SERVICES - Platform business services (tools) enabled
+  // ========================================================================
+  supportedServices: [BusinessSupportServices.APPOINTMENT_MANAGEMENT]
 });
 
 console.log(`Instructions Created: ${instructionConfig.instructionName}`);
@@ -395,12 +402,12 @@ if (!defaultModel) {
 
 // Create agent configuration
 const agentConfig = await client.agentConfigs.create({
-  agentName: 'Customer Support Agent',
+  name: 'SupportAgent',
   modelId: defaultModel.modelId,  // Wiil Model ID from Step 4
   instructionConfigurationId: instructionConfig.id  // From Step 3
 });
 
-console.log(`Agent Created: ${agentConfig.agentName}`);
+console.log(`Agent Created: ${agentConfig.name}`);
 console.log(`Agent ID: ${agentConfig.id}`);
 console.log(`Using Model: ${defaultModel.name} (${defaultModel.modelId})`);
 console.log(`Using Instructions: ${instructionConfig.instructionName}`);
@@ -409,7 +416,7 @@ console.log(`Using Instructions: ${instructionConfig.instructionName}`);
 ### Expected Output
 
 ```
-Agent Created: Customer Support Agent
+Agent Created: SupportAgent
 Agent ID: a1b2c3d4e5
 Using Model: Gemini 2.0 Flash (Experimental) (abc123xyz)
 Using Instructions: customer-support-agent
@@ -421,134 +428,87 @@ Using Instructions: customer-support-agent
 
 **Objective**: Search for available phone numbers for voice or SMS channels.
 
-> **📖 Full Guide**: For a complete phone number purchasing workflow, see the [Phone Purchase Guide](./channels/phone-purchase.md).
-
 ### When to Use This
 
-Before purchasing a phone number for CALLS or SMS channels, use this API to:
+Before purchasing a phone number for CALLS or SMS channels, use the Telephony Provider API to:
 
-- Search available phone numbers by region/country
-- Filter by area code or postal code
+- Search available phone numbers by area code, pattern, or postal code
 - Check pricing for different number types
-
-### Understanding Telephony Provider
-
-The Telephony Provider API allows you to:
-
-- Get available regions for phone number provisioning
-- Search for available phone numbers with filters
-- Get pricing information before purchase
+- Purchase phone numbers for deployment
 
 ### Code
 
 ```typescript
-import { ProviderType } from 'wiil-core-js';
+// Step 1: Get pricing information
+const pricing = await client.telephonyProvider.getPricing();
 
-// Step 1: Get available regions
-const regions = await client.telephonyProvider.getRegions(ProviderType.SIGNALWIRE);
-console.log(`Found ${regions.length} available regions`);
-
-regions.forEach(region => {
-  console.log(`  - ${region.regionName} (${region.regionId}) - ${region.countryCode}`);
+console.log('Pricing Information:');
+pricing.forEach(price => {
+  console.log(`  ${price.number_type}: $${price.price}/month`);
 });
 
-// Step 2: Select a region (e.g., United States)
-const usRegion = regions.find(r => r.countryCode === 'US');
-if (!usRegion) {
-  throw new Error('US region not available');
-}
-
-// Step 3: Search for phone numbers in the selected region
-const numbers = await client.telephonyProvider.getPhoneNumbers(
-  ProviderType.SIGNALWIRE,
-  usRegion.countryCode
-);
+// Step 2: Search for available phone numbers
+const numbers = await client.telephonyProvider.getPhoneNumbers();
 
 console.log(`\nFound ${numbers.length} available phone numbers`);
 
 // Display first 5 numbers
 numbers.slice(0, 5).forEach(number => {
   console.log(`  ${number.phoneNumber} - ${number.friendlyName}`);
-  if (number.locality) {
-    console.log(`    Location: ${number.locality}, ${number.region}`);
-  }
 });
 
-// Step 4: Get pricing information
-const pricing = await client.telephonyProvider.getPricing(
-  ProviderType.SIGNALWIRE,
-  usRegion.countryCode
-);
-
-console.log('\nPricing Information:');
-pricing.forEach(price => {
-  console.log(`  ${price.number_type}: $${price.price}/month`);
+// Step 3: Search with area code filter
+const seattleNumbers = await client.telephonyProvider.getPhoneNumbers({
+  areaCode: '206'  // Seattle area code
 });
+
+console.log(`\nFound ${seattleNumbers.length} Seattle area numbers`);
 ```
 
 ### Expected Output
 
 ```
-Found 12 available regions
-  - United States (us-east-1) - US
-  - Canada (ca-central-1) - CA
-  - United Kingdom (eu-west-2) - GB
-  ...
-
-Found 150 available phone numbers
-  +12065551234 - (206) 555-1234
-    Location: Seattle, WA
-  +12065551235 - (206) 555-1235
-    Location: Seattle, WA
-  +12125551000 - (212) 555-1000
-    Location: New York, NY
-  ...
-
 Pricing Information:
   local: $1.00/month
   toll-free: $2.00/month
+
+Found 150 available phone numbers
+  +12065551234 - (206) 555-1234
+  +12065551235 - (206) 555-1235
+  +12125551000 - (212) 555-1000
+  ...
+
+Found 25 Seattle area numbers
 ```
 
-### Search with Filters
+### Search Options
 
-You can narrow your search using optional filters:
+| Option | Type | Description |
+|--------|------|-------------|
+| areaCode | string | Filter by area code (e.g., '206', '415') |
+| contains | string | Filter by number pattern (e.g., '555') |
+| postalCode | string | Filter by postal code (e.g., '98101') |
 
-```typescript
-// Search for numbers in a specific area code
-const seattleNumbers = await client.telephonyProvider.getPhoneNumbers(
-  ProviderType.SIGNALWIRE,
-  usRegion.countryCode,
-  { areaCode: '206' }  // Seattle area code
-);
+### Purchase Phone Number
 
-// Search for numbers with specific pattern and postal code
-const customNumbers = await client.telephonyProvider.getPhoneNumbers(
-  ProviderType.SIGNALWIRE,
-  usRegion.countryCode,
-  {
-    contains: '555',
-    postalCode: '98101'
-  }
-);
-```
-
-### Next: Purchase Phone Number
-
-Once you've found a suitable number, purchase it using the Phone Configurations API:
+Once you've found a suitable number, purchase it:
 
 ```typescript
-const phonePurchase = await client.phoneConfigs.purchase({
-  friendlyName: 'Customer Support Line',
-  phoneNumber: '+12065551234',  // Number from search results
-  providerType: ProviderType.SIGNALWIRE,
-  numberType: PhoneNumberType.LOCAL
+const purchase = await client.telephonyProvider.purchase({
+  phoneNumber: numbers[0].phoneNumber  // Use number from search results
 });
 
-console.log(`Purchase ID: ${phonePurchase.id}`);
-console.log(`Status: ${phonePurchase.status}`);
+console.log(`Purchase ID: ${purchase.id}`);
+console.log(`Status: ${purchase.status}`);
+console.log(`Phone Number: ${purchase.phoneNumber}`);
+
+// The purchase() method automatically polls until completion
+// Check status if needed:
+const status = await client.telephonyProvider.getPurchaseStatus(purchase.id);
+console.log(`Final Status: ${status.status}`);
 ```
 
-See the [Phone Purchase Guide](./channels/phone-purchase.md) for complete phone number purchasing workflow.
+See the [Telephony Provider Guide](./service-mgt/telephony-provider-guide.md) for complete documentation.
 
 ---
 
@@ -572,13 +532,15 @@ Channels define how customers reach your agent:
 ### Code - Web Chat Channel
 
 ```typescript
+import { DeploymentType } from 'wiil-js';
+
 const webChatChannel = await client.deploymentChannels.create({
+  channelIdentifier: 'https://example.com',  // URL for web channels
+  deploymentType: DeploymentType.WEB,
   channelName: 'Website Live Chat',
-  deploymentType: 'WEB',
-  channelIdentifier: 'web-chat-widget-01',  // Unique identifier for this channel
-  recordingEnabled: true,  // Enable conversation recording
+  recordingEnabled: true,
   configuration: {
-    communicationType: 'TEXT',  // TEXT, VOICE, or UNIFIED
+    communicationType: 'unified',  // 'text', 'voice', or 'unified'
     widgetConfiguration: {
       position: 'right'  // 'left' or 'right'
     }
@@ -758,8 +720,8 @@ console.log(`  Agent: ${verifiedDeployment.agentConfigurationId}`);
 console.log(`  Instructions: ${verifiedDeployment.instructionConfigurationId}`);
 
 console.log('\nChannel Status:');
-console.log(`  Active: ${verifiedChannel.isActive ? '✓ YES' : '✗ NO'}`);
-console.log(`  Type: ${verifiedChannel.channelType}`);
+console.log(`  Name: ${verifiedChannel.channelName}`);
+console.log(`  Type: ${verifiedChannel.deploymentType}`);
 console.log(`  Channel ID: ${verifiedChannel.id}`);
 
 console.log('\n' + '='.repeat(60));
@@ -780,8 +742,8 @@ Deployment Status:
   Instructions: f6g7h8i9j0
 
 Channel Status:
-  Active: ✓ YES
-  Type: WEB
+  Name: Website Live Chat
+  Type: web
   Channel ID: p6q7r8s9t0
 
 ============================================================

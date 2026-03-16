@@ -54,7 +54,7 @@ describe('ServiceAppointmentsResource', () => {
 
       nock(BASE_URL)
         .post('/service-appointments', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -100,7 +100,7 @@ describe('ServiceAppointmentsResource', () => {
 
       nock(BASE_URL)
         .post('/service-appointments', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -149,7 +149,7 @@ describe('ServiceAppointmentsResource', () => {
 
       nock(BASE_URL)
         .post('/service-appointments', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -189,7 +189,7 @@ describe('ServiceAppointmentsResource', () => {
 
       nock(BASE_URL)
         .post('/service-appointments', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -221,7 +221,7 @@ describe('ServiceAppointmentsResource', () => {
 
       nock(BASE_URL)
         .get('/service-appointments/appointment_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -292,7 +292,7 @@ describe('ServiceAppointmentsResource', () => {
 
       nock(BASE_URL)
         .get('/service-appointments/by-customer/cust_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -323,7 +323,7 @@ describe('ServiceAppointmentsResource', () => {
       nock(BASE_URL)
         .get('/service-appointments/by-customer/cust_456')
         .query({ page: '2', pageSize: '10' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -383,7 +383,7 @@ describe('ServiceAppointmentsResource', () => {
 
       nock(BASE_URL)
         .get('/service-appointments/by-service/service_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -412,7 +412,7 @@ describe('ServiceAppointmentsResource', () => {
       nock(BASE_URL)
         .get('/service-appointments/by-service/service_456')
         .query({ page: '1', pageSize: '15' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -445,7 +445,7 @@ describe('ServiceAppointmentsResource', () => {
 
       nock(BASE_URL)
         .patch('/service-appointments/appointment_123/status', { status: AppointmentStatus.CONFIRMED })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -473,7 +473,7 @@ describe('ServiceAppointmentsResource', () => {
 
       nock(BASE_URL)
         .patch('/service-appointments/appointment_456/status', { status: AppointmentStatus.NO_SHOW })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -501,7 +501,7 @@ describe('ServiceAppointmentsResource', () => {
 
       nock(BASE_URL)
         .patch('/service-appointments/appointment_789/status', { status: AppointmentStatus.COMPLETED })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -532,7 +532,7 @@ describe('ServiceAppointmentsResource', () => {
 
       nock(BASE_URL)
         .post('/service-appointments/appointment_123/cancel', { reason: 'Customer requested cancellation' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -561,7 +561,7 @@ describe('ServiceAppointmentsResource', () => {
 
       nock(BASE_URL)
         .post('/service-appointments/appointment_456/cancel', {})
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -598,7 +598,7 @@ describe('ServiceAppointmentsResource', () => {
           startTime: newStartTime.toString(),
           endTime: newEndTime.toString(),
         })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -638,7 +638,7 @@ describe('ServiceAppointmentsResource', () => {
           endTime: newEndTime.toString(),
           serviceId: 'service_456',
         })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -660,7 +660,7 @@ describe('ServiceAppointmentsResource', () => {
     it('should delete a service appointment', async () => {
       nock(BASE_URL)
         .delete('/service-appointments/appointment_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: true,
@@ -729,7 +729,7 @@ describe('ServiceAppointmentsResource', () => {
 
       nock(BASE_URL)
         .get('/service-appointments')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -760,7 +760,7 @@ describe('ServiceAppointmentsResource', () => {
       nock(BASE_URL)
         .get('/service-appointments')
         .query({ page: '3', pageSize: '25' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,

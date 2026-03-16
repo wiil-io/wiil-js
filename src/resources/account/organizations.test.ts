@@ -39,7 +39,7 @@ describe('OrganizationsResource', () => {
 
       nock(BASE_URL)
         .get('/organizations')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,

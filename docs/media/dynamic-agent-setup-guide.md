@@ -454,7 +454,6 @@ SupportedProprietor.ANTHROPIC   // "Anthropic"
 SupportedProprietor.GROQ        // "Groq"
 SupportedProprietor.DEEPGRAM    // "Deepgram" - Recommended for STT
 SupportedProprietor.ELEVENLABS  // "ElevenLabs" - Recommended for TTS
-SupportedProprietor.DEEPSEEK    // "DeepSeek"
 SupportedProprietor.CARTESIA    // "Cartesia"
 ```
 

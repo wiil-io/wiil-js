@@ -54,7 +54,7 @@ describe('AgentConfigurationsResource', () => {
 
       nock(BASE_URL)
         .post('/agent-configurations', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -86,7 +86,7 @@ describe('AgentConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/agent-configurations/agent_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -143,7 +143,7 @@ describe('AgentConfigurationsResource', () => {
           name: 'Updated Agent Name',
           metadata: { department: 'enterprise-support' },
         })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -161,7 +161,7 @@ describe('AgentConfigurationsResource', () => {
     it('should delete an agent configuration', async () => {
       nock(BASE_URL)
         .delete('/agent-configurations/agent_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: true,
@@ -230,7 +230,7 @@ describe('AgentConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/agent-configurations')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -260,7 +260,7 @@ describe('AgentConfigurationsResource', () => {
       nock(BASE_URL)
         .get('/agent-configurations')
         .query({ page: '2', pageSize: '50' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,

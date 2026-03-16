@@ -55,7 +55,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .post('/property-management/categories', input)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -85,7 +85,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .post('/property-management/categories', input)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -112,7 +112,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .get('/property-management/categories/category_123')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -174,7 +174,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .get('/property-management/categories')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -203,7 +203,7 @@ describe('PropertyConfigResource', () => {
         nock(BASE_URL)
           .get('/property-management/categories')
           .query({ page: '2', pageSize: '10' })
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -240,7 +240,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .patch('/property-management/categories', updateData)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -258,7 +258,7 @@ describe('PropertyConfigResource', () => {
       it('should delete a property category', async () => {
         nock(BASE_URL)
           .delete('/property-management/categories/category_123')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: true,
@@ -313,7 +313,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .post('/property-management/addresses', input)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -359,7 +359,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .post('/property-management/addresses', input)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -391,7 +391,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .get('/property-management/addresses/address_123')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -459,7 +459,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .get('/property-management/addresses')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -495,7 +495,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .patch('/property-management/addresses', updateData)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -513,7 +513,7 @@ describe('PropertyConfigResource', () => {
       it('should delete a property address', async () => {
         nock(BASE_URL)
           .delete('/property-management/addresses/address_123')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: true,
@@ -541,7 +541,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .post('/property-management/addresses/address_123/verify', {})
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -622,7 +622,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .post('/property-management/properties', input)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -683,7 +683,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .post('/property-management/properties', input)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -724,7 +724,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .get('/property-management/properties/property_123')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -815,7 +815,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .get('/property-management/properties')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -845,7 +845,7 @@ describe('PropertyConfigResource', () => {
         nock(BASE_URL)
           .get('/property-management/properties')
           .query({ page: '1', pageSize: '20', includeDeleted: 'true' })
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -902,7 +902,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .get('/property-management/properties/by-category/category_residential')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -931,7 +931,7 @@ describe('PropertyConfigResource', () => {
         nock(BASE_URL)
           .get('/property-management/properties/by-category/category_commercial')
           .query({ page: '2', pageSize: '15' })
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -974,7 +974,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .get('/property-management/properties/by-address/address_specific')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -1030,7 +1030,7 @@ describe('PropertyConfigResource', () => {
         nock(BASE_URL)
           .get('/property-management/properties/search')
           .query({ query: 'beachfront' })
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -1059,7 +1059,7 @@ describe('PropertyConfigResource', () => {
         nock(BASE_URL)
           .get('/property-management/properties/search')
           .query({ query: 'downtown', page: '2', pageSize: '10' })
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -1109,7 +1109,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .patch('/property-management/properties', updateData)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -1168,7 +1168,7 @@ describe('PropertyConfigResource', () => {
 
         nock(BASE_URL)
           .patch('/property-management/properties', updateData)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -1186,7 +1186,7 @@ describe('PropertyConfigResource', () => {
       it('should delete a property', async () => {
         nock(BASE_URL)
           .delete('/property-management/properties/property_123')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: true,

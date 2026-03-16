@@ -43,7 +43,7 @@ describe('ProductsResource', () => {
 
         nock(BASE_URL)
           .post('/product-management/categories', input)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -70,7 +70,7 @@ describe('ProductsResource', () => {
 
         nock(BASE_URL)
           .post('/product-management/categories', input)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -95,7 +95,7 @@ describe('ProductsResource', () => {
 
         nock(BASE_URL)
           .get('/product-management/categories/category_123')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -156,7 +156,7 @@ describe('ProductsResource', () => {
 
         nock(BASE_URL)
           .get('/product-management/categories')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -185,7 +185,7 @@ describe('ProductsResource', () => {
         nock(BASE_URL)
           .get('/product-management/categories')
           .query({ page: '2', pageSize: '10' })
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -221,7 +221,7 @@ describe('ProductsResource', () => {
 
         nock(BASE_URL)
           .patch('/product-management/categories', updateData)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -239,7 +239,7 @@ describe('ProductsResource', () => {
       it('should delete a product category', async () => {
         nock(BASE_URL)
           .delete('/product-management/categories/category_123')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: true,
@@ -316,7 +316,7 @@ describe('ProductsResource', () => {
 
         nock(BASE_URL)
           .post('/product-management/products', input)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -355,7 +355,7 @@ describe('ProductsResource', () => {
 
         nock(BASE_URL)
           .post('/product-management/products', input)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -388,7 +388,7 @@ describe('ProductsResource', () => {
 
         nock(BASE_URL)
           .get('/product-management/products/product_123')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -435,7 +435,7 @@ describe('ProductsResource', () => {
 
         nock(BASE_URL)
           .get('/product-management/products/by-sku/KB-2024-MEC')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -468,7 +468,7 @@ describe('ProductsResource', () => {
 
         nock(BASE_URL)
           .get('/product-management/products/by-barcode/987654321098')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -522,7 +522,7 @@ describe('ProductsResource', () => {
 
         nock(BASE_URL)
           .get('/product-management/products')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -552,7 +552,7 @@ describe('ProductsResource', () => {
         nock(BASE_URL)
           .get('/product-management/products')
           .query({ page: '1', pageSize: '20', includeDeleted: 'true' })
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -610,7 +610,7 @@ describe('ProductsResource', () => {
 
         nock(BASE_URL)
           .get('/product-management/products/by-category/category_electronics')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -639,7 +639,7 @@ describe('ProductsResource', () => {
         nock(BASE_URL)
           .get('/product-management/products/by-category/category_clothing')
           .query({ page: '2', pageSize: '15' })
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -700,7 +700,7 @@ describe('ProductsResource', () => {
         nock(BASE_URL)
           .get('/product-management/products/search')
           .query({ query: 'wireless' })
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -730,7 +730,7 @@ describe('ProductsResource', () => {
         nock(BASE_URL)
           .get('/product-management/products/search')
           .query({ query: 'laptop', page: '2', pageSize: '10' })
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -773,7 +773,7 @@ describe('ProductsResource', () => {
 
         nock(BASE_URL)
           .patch('/product-management/products', updateData)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -817,7 +817,7 @@ describe('ProductsResource', () => {
 
         nock(BASE_URL)
           .patch('/product-management/products', updateData)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -835,7 +835,7 @@ describe('ProductsResource', () => {
       it('should delete a product', async () => {
         nock(BASE_URL)
           .delete('/product-management/products/product_123')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: true,

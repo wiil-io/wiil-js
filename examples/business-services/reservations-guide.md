@@ -263,6 +263,118 @@ console.log('Resources:', result.data.length);
 console.log('Total:', result.meta.totalCount);
 ```
 
+## Batch Operations
+
+Batch operations allow you to create multiple resources in a single API request, improving performance for bulk data imports.
+
+### Batch Create Resources
+
+Create up to 50 reservation resources in a single request:
+
+```typescript
+const resources = await client.reservationResources.createBatch([
+  {
+    resourceType: ResourceType.TABLE,
+    name: 'Table 1',
+    description: 'Corner booth for 2',
+    capacity: 2,
+    isAvailable: true,
+    location: 'Corner area',
+    amenities: ['Quiet', 'Intimate'],
+    reservationDuration: 2,
+    reservationDurationUnit: ResourceReservationDurationUnit.HOURS,
+    syncEnabled: false,
+  },
+  {
+    resourceType: ResourceType.TABLE,
+    name: 'Table 2',
+    description: 'Family table for 4',
+    capacity: 4,
+    isAvailable: true,
+    location: 'Main dining',
+    amenities: ['High chairs available'],
+    reservationDuration: 2,
+    reservationDurationUnit: ResourceReservationDurationUnit.HOURS,
+    syncEnabled: false,
+  },
+  {
+    resourceType: ResourceType.TABLE,
+    name: 'Table 3',
+    description: 'Large party table',
+    capacity: 8,
+    isAvailable: true,
+    location: 'Private room',
+    amenities: ['Privacy screen', 'Wine service'],
+    reservationDuration: 3,
+    reservationDurationUnit: ResourceReservationDurationUnit.HOURS,
+    syncEnabled: false,
+  },
+]);
+
+console.log(`Created ${resources.data.length} resources`);
+resources.data.forEach(res => {
+  console.log(`- ${res.name} (capacity: ${res.capacity})`);
+});
+```
+
+### Batch Create Room Resources
+
+```typescript
+const rooms = await client.reservationResources.createBatch([
+  {
+    resourceType: ResourceType.ROOM,
+    name: 'Room 101',
+    description: 'Standard King',
+    capacity: 2,
+    isAvailable: true,
+    reservationDuration: 1,
+    reservationDurationUnit: ResourceReservationDurationUnit.NIGHTS,
+    roomResource: {
+      roomNumber: '101',
+      roomType: 'Standard King',
+      pricePerNight: 199.99,
+      bedType: 'King',
+      isSmoking: false,
+    },
+  },
+  {
+    resourceType: ResourceType.ROOM,
+    name: 'Room 102',
+    description: 'Deluxe Suite',
+    capacity: 4,
+    isAvailable: true,
+    reservationDuration: 1,
+    reservationDurationUnit: ResourceReservationDurationUnit.NIGHTS,
+    roomResource: {
+      roomNumber: '102',
+      roomType: 'Deluxe Suite',
+      pricePerNight: 349.99,
+      bedType: 'King + Sofa',
+      isSmoking: false,
+    },
+  },
+]);
+
+console.log(`Created ${rooms.data.length} rooms`);
+```
+
+### Batch Limits
+
+| Resource              | Maximum per Batch |
+|-----------------------|-------------------|
+| Reservation Resources | 50                |
+
+**Note:** Batch operations validate each item individually. If validation fails for any item, the entire batch request fails with an error indicating the index of the failing item.
+
+```typescript
+try {
+  const resources = await client.reservationResources.createBatch(resourceList);
+} catch (error) {
+  // Error message includes the index: "Validation failed for item at index 2"
+  console.error('Batch creation failed:', error.message);
+}
+```
+
 ## Reservations
 
 Reservations represent customer bookings for specific resources.

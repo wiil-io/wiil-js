@@ -62,7 +62,7 @@ describe('ReservationsResource', () => {
 
       nock(BASE_URL)
         .post('/reservations', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -113,7 +113,7 @@ describe('ReservationsResource', () => {
 
       nock(BASE_URL)
         .post('/reservations', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -163,7 +163,7 @@ describe('ReservationsResource', () => {
 
       nock(BASE_URL)
         .post('/reservations', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -207,7 +207,7 @@ describe('ReservationsResource', () => {
 
       nock(BASE_URL)
         .post('/reservations', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -242,7 +242,7 @@ describe('ReservationsResource', () => {
 
       nock(BASE_URL)
         .get('/reservations/reservation_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -318,7 +318,7 @@ describe('ReservationsResource', () => {
 
       nock(BASE_URL)
         .get('/reservations/by-customer/cust_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -349,7 +349,7 @@ describe('ReservationsResource', () => {
       nock(BASE_URL)
         .get('/reservations/by-customer/cust_456')
         .query({ page: '2', pageSize: '10' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -415,7 +415,7 @@ describe('ReservationsResource', () => {
 
       nock(BASE_URL)
         .get('/reservations/by-resource/resource_table5')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -444,7 +444,7 @@ describe('ReservationsResource', () => {
       nock(BASE_URL)
         .get('/reservations/by-resource/resource_room101')
         .query({ page: '1', pageSize: '15' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -487,7 +487,7 @@ describe('ReservationsResource', () => {
 
       nock(BASE_URL)
         .patch('/reservations', updateData)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -520,7 +520,7 @@ describe('ReservationsResource', () => {
 
       nock(BASE_URL)
         .patch('/reservations/reservation_123/status', { status: AppointmentStatus.COMPLETED })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -553,7 +553,7 @@ describe('ReservationsResource', () => {
 
       nock(BASE_URL)
         .post('/reservations/reservation_123/cancel', { reason: 'Customer requested cancellation' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -584,7 +584,7 @@ describe('ReservationsResource', () => {
 
       nock(BASE_URL)
         .post('/reservations/reservation_456/cancel', {})
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -624,7 +624,7 @@ describe('ReservationsResource', () => {
           startTime: newStartTime.toString(),
           endTime: newEndTime.toString(),
         })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -667,7 +667,7 @@ describe('ReservationsResource', () => {
           endTime: newEndTime.toString(),
           resourceId: 'resource_table10',
         })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -688,7 +688,7 @@ describe('ReservationsResource', () => {
     it('should delete a reservation', async () => {
       nock(BASE_URL)
         .delete('/reservations/reservation_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: true,
@@ -761,7 +761,7 @@ describe('ReservationsResource', () => {
 
       nock(BASE_URL)
         .get('/reservations')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -792,7 +792,7 @@ describe('ReservationsResource', () => {
       nock(BASE_URL)
         .get('/reservations')
         .query({ page: '3', pageSize: '25' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -838,7 +838,7 @@ describe('ReservationsResource', () => {
 
         nock(BASE_URL)
           .get('/reservations/settings')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockSettings,
@@ -875,7 +875,7 @@ describe('ReservationsResource', () => {
 
         nock(BASE_URL)
           .patch('/reservations/settings', updateData)
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: mockResponse,
@@ -893,7 +893,7 @@ describe('ReservationsResource', () => {
       it('should delete reservation settings', async () => {
         nock(BASE_URL)
           .delete('/reservations/settings/settings_123')
-          .matchHeader('X-WIIL-API-Key', API_KEY)
+          .matchHeader('X-Wiil-Api-Key', API_KEY)
           .reply(200, {
             success: true,
             data: true,

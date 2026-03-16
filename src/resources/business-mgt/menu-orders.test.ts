@@ -128,7 +128,7 @@ describe('MenuOrdersResource', () => {
 
       nock(BASE_URL)
         .post('/menu-orders', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -219,7 +219,7 @@ describe('MenuOrdersResource', () => {
 
       nock(BASE_URL)
         .post('/menu-orders', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -273,7 +273,7 @@ describe('MenuOrdersResource', () => {
 
       nock(BASE_URL)
         .get('/menu-orders/order_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -354,7 +354,7 @@ describe('MenuOrdersResource', () => {
 
       nock(BASE_URL)
         .get('/menu-orders/by-customer/cust_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -413,7 +413,7 @@ describe('MenuOrdersResource', () => {
 
       nock(BASE_URL)
         .patch('/menu-orders', updateData)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -465,7 +465,7 @@ describe('MenuOrdersResource', () => {
 
       nock(BASE_URL)
         .patch('/menu-orders/order_123/status', { id: 'order_123', status: OrderStatus.PREPARING })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -517,7 +517,7 @@ describe('MenuOrdersResource', () => {
 
       nock(BASE_URL)
         .post('/menu-orders/order_123/cancel', { cancelReason: 'Customer requested cancellation' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -535,7 +535,7 @@ describe('MenuOrdersResource', () => {
     it('should delete a menu order', async () => {
       nock(BASE_URL)
         .delete('/menu-orders/order_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: true,
@@ -599,7 +599,7 @@ describe('MenuOrdersResource', () => {
 
       nock(BASE_URL)
         .get('/menu-orders')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,

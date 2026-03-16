@@ -88,7 +88,7 @@ describe('PropertyInquiryResource', () => {
 
       nock(BASE_URL)
         .post('/property-inquiries')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -154,7 +154,7 @@ describe('PropertyInquiryResource', () => {
 
       nock(BASE_URL)
         .post('/property-inquiries')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -197,7 +197,7 @@ describe('PropertyInquiryResource', () => {
 
       nock(BASE_URL)
         .get('/property-inquiries/inquiry_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -275,7 +275,7 @@ describe('PropertyInquiryResource', () => {
 
       nock(BASE_URL)
         .get('/property-inquiries/by-property/property_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -304,7 +304,7 @@ describe('PropertyInquiryResource', () => {
       nock(BASE_URL)
         .get('/property-inquiries/by-property/property_456')
         .query({ page: '2', pageSize: '10' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -370,7 +370,7 @@ describe('PropertyInquiryResource', () => {
 
       nock(BASE_URL)
         .get('/property-inquiries/by-customer/cust_456')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -399,7 +399,7 @@ describe('PropertyInquiryResource', () => {
       nock(BASE_URL)
         .get('/property-inquiries/by-customer/cust_789')
         .query({ page: '1', pageSize: '5' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -448,7 +448,7 @@ describe('PropertyInquiryResource', () => {
 
       nock(BASE_URL)
         .patch('/property-inquiries')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -490,7 +490,7 @@ describe('PropertyInquiryResource', () => {
 
       nock(BASE_URL)
         .patch('/property-inquiries/inquiry_123/status')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -534,7 +534,7 @@ describe('PropertyInquiryResource', () => {
 
       nock(BASE_URL)
         .patch('/property-inquiries/inquiry_456/status')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -574,7 +574,7 @@ describe('PropertyInquiryResource', () => {
 
       nock(BASE_URL)
         .patch('/property-inquiries/inquiry_789/status')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -593,7 +593,7 @@ describe('PropertyInquiryResource', () => {
     it('should delete a property inquiry', async () => {
       nock(BASE_URL)
         .delete('/property-inquiries/inquiry_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: true,
@@ -668,7 +668,7 @@ describe('PropertyInquiryResource', () => {
 
       nock(BASE_URL)
         .get('/property-inquiries')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -698,7 +698,7 @@ describe('PropertyInquiryResource', () => {
       nock(BASE_URL)
         .get('/property-inquiries')
         .query({ page: '3', pageSize: '25' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,

@@ -61,7 +61,7 @@ describe('TranslationSessionsResource', () => {
 
       nock(BASE_URL)
         .get('/translation-sessions/session_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -142,7 +142,7 @@ describe('TranslationSessionsResource', () => {
 
       nock(BASE_URL)
         .get('/translation-sessions')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -174,7 +174,7 @@ describe('TranslationSessionsResource', () => {
       nock(BASE_URL)
         .get('/translation-sessions')
         .query({ page: '2', pageSize: '50' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,

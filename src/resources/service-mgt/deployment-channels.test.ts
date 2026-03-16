@@ -7,7 +7,6 @@ import nock from 'nock';
 import { WiilClient } from '../../client/WiilClient';
 import { DeploymentChannel, PaginatedResultType, DeploymentType, OttCommunicationType } from 'wiil-core-js';
 import { WiilAPIError } from '../../errors/WiilError';
-import { DeploymentType as LocalDeploymentType } from './deployment-channels';
 
 const BASE_URL = 'https://api.wiil.io/v1';
 const API_KEY = 'test-api-key';
@@ -53,7 +52,7 @@ describe('DeploymentChannelsResource', () => {
 
       nock(BASE_URL)
         .post('/deployment-channels', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -102,7 +101,7 @@ describe('DeploymentChannelsResource', () => {
 
       nock(BASE_URL)
         .post('/deployment-channels', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -134,7 +133,7 @@ describe('DeploymentChannelsResource', () => {
 
       nock(BASE_URL)
         .get('/deployment-channels/channel_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -179,8 +178,8 @@ describe('DeploymentChannelsResource', () => {
 
       nock(BASE_URL)
         .get('/deployment-channels/by-identifier/%2B12125551234')
-        .query({ type: 'CALLS' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .query({ type: 'calls' })
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -189,7 +188,7 @@ describe('DeploymentChannelsResource', () => {
 
       const result = await client.deploymentChannels.getByIdentifier(
         '+12125551234',
-        LocalDeploymentType.CALLS
+        DeploymentType.CALLS
       );
 
       expect(result.id).toBe('channel_123');
@@ -224,7 +223,7 @@ describe('DeploymentChannelsResource', () => {
           channelName: 'Updated Support Line',
           recordingEnabled: false,
         })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -242,7 +241,7 @@ describe('DeploymentChannelsResource', () => {
     it('should delete a deployment channel', async () => {
       nock(BASE_URL)
         .delete('/deployment-channels/channel_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: true,
@@ -315,7 +314,7 @@ describe('DeploymentChannelsResource', () => {
 
       nock(BASE_URL)
         .get('/deployment-channels')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -360,15 +359,15 @@ describe('DeploymentChannelsResource', () => {
       };
 
       nock(BASE_URL)
-        .get('/deployment-channels/by-type/CALLS')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .get('/deployment-channels/by-type/calls')
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
           metadata: { timestamp: Date.now(), version: 'v1' },
         });
 
-      const result = await client.deploymentChannels.listByType(LocalDeploymentType.CALLS);
+      const result = await client.deploymentChannels.listByType(DeploymentType.CALLS);
 
       expect(result.data).toHaveLength(1);
       expect(result.data[0].deploymentType).toBe(DeploymentType.CALLS);

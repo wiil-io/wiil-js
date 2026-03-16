@@ -561,6 +561,133 @@ console.log('Deleted:', deleted);
 
 ---
 
+## Batch Operations
+
+Batch operations allow you to create multiple resources in a single API request, improving performance for bulk data imports.
+
+### Batch Create Categories
+
+Create up to 50 property categories in a single request:
+
+```typescript
+const categories = await client.propertyConfig.createCategoryBatch([
+  {
+    organizationId: 'org_123',
+    name: 'Luxury Homes',
+    propertyType: PropertyType.RESIDENTIAL,
+    displayOrder: 1,
+  },
+  {
+    organizationId: 'org_123',
+    name: 'Waterfront Properties',
+    propertyType: PropertyType.RESIDENTIAL,
+    displayOrder: 2,
+  },
+  {
+    organizationId: 'org_123',
+    name: 'Commercial Offices',
+    propertyType: PropertyType.COMMERCIAL,
+    displayOrder: 3,
+  },
+]);
+
+console.log(`Created ${categories.data.length} categories`);
+```
+
+### Batch Create Addresses
+
+Create up to 50 property addresses in a single request:
+
+```typescript
+const addresses = await client.propertyConfig.createAddressBatch([
+  {
+    organizationId: 'org_123',
+    street: '123 Ocean Drive',
+    city: 'Miami',
+    state: 'FL',
+    postalCode: '33139',
+    country: 'USA',
+  },
+  {
+    organizationId: 'org_123',
+    street: '456 Park Avenue',
+    city: 'New York',
+    state: 'NY',
+    postalCode: '10022',
+    country: 'USA',
+  },
+  {
+    organizationId: 'org_123',
+    street: '789 Rodeo Drive',
+    city: 'Beverly Hills',
+    state: 'CA',
+    postalCode: '90210',
+    country: 'USA',
+  },
+]);
+
+console.log(`Created ${addresses.data.length} addresses`);
+```
+
+### Batch Create Properties
+
+Create up to 50 properties in a single request:
+
+```typescript
+const properties = await client.propertyConfig.createBatch([
+  {
+    organizationId: 'org_123',
+    categoryId: 'cat_luxury',
+    addressId: 'addr_001',
+    title: 'Oceanfront Villa',
+    propertyType: PropertyType.RESIDENTIAL,
+    propertySubType: PropertySubType.VILLA,
+    listingType: ListingType.SALE,
+    salePrice: 2500000,
+    features: { bedrooms: 5, bathrooms: 4, squareFootage: 4500 },
+    isActive: true,
+  },
+  {
+    organizationId: 'org_123',
+    categoryId: 'cat_luxury',
+    addressId: 'addr_002',
+    title: 'Penthouse Suite',
+    propertyType: PropertyType.RESIDENTIAL,
+    propertySubType: PropertySubType.CONDO,
+    listingType: ListingType.SALE,
+    salePrice: 3200000,
+    features: { bedrooms: 3, bathrooms: 3, squareFootage: 3200 },
+    isActive: true,
+  },
+]);
+
+console.log(`Created ${properties.data.length} properties`);
+properties.data.forEach(prop => {
+  console.log(`- ${prop.title}: $${prop.salePrice?.toLocaleString()}`);
+});
+```
+
+### Batch Limits
+
+| Resource   | Maximum per Batch |
+|------------|-------------------|
+| Categories | 50                |
+| Addresses  | 50                |
+| Properties | 50                |
+
+**Note:** Batch operations validate each item individually. If validation fails for any item, the entire batch request fails with an error indicating the index of the failing item.
+
+```typescript
+try {
+  const properties = await client.propertyConfig.createBatch(propertyList);
+} catch (error) {
+  // Error message includes the index: "Validation failed for item at index 2"
+  console.error('Batch creation failed:', error.message);
+}
+```
+
+---
+
 ## Property Inquiries
 
 Property inquiries track customer interest, viewings, and lead management.

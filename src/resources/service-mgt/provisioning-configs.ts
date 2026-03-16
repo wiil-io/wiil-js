@@ -16,6 +16,7 @@ import {
   PaginationRequest,
 } from 'wiil-core-js';
 import { HttpClient } from '../../client/HttpClient';
+import { WiilValidationError } from '../../errors/WiilError';
 
 /**
  * Resource class for managing provisioning configurations in the WIIL Platform.
@@ -67,11 +68,17 @@ export class ProvisioningConfigurationsResource {
    * @param data - Provisioning configuration chain data
    * @returns Promise resolving to the created provisioning configuration
    *
-   * @throws {@link WiilValidationError} - When input validation fails
+   * @throws {@link WiilValidationError} - When input validation fails or model is not supported
    * @throws {@link WiilAPIError} - When the API returns an error
    * @throws {@link WiilNetworkError} - When network communication fails
    */
   public async create(data: CreateProvisioningConfig): Promise<ProvisioningConfigChain> {
+    await this.validateModelConfigurations(
+      data.sttConfig,
+      data.processingConfig,
+      data.ttsConfig
+    );
+
     return this.http.post<CreateProvisioningConfig, ProvisioningConfigChain>(
       this.resource_path,
       data,
@@ -85,11 +92,17 @@ export class ProvisioningConfigurationsResource {
    * @param data - Translation configuration chain data
    * @returns Promise resolving to the created translation configuration
    *
-   * @throws {@link WiilValidationError} - When input validation fails
+   * @throws {@link WiilValidationError} - When input validation fails or model is not supported
    * @throws {@link WiilAPIError} - When the API returns an error
    * @throws {@link WiilNetworkError} - When network communication fails
    */
   public async createTranslation(data: CreateTranslationChainConfig): Promise<TranslationChainConfig> {
+    await this.validateModelConfigurations(
+      data.sttConfig,
+      data.processingConfig,
+      data.ttsConfig
+    );
+
     return this.http.post<CreateTranslationChainConfig, TranslationChainConfig>(
       this.resource_path,
       data,
@@ -129,11 +142,17 @@ export class ProvisioningConfigurationsResource {
    * @param data - Provisioning configuration update data (must include id)
    * @returns Promise resolving to the updated provisioning configuration
    *
-   * @throws {@link WiilValidationError} - When input validation fails
+   * @throws {@link WiilValidationError} - When input validation fails or model is not supported
    * @throws {@link WiilAPIError} - When the provisioning configuration is not found or API returns an error
    * @throws {@link WiilNetworkError} - When network communication fails
    */
   public async update(data: UpdateProvisioningConfig): Promise<ProvisioningConfigChain> {
+    await this.validateModelConfigurations(
+      data.sttConfig,
+      data.processingConfig,
+      data.ttsConfig
+    );
+
     return this.http.patch<UpdateProvisioningConfig, ProvisioningConfigChain>(
       this.resource_path,
       data,
@@ -221,5 +240,72 @@ export class ProvisioningConfigurationsResource {
     const path = `${this.resource_path}/translations${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
     return this.http.get<PaginatedResultType<TranslationChainConfig>>(path);
+  }
+
+  /**
+   * Validates STT, Processing, and TTS model configurations against the support registry.
+   *
+   * @param sttConfig - Optional STT configuration to validate
+   * @param processingConfig - Optional Processing configuration to validate
+   * @param ttsConfig - Optional TTS configuration to validate
+   *
+   * @throws {@link WiilValidationError} - When a model is not supported
+   *
+   * @private
+   */
+  private async validateModelConfigurations(
+    sttConfig?: { providerType: string; providerModelId: string } | null,
+    processingConfig?: { providerType: string; providerModelId: string } | null,
+    ttsConfig?: { providerType: string; providerModelId: string } | null
+  ): Promise<void> {
+    const validationPromises: Promise<void>[] = [];
+
+    if (sttConfig?.providerType && sttConfig?.providerModelId) {
+      validationPromises.push(
+        this.validateModel(sttConfig.providerType, sttConfig.providerModelId, 'STT')
+      );
+    }
+
+    if (processingConfig?.providerType && processingConfig?.providerModelId) {
+      validationPromises.push(
+        this.validateModel(processingConfig.providerType, processingConfig.providerModelId, 'Processing')
+      );
+    }
+
+    if (ttsConfig?.providerType && ttsConfig?.providerModelId) {
+      validationPromises.push(
+        this.validateModel(ttsConfig.providerType, ttsConfig.providerModelId, 'TTS')
+      );
+    }
+
+    await Promise.all(validationPromises);
+  }
+
+  /**
+   * Validates a single model against the support registry.
+   *
+   * @param providerType - The model provider (e.g., 'Deepgram', 'ElevenLabs')
+   * @param providerModelId - The provider-specific model identifier
+   * @param modelType - Label for error messages ('STT', 'Processing', or 'TTS')
+   *
+   * @throws {@link WiilValidationError} - When the model is not supported
+   *
+   * @private
+   */
+  private async validateModel(
+    providerType: string,
+    providerModelId: string,
+    modelType: string
+  ): Promise<void> {
+    const isSupported = await this.http.get<boolean>(
+      `/supports/${providerType}/${providerModelId}`
+    );
+
+    if (!isSupported) {
+      throw new WiilValidationError(
+        `Unsupported ${modelType} model: ${providerType}/${providerModelId}. ` +
+        `Please verify the model is available in the support registry.`
+      );
+    }
   }
 }

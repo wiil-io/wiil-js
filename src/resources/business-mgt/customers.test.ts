@@ -88,7 +88,7 @@ describe('CustomersResource', () => {
 
       nock(BASE_URL)
         .post('/customers', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -124,7 +124,7 @@ describe('CustomersResource', () => {
 
       nock(BASE_URL)
         .get('/customers/cust_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -170,7 +170,7 @@ describe('CustomersResource', () => {
 
       nock(BASE_URL)
         .get('/customers/phone/%2B12125551234')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -186,7 +186,7 @@ describe('CustomersResource', () => {
     it('should return null when customer not found by phone', async () => {
       nock(BASE_URL)
         .get('/customers/phone/%2B19999999999')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: null,
@@ -215,7 +215,7 @@ describe('CustomersResource', () => {
 
       nock(BASE_URL)
         .get('/customers/email/alice.johnson%40example.com')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -231,7 +231,7 @@ describe('CustomersResource', () => {
     it('should return null when customer not found by email', async () => {
       nock(BASE_URL)
         .get('/customers/email/notfound%40example.com')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: null,
@@ -287,7 +287,7 @@ describe('CustomersResource', () => {
       nock(BASE_URL)
         .get('/customers/search')
         .query({ query: 'john' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -318,7 +318,7 @@ describe('CustomersResource', () => {
       nock(BASE_URL)
         .get('/customers/search')
         .query({ query: 'smith', page: '2', pageSize: '10' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -362,7 +362,7 @@ describe('CustomersResource', () => {
 
       nock(BASE_URL)
         .patch('/customers/cust_123', updateData)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -381,7 +381,7 @@ describe('CustomersResource', () => {
     it('should delete a customer', async () => {
       nock(BASE_URL)
         .delete('/customers/cust_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: true,
@@ -450,7 +450,7 @@ describe('CustomersResource', () => {
 
       nock(BASE_URL)
         .get('/customers')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -481,7 +481,7 @@ describe('CustomersResource', () => {
       nock(BASE_URL)
         .get('/customers')
         .query({ page: '3', pageSize: '25' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,

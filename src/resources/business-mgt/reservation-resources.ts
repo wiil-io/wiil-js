@@ -13,6 +13,9 @@ import {
   PaginationRequest,
 } from 'wiil-core-js';
 import { HttpClient } from '../../client/HttpClient';
+import { WiilValidationError } from '../../errors/WiilError';
+
+const BATCH_LIMIT = 50;
 
 /**
  * Resource class for managing reservation resources in the WIIL Platform.
@@ -262,5 +265,50 @@ export class ReservationResourcesResource {
     const path = `${this.resource_path}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
     return this.http.get<PaginatedResultType<Resource>>(path);
+  }
+
+  /**
+   * Creates multiple reservation resources in a single batch request.
+   *
+   * @param data - Array of reservation resource data (maximum 50 items)
+   * @returns Promise resolving to paginated result of created reservation resources
+   *
+   * @throws {@link WiilValidationError} - When input validation fails or batch limit exceeded
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   *
+   * @example
+   * ```typescript
+   * const resources = await client.reservationResources.createBatch([
+   *   { name: 'Table 1', type: 'TABLE', capacity: 4 },
+   *   { name: 'Table 2', type: 'TABLE', capacity: 6 }
+   * ]);
+   * console.log(`Created ${resources.data.length} resources`);
+   * ```
+   */
+  public async createBatch(
+    data: CreateResource[]
+  ): Promise<PaginatedResultType<Resource>> {
+    if (data.length > BATCH_LIMIT) {
+      throw new WiilValidationError(
+        `Batch size exceeds maximum limit of ${BATCH_LIMIT}`,
+        [{ path: ['data'], message: `Array length ${data.length} exceeds maximum of ${BATCH_LIMIT}` }]
+      );
+    }
+
+    for (let i = 0; i < data.length; i++) {
+      const validation = CreateResourceSchema.safeParse(data[i]);
+      if (!validation.success) {
+        throw new WiilValidationError(
+          `Validation failed for item at index ${i}`,
+          validation.error.issues
+        );
+      }
+    }
+
+    return this.http.post<CreateResource[], PaginatedResultType<Resource>>(
+      `${this.resource_path}/batch`,
+      data
+    );
   }
 }

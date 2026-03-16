@@ -54,7 +54,7 @@ describe('DynamicPhoneAgentResource', () => {
 
       nock(BASE_URL)
         .post('/dynamic-setup/phone-agent', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -100,9 +100,20 @@ describe('DynamicPhoneAgentResource', () => {
         phoneNumber: '+15559876543',
       };
 
+      // Mock model validation endpoints
+      nock(BASE_URL)
+        .get('/supports/Deepgram/nova-2')
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
+        .reply(200, { success: true, data: true, metadata: { timestamp: Date.now(), version: 'v1' } });
+
+      nock(BASE_URL)
+        .get('/supports/ElevenLabs/eleven_turbo_v2')
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
+        .reply(200, { success: true, data: true, metadata: { timestamp: Date.now(), version: 'v1' } });
+
       nock(BASE_URL)
         .post('/dynamic-setup/phone-agent', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -139,7 +150,7 @@ describe('DynamicPhoneAgentResource', () => {
 
       nock(BASE_URL)
         .patch('/dynamic-setup/phone-agent', updateData)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -174,9 +185,15 @@ describe('DynamicPhoneAgentResource', () => {
         phoneNumber: '+15551234567',
       };
 
+      // Mock model validation endpoint
+      nock(BASE_URL)
+        .get('/supports/Google/chirp')
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
+        .reply(200, { success: true, data: true, metadata: { timestamp: Date.now(), version: 'v1' } });
+
       nock(BASE_URL)
         .patch('/dynamic-setup/phone-agent', updateData)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,

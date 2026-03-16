@@ -265,6 +265,92 @@ const deleted = await client.products.delete('product_123');
 console.log('Deleted:', deleted);
 ```
 
+## Batch Operations
+
+Batch operations allow you to create multiple resources in a single API request, improving performance for bulk data imports.
+
+### Batch Create Categories
+
+Create up to 50 product categories in a single request:
+
+```typescript
+const categories = await client.products.createCategoryBatch([
+  { name: 'Electronics', description: 'Electronic devices', displayOrder: 1 },
+  { name: 'Accessories', description: 'Computer peripherals', displayOrder: 2 },
+  { name: 'Software', description: 'Digital products', displayOrder: 3 },
+]);
+
+console.log(`Created ${categories.data.length} categories`);
+categories.data.forEach(cat => {
+  console.log(`- ${cat.name}: ${cat.id}`);
+});
+```
+
+### Batch Create Products
+
+Create up to 100 products in a single request:
+
+```typescript
+const products = await client.products.createBatch([
+  {
+    name: 'Wireless Mouse',
+    description: 'Ergonomic wireless mouse',
+    price: 29.99,
+    sku: 'WM-001',
+    categoryId: 'cat_accessories',
+    trackInventory: true,
+    stockQuantity: 150,
+    lowStockThreshold: 20,
+    isActive: true,
+  },
+  {
+    name: 'Mechanical Keyboard',
+    description: 'RGB backlit mechanical keyboard',
+    price: 89.99,
+    sku: 'KB-001',
+    categoryId: 'cat_accessories',
+    trackInventory: true,
+    stockQuantity: 75,
+    lowStockThreshold: 15,
+    isActive: true,
+  },
+  {
+    name: 'USB-C Hub',
+    description: '7-in-1 USB-C adapter',
+    price: 49.99,
+    sku: 'HUB-001',
+    categoryId: 'cat_accessories',
+    trackInventory: true,
+    stockQuantity: 200,
+    lowStockThreshold: 30,
+    isActive: true,
+  },
+]);
+
+console.log(`Created ${products.data.length} products`);
+products.data.forEach(prod => {
+  console.log(`- ${prod.name} (${prod.sku}): $${prod.price}`);
+});
+```
+
+### Batch Limits
+
+| Resource   | Maximum per Batch |
+|------------|-------------------|
+| Categories | 50                |
+| Products   | 100               |
+
+**Note:** Batch operations validate each item individually. If validation fails for any item, the entire batch request fails with an error indicating the index of the failing item.
+
+```typescript
+try {
+  const products = await client.products.createBatch(productList);
+} catch (error) {
+  // Error message includes the index: "Validation failed for item at index 2"
+  console.error('Batch creation failed:', error.message);
+}
+```
+
 ## Product Orders
 
 ### Order Schema

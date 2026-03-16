@@ -23,6 +23,9 @@ import {
   PaginationRequest,
 } from 'wiil-core-js';
 import { HttpClient } from '../../client/HttpClient';
+import { WiilValidationError } from '../../errors/WiilError';
+
+const BATCH_LIMIT = 50;
 
 /**
  * Resource class for managing property configurations in the WIIL Platform.
@@ -191,5 +194,113 @@ export class PropertyConfigResource {
 
   public async delete(id: string): Promise<boolean> {
     return this.http.delete<boolean>(`${this.resource_path}/properties/${id}`);
+  }
+
+  /**
+   * Creates multiple property categories in a single batch request.
+   *
+   * @param data - Array of property category data (maximum 50 items)
+   * @returns Promise resolving to paginated result of created property categories
+   *
+   * @throws {@link WiilValidationError} - When input validation fails or batch limit exceeded
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   */
+  public async createCategoryBatch(
+    data: CreatePropertyCategory[]
+  ): Promise<PaginatedResultType<PropertyCategory>> {
+    if (data.length > BATCH_LIMIT) {
+      throw new WiilValidationError(
+        `Batch size exceeds maximum limit of ${BATCH_LIMIT}`,
+        [{ path: ['data'], message: `Array length ${data.length} exceeds maximum of ${BATCH_LIMIT}` }]
+      );
+    }
+
+    for (let i = 0; i < data.length; i++) {
+      const validation = CreatePropertyCategorySchema.safeParse(data[i]);
+      if (!validation.success) {
+        throw new WiilValidationError(
+          `Validation failed for item at index ${i}`,
+          validation.error.issues
+        );
+      }
+    }
+
+    return this.http.post<CreatePropertyCategory[], PaginatedResultType<PropertyCategory>>(
+      `${this.resource_path}/categories/batch`,
+      data
+    );
+  }
+
+  /**
+   * Creates multiple property addresses in a single batch request.
+   *
+   * @param data - Array of property address data (maximum 50 items)
+   * @returns Promise resolving to paginated result of created property addresses
+   *
+   * @throws {@link WiilValidationError} - When input validation fails or batch limit exceeded
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   */
+  public async createAddressBatch(
+    data: CreatePropertyAddress[]
+  ): Promise<PaginatedResultType<PropertyAddress>> {
+    if (data.length > BATCH_LIMIT) {
+      throw new WiilValidationError(
+        `Batch size exceeds maximum limit of ${BATCH_LIMIT}`,
+        [{ path: ['data'], message: `Array length ${data.length} exceeds maximum of ${BATCH_LIMIT}` }]
+      );
+    }
+
+    for (let i = 0; i < data.length; i++) {
+      const validation = CreatePropertyAddressSchema.safeParse(data[i]);
+      if (!validation.success) {
+        throw new WiilValidationError(
+          `Validation failed for item at index ${i}`,
+          validation.error.issues
+        );
+      }
+    }
+
+    return this.http.post<CreatePropertyAddress[], PaginatedResultType<PropertyAddress>>(
+      `${this.resource_path}/addresses/batch`,
+      data
+    );
+  }
+
+  /**
+   * Creates multiple properties in a single batch request.
+   *
+   * @param data - Array of property data (maximum 50 items)
+   * @returns Promise resolving to paginated result of created properties
+   *
+   * @throws {@link WiilValidationError} - When input validation fails or batch limit exceeded
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   */
+  public async createBatch(
+    data: CreateProperty[]
+  ): Promise<PaginatedResultType<Property>> {
+    if (data.length > BATCH_LIMIT) {
+      throw new WiilValidationError(
+        `Batch size exceeds maximum limit of ${BATCH_LIMIT}`,
+        [{ path: ['data'], message: `Array length ${data.length} exceeds maximum of ${BATCH_LIMIT}` }]
+      );
+    }
+
+    for (let i = 0; i < data.length; i++) {
+      const validation = CreatePropertySchema.safeParse(data[i]);
+      if (!validation.success) {
+        throw new WiilValidationError(
+          `Validation failed for item at index ${i}`,
+          validation.error.issues
+        );
+      }
+    }
+
+    return this.http.post<CreateProperty[], PaginatedResultType<Property>>(
+      `${this.resource_path}/properties/batch`,
+      data
+    );
   }
 }

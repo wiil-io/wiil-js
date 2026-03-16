@@ -160,6 +160,73 @@ if (deleted) {
 }
 ```
 
+### Batch Create Services
+
+Create up to 50 business services in a single request:
+
+```typescript
+const services = await client.businessServices.createBatch([
+  {
+    name: 'Haircut & Style',
+    description: 'Professional haircut with styling',
+    duration: 45,
+    bufferTime: 15,
+    price: 50.00,
+    isBookable: true,
+    isActive: true,
+  },
+  {
+    name: 'Hair Coloring',
+    description: 'Full hair coloring service',
+    duration: 120,
+    bufferTime: 20,
+    price: 150.00,
+    isBookable: true,
+    isActive: true,
+  },
+  {
+    name: 'Manicure',
+    description: 'Classic manicure with polish',
+    duration: 30,
+    bufferTime: 10,
+    price: 35.00,
+    isBookable: true,
+    isActive: true,
+  },
+  {
+    name: 'Pedicure',
+    description: 'Relaxing pedicure with massage',
+    duration: 45,
+    bufferTime: 15,
+    price: 55.00,
+    isBookable: true,
+    isActive: true,
+  },
+]);
+
+console.log(`Created ${services.data.length} services`);
+services.data.forEach(svc => {
+  console.log(`- ${svc.name}: $${svc.price} (${svc.duration} min)`);
+});
+```
+
+### Batch Limits
+
+| Resource          | Maximum per Batch |
+|-------------------|-------------------|
+| Business Services | 50                |
+
+**Note:** Batch operations validate each item individually. If validation fails for any item, the entire batch request fails with an error indicating the index of the failing item.
+
+```typescript
+try {
+  const services = await client.businessServices.createBatch(serviceList);
+} catch (error) {
+  // Error message includes the index: "Validation failed for item at index 2"
+  console.error('Batch creation failed:', error.message);
+}
+```
+
 ---
 
 ## Service Appointments

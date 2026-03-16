@@ -156,7 +156,7 @@ describe('ProductOrdersResource', () => {
 
       nock(BASE_URL)
         .post('/product-orders', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -269,7 +269,7 @@ describe('ProductOrdersResource', () => {
 
       nock(BASE_URL)
         .post('/product-orders', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -331,7 +331,7 @@ describe('ProductOrdersResource', () => {
 
       nock(BASE_URL)
         .get('/product-orders/order_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -429,7 +429,7 @@ describe('ProductOrdersResource', () => {
 
       nock(BASE_URL)
         .get('/product-orders/by-customer/cust_456')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -459,7 +459,7 @@ describe('ProductOrdersResource', () => {
       nock(BASE_URL)
         .get('/product-orders/by-customer/cust_789')
         .query({ page: '2', pageSize: '10' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -516,7 +516,7 @@ describe('ProductOrdersResource', () => {
 
       nock(BASE_URL)
         .patch('/product-orders', updateData)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -562,7 +562,7 @@ describe('ProductOrdersResource', () => {
 
       nock(BASE_URL)
         .patch('/product-orders/order_123/status', { id: 'order_123', status: OrderStatus.OUT_FOR_DELIVERY })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -606,7 +606,7 @@ describe('ProductOrdersResource', () => {
 
       nock(BASE_URL)
         .post('/product-orders/order_123/cancel', { cancelReason: 'Customer requested cancellation' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -648,7 +648,7 @@ describe('ProductOrdersResource', () => {
 
       nock(BASE_URL)
         .post('/product-orders/order_456/cancel', { cancelReason: '' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -665,7 +665,7 @@ describe('ProductOrdersResource', () => {
     it('should delete a product order', async () => {
       nock(BASE_URL)
         .delete('/product-orders/order_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: true,
@@ -760,7 +760,7 @@ describe('ProductOrdersResource', () => {
 
       nock(BASE_URL)
         .get('/product-orders')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -791,7 +791,7 @@ describe('ProductOrdersResource', () => {
       nock(BASE_URL)
         .get('/product-orders')
         .query({ page: '3', pageSize: '25' })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,

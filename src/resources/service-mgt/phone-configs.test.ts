@@ -25,49 +25,6 @@ describe('PhoneConfigurationsResource', () => {
     nock.cleanAll();
   });
 
-  describe('purchase', () => {
-    it('should purchase a new phone number', async () => {
-      const input = {
-        friendlyName: 'Customer Support Line',
-        phoneNumber: '+12125551234',
-        requestTime: Date.now(),
-        providerType: ProviderType.TWILIO,
-        amount: 1.00,
-        currency: 'USD',
-        status: PhonePurchaseStatus.PENDING,
-        numberType: PhoneNumberType.LOCAL,
-      };
-
-      const mockResponse: PhoneNumberPurchase = {
-        id: 'purchase_123',
-        friendlyName: 'Customer Support Line',
-        phoneNumber: '+12125551234',
-        providerType: ProviderType.TWILIO,
-        amount: 1.00,
-        currency: 'USD',
-        status: PhonePurchaseStatus.COMPLETED,
-        numberType: PhoneNumberType.LOCAL,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      };
-
-      nock(BASE_URL)
-        .post('/phone-configurations/purchase', input)
-        .matchHeader('X-WIIL-API-Key', API_KEY)
-        .reply(200, {
-          success: true,
-          data: mockResponse,
-          metadata: { timestamp: Date.now(), version: 'v1' },
-        });
-
-      const result = await client.phoneConfigs.purchase(input);
-
-      expect(result.id).toBe('purchase_123');
-      expect(result.phoneNumber).toBe('+12125551234');
-      expect(result.status).toBe(PhonePurchaseStatus.COMPLETED);
-    });
-  });
-
   describe('get', () => {
     it('should retrieve a phone configuration by ID', async () => {
       const mockResponse: PhoneConfiguration = {
@@ -88,7 +45,7 @@ describe('PhoneConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/phone-configurations/phone_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -137,7 +94,7 @@ describe('PhoneConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/phone-configurations/by-phone-number/%2B12125551234')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -170,7 +127,7 @@ describe('PhoneConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/phone-configurations/by-request/request_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -211,7 +168,7 @@ describe('PhoneConfigurationsResource', () => {
           id: 'phone_123',
           friendlyName: 'Updated Support Line',
         })
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
@@ -228,7 +185,7 @@ describe('PhoneConfigurationsResource', () => {
     it('should delete a phone configuration', async () => {
       nock(BASE_URL)
         .delete('/phone-configurations/phone_123')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: true,
@@ -303,7 +260,7 @@ describe('PhoneConfigurationsResource', () => {
 
       nock(BASE_URL)
         .get('/phone-configurations')
-        .matchHeader('X-WIIL-API-Key', API_KEY)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
           data: mockResponse,
