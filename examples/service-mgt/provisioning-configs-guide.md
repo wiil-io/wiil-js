@@ -1,6 +1,6 @@
-# Provisioning Configurations Guide
+# Translation Chain Configuration Guide
 
-This guide covers creating and managing provisioning configurations using the WIIL Platform JS SDK. Provisioning configurations define voice processing chains (STT -> Processing -> TTS) and translation configurations for AI deployments.
+This guide covers creating translation chain configurations using the WIIL Platform JS SDK. Translation chains define voice processing pipelines (STT → Processing → TTS) for real-time translation deployments.
 
 ## Quick Start
 
@@ -13,191 +13,78 @@ const client = new WiilClient({
 });
 
 const chain = await client.provisioningConfigs.create({
-  chainName: 'customer-support-voice-chain',
-  description: 'Voice processing chain for customer support',
-  sttConfig: {
-    providerType: SupportedProprietor.DEEPGRAM,
-    providerModelId: 'nova-2',
-    languageId: 'en-US'
-  },
-  processingConfig: {
-    providerType: SupportedProprietor.OPENAI,
-    providerModelId: 'gpt-4o-mini'
-  },
-  ttsConfig: {
-    providerType: SupportedProprietor.ELEVENLABS,
-    providerModelId: 'eleven_turbo_v2',
-    languageId: 'en-US',
-    voiceId: 'voice_rachel'
-  }
-});
-
-console.log('Chain created:', chain.id);
-```
-
-## Architecture Overview
-
-Provisioning configurations define **voice processing chains**:
-
-- **STT Config**: Speech-to-Text configuration for converting voice input to text
-- **Processing Config**: The LLM model that processes the text
-- **TTS Config**: Text-to-Speech configuration for converting responses to voice
-
-**Use Cases:**
-- Phone-based AI assistants
-- Voice-enabled web applications
-- Real-time translation services
-
-## Provisioning Chain Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| chainName | string | Yes | Unique name for the chain |
-| description | string | No | Description of the chain's purpose |
-| sttConfig | DynamicSTTModelConfiguration | Yes | Speech-to-Text configuration |
-| processingConfig | DynamicModelConfiguration | Yes | Text processing model configuration |
-| ttsConfig | DynamicTTSModelConfiguration | Yes | Text-to-Speech configuration |
-
-### STT Config Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| providerType | SupportedProprietor | Yes | Provider (e.g., 'Deepgram', 'OpenAI') |
-| providerModelId | string | Yes | Provider-specific model ID (e.g., 'nova-2') |
-| languageId | string | No | Language code (default: 'en') |
-
-### Processing Config Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| providerType | SupportedProprietor | Yes | Provider (e.g., 'OpenAI', 'Anthropic') |
-| providerModelId | string | Yes | Provider-specific model ID (e.g., 'gpt-4o-mini') |
-
-### TTS Config Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| providerType | SupportedProprietor | Yes | Provider (e.g., 'ElevenLabs', 'OpenAI') |
-| providerModelId | string | Yes | Provider-specific model ID (e.g., 'eleven_multilingual_v2') |
-| languageId | string | No | Language code (default: 'en') |
-| voiceId | string | No | Voice ID from the TTS model's supported voices |
-
-## CRUD Operations
-
-### Create Provisioning Configuration
-
-```typescript
-const chain = await client.provisioningConfigs.create({
-  chainName: 'voice-support-chain',
-  description: 'Voice processing for customer support',
-  sttConfig: {
-    providerType: SupportedProprietor.DEEPGRAM,
-    providerModelId: 'nova-2',
-    languageId: 'en-US'
-  },
-  processingConfig: {
-    providerType: SupportedProprietor.OPENAI,
-    providerModelId: 'gpt-4o-mini'
-  },
-  ttsConfig: {
-    providerType: SupportedProprietor.ELEVENLABS,
-    providerModelId: 'eleven_turbo_v2',
-    languageId: 'en-US',
-    voiceId: 'voice_rachel'
-  }
-});
-
-console.log('Chain created:', chain.id);
-console.log('Chain name:', chain.chainName);
-```
-
-### Create Translation Configuration
-
-```typescript
-const translationChain = await client.provisioningConfigs.createTranslation({
   chainName: 'english-spanish-translation',
   description: 'Real-time English to Spanish translation',
   sttConfig: {
     providerType: SupportedProprietor.DEEPGRAM,
     providerModelId: 'nova-2',
-    languageId: 'en',
+    languageId: 'en-US'
   },
   processingConfig: {
     providerType: SupportedProprietor.OPENAI,
-    providerModelId: 'gpt-4o-mini',
+    providerModelId: 'gpt-4o'
   },
   ttsConfig: {
     providerType: SupportedProprietor.ELEVENLABS,
     providerModelId: 'eleven_multilingual_v2',
-    languageId: 'es',
-    voiceId: 'spanish-voice-id',
+    languageId: 'es-ES',
+    voiceId: 'spanish-voice-id'
   },
-  isTranslation: true,
+  isTranslation: true
 });
 
-console.log('Translation chain created:', translationChain.id);
+console.log('Translation chain created:', chain.id);
 ```
 
-### Get Provisioning Configuration
+## Architecture Overview
 
-```typescript
-// Get by ID
-const chain = await client.provisioningConfigs.get('chain_123');
-console.log('Chain name:', chain.chainName);
+Translation chains define **voice processing pipelines**:
 
-// Get by chain name
-const byName = await client.provisioningConfigs.getByChainName('voice-support-chain');
-console.log('Found chain:', byName.id);
-```
+- **STT Config**: Speech-to-Text configuration for converting voice input to text
+- **Processing Config**: The LLM model that translates the text
+- **TTS Config**: Text-to-Speech configuration for converting translated text to voice
 
-### List Provisioning Configurations
+**Use Cases:**
+- Real-time translation services
+- Multilingual customer support
+- Cross-language communication platforms
 
-```typescript
-// List all configurations
-const all = await client.provisioningConfigs.list({
-  page: 1,
-  pageSize: 20,
-});
+## Translation Chain Schema
 
-console.log('Total configs:', all.meta.totalCount);
+| Field            | Type                          | Required | Description                              |
+|------------------|-------------------------------|----------|------------------------------------------|
+| chainName        | string                        | Yes      | Unique name for the chain                |
+| description      | string                        | No       | Description of the chain's purpose       |
+| sttConfig        | DynamicSTTModelConfiguration  | Yes      | Speech-to-Text configuration             |
+| processingConfig | DynamicModelConfiguration     | Yes      | Text processing/translation model config |
+| ttsConfig        | DynamicTTSModelConfiguration  | Yes      | Text-to-Speech configuration             |
+| isTranslation    | boolean                       | Yes      | Must be `true` for translation chains    |
 
-// List only provisioning chains (STT -> Processing -> TTS)
-const provisioningChains = await client.provisioningConfigs.listProvisioningChains();
-console.log('Provisioning chains:', provisioningChains.data.length);
+### STT Config Schema
 
-// List only translation chains
-const translationChains = await client.provisioningConfigs.listTranslationChains();
-console.log('Translation chains:', translationChains.data.length);
-```
+| Field           | Type               | Required | Description                                   |
+|-----------------|--------------------|----------|-----------------------------------------------|
+| providerType    | SupportedProprietor | Yes      | Provider (e.g., 'Deepgram', 'OpenAI')        |
+| providerModelId | string             | Yes      | Provider-specific model ID (e.g., 'nova-2')  |
+| languageId      | string             | Yes      | Source language code (e.g., 'en-US')         |
 
-### Update Provisioning Configuration
+### Processing Config Schema
 
-```typescript
-const updated = await client.provisioningConfigs.update({
-  id: 'chain_123',
-  description: 'Updated voice processing chain',
-  chainName: 'updated-voice-chain',
-  // Optionally update model configurations
-  processingConfig: {
-    providerType: SupportedProprietor.OPENAI,
-    providerModelId: 'gpt-4.1-mini',
-  },
-});
+| Field           | Type               | Required | Description                                    |
+|-----------------|--------------------|----------|------------------------------------------------|
+| providerType    | SupportedProprietor | Yes      | Provider (e.g., 'OpenAI', 'Anthropic')        |
+| providerModelId | string             | Yes      | Provider-specific model ID (e.g., 'gpt-4o')   |
 
-console.log('Updated chain:', updated.chainName);
-```
+### TTS Config Schema
 
-### Delete Provisioning Configuration
+| Field           | Type               | Required | Description                                        |
+|-----------------|--------------------|----------|----------------------------------------------------|
+| providerType    | SupportedProprietor | Yes      | Provider (e.g., 'ElevenLabs', 'OpenAI')           |
+| providerModelId | string             | Yes      | Provider-specific model ID                         |
+| languageId      | string             | Yes      | Target language code (e.g., 'es-ES')              |
+| voiceId         | string             | No       | Voice ID from the TTS model's supported voices    |
 
-```typescript
-const deleted = await client.provisioningConfigs.delete('chain_123');
-
-if (deleted) {
-  console.log('Chain deleted successfully');
-}
-```
-
-## Full Example with Voice
+## Create Translation Chain
 
 ```typescript
 import { WiilClient } from 'wiil-js';
@@ -207,74 +94,71 @@ const client = new WiilClient({
   apiKey: process.env.WIIL_API_KEY!
 });
 
-const chain = await client.provisioningConfigs.create({
-  // Required
-  chainName: 'customer-support-voice-chain',
+const translationChain = await client.provisioningConfigs.create({
+  // Required - Unique chain name
+  chainName: 'french-english-translation',
 
   // Optional - Description
-  description: 'Voice processing chain for customer support calls',
+  description: 'Real-time French to English translation',
 
-  // Required - STT Configuration
+  // Required - STT Configuration (source language)
   sttConfig: {
     providerType: SupportedProprietor.DEEPGRAM,
     providerModelId: 'nova-2',
-    languageId: 'en-US'
+    languageId: 'fr-FR'
   },
 
-  // Required - Processing Configuration
+  // Required - Processing Configuration (translation model)
   processingConfig: {
     providerType: SupportedProprietor.OPENAI,
-    providerModelId: 'gpt-4o-mini'
+    providerModelId: 'gpt-4o'
   },
 
-  // Required - TTS Configuration
+  // Required - TTS Configuration (target language)
   ttsConfig: {
     providerType: SupportedProprietor.ELEVENLABS,
-    providerModelId: 'eleven_turbo_v2',
+    providerModelId: 'eleven_multilingual_v2',
     languageId: 'en-US',
     voiceId: 'voice_rachel'
-  }
+  },
+
+  // Required - Mark as translation chain
+  isTranslation: true
 });
 
-console.log('Chain created:', chain.id);
-console.log('Chain name:', chain.chainName);
+console.log('Translation chain created:', translationChain.id);
+console.log('Chain name:', translationChain.chainName);
 ```
-
----
 
 ## Voice Configuration
 
-### Overview
-
-Provisioning chains require Speech-to-Text (STT), Processing, and Text-to-Speech (TTS) configurations to define the complete voice processing pipeline.
-
-### STT Configuration
+### STT Configuration (Source Language)
 
 ```typescript
 sttConfig: {
   providerType: SupportedProprietor.DEEPGRAM,  // Required
   providerModelId: 'nova-2',                    // Required
-  languageId: 'en-US'                           // Optional, default: 'en'
+  languageId: 'en-US'                           // Required - source language
 }
 ```
 
-### Processing Configuration
+### Processing Configuration (Translation Model)
 
 ```typescript
 processingConfig: {
   providerType: SupportedProprietor.OPENAI,    // Required
-  providerModelId: 'gpt-4o-mini'               // Required
+  providerModelId: 'gpt-4o'                    // Required
 }
 ```
 
-### TTS Configuration
+### TTS Configuration (Target Language)
 
 ```typescript
 ttsConfig: {
   providerType: SupportedProprietor.ELEVENLABS, // Required
-  providerModelId: 'eleven_turbo_v2',           // Required
-  languageId: 'en-US',                          // Optional, default: 'en'
-  voiceId: 'voice_rachel'                       // Optional
+  providerModelId: 'eleven_multilingual_v2',    // Required
+  languageId: 'es-ES',                          // Required - target language
+  voiceId: 'spanish-voice-id'                   // Optional
 }
 ```
 
@@ -293,43 +177,9 @@ SupportedProprietor.ELEVENLABS  // "ElevenLabs" - Recommended for TTS
 SupportedProprietor.CARTESIA    // "Cartesia"
 ```
 
-### Recommended Configurations
+## Example: Dynamic Model Discovery
 
-**For STT (Speech-to-Text):**
-
-```typescript
-sttConfig: {
-  providerType: SupportedProprietor.DEEPGRAM,
-  providerModelId: 'nova-2',
-  languageId: 'en-US'
-}
-```
-
-**For Processing (LLM):**
-
-```typescript
-processingConfig: {
-  providerType: SupportedProprietor.OPENAI,
-  providerModelId: 'gpt-4o-mini'
-}
-```
-
-**For TTS (Text-to-Speech):**
-
-```typescript
-ttsConfig: {
-  providerType: SupportedProprietor.ELEVENLABS,
-  providerModelId: 'eleven_turbo_v2',
-  languageId: 'en-US',
-  voiceId: 'voice_rachel'
-}
-```
-
----
-
-## Complete Lifecycle Example
-
-Full workflow demonstrating provisioning configuration lifecycle with dynamic model discovery:
+Create a translation chain using models discovered from the support registry:
 
 ```typescript
 import { WiilClient } from 'wiil-js';
@@ -339,7 +189,7 @@ const client = new WiilClient({
   apiKey: process.env.WIIL_API_KEY!
 });
 
-async function createVoiceProcessingChain() {
+async function createTranslationChain(sourceLang: string, targetLang: string) {
   // 1. Discover available models from support registry
   console.log('Fetching available models...');
   const models = await client.supportModels.list();
@@ -347,7 +197,7 @@ async function createVoiceProcessingChain() {
   const sttModel = models.find(m =>
     m.type === LLMType.STT &&
     !m.discontinued &&
-    m.supportLanguages?.length > 0
+    m.supportLanguages?.some(l => l.languageId === sourceLang)
   );
 
   const processingModel = models.find(m =>
@@ -359,30 +209,28 @@ async function createVoiceProcessingChain() {
     m.type === LLMType.TTS &&
     !m.discontinued &&
     m.supportedVoices?.length > 0 &&
-    m.supportLanguages?.length > 0
+    m.supportLanguages?.some(l => l.languageId === targetLang)
   );
 
   if (!sttModel || !processingModel || !ttsModel) {
-    throw new Error('Required models not available');
+    throw new Error('Required models not available for specified languages');
   }
 
   console.log('Using STT:', `${sttModel.proprietor}/${sttModel.provider_model_id}`);
   console.log('Using Processing:', `${processingModel.proprietor}/${processingModel.provider_model_id}`);
   console.log('Using TTS:', `${ttsModel.proprietor}/${ttsModel.provider_model_id}`);
 
-  // 2. Get default language and voice
-  const sttLang = sttModel.supportLanguages!.find(l => l.isDefault) || sttModel.supportLanguages![0];
-  const ttsLang = ttsModel.supportLanguages!.find(l => l.isDefault) || ttsModel.supportLanguages![0];
+  // 2. Get voice for target language
   const voice = ttsModel.supportedVoices!.find(v => v.isDefault) || ttsModel.supportedVoices![0];
 
-  // 3. Create provisioning chain
+  // 3. Create translation chain
   const chain = await client.provisioningConfigs.create({
-    chainName: `voice-chain-${Date.now()}`,
-    description: 'Voice processing chain for phone support',
+    chainName: `translation-${sourceLang}-to-${targetLang}-${Date.now()}`,
+    description: `Real-time ${sourceLang} to ${targetLang} translation`,
     sttConfig: {
       providerType: sttModel.proprietor as SupportedProprietor,
       providerModelId: sttModel.provider_model_id!,
-      languageId: sttLang.languageId
+      languageId: sourceLang
     },
     processingConfig: {
       providerType: processingModel.proprietor as SupportedProprietor,
@@ -391,35 +239,18 @@ async function createVoiceProcessingChain() {
     ttsConfig: {
       providerType: ttsModel.proprietor as SupportedProprietor,
       providerModelId: ttsModel.provider_model_id!,
-      languageId: ttsLang.languageId,
+      languageId: targetLang,
       voiceId: voice.voiceId
-    }
+    },
+    isTranslation: true
   });
-  console.log('Chain created:', chain.id);
 
-  // 4. Retrieve and verify
-  const retrieved = await client.provisioningConfigs.get(chain.id);
-  console.log('Retrieved chain:', retrieved.chainName);
-
-  // 5. List all provisioning chains
-  const allChains = await client.provisioningConfigs.listProvisioningChains();
-  console.log('Total provisioning chains:', allChains.meta.totalCount);
-
-  // 6. Update the chain
-  const updated = await client.provisioningConfigs.update({
-    id: chain.id,
-    description: 'Updated voice processing chain'
-  });
-  console.log('Updated chain description');
-
-  // 7. Clean up
-  await client.provisioningConfigs.delete(chain.id);
-  console.log('Chain deleted');
-
-  console.log('Complete!');
+  console.log('Translation chain created:', chain.id);
+  return chain;
 }
 
-createVoiceProcessingChain().catch(console.error);
+// Create English to Spanish translation chain
+createTranslationChain('en-US', 'es-ES').catch(console.error);
 ```
 
 ## Best Practices
@@ -428,11 +259,11 @@ createVoiceProcessingChain().catch(console.error);
 
 2. **Use valid provider/model combinations** - The `providerType` and `providerModelId` must match entries in the support models registry.
 
-3. **Use compatible voice IDs** - The voiceId must come from the TTS model's `supportedVoices` array.
+3. **Use multilingual TTS models** - For translation, use models that support multiple languages (e.g., `eleven_multilingual_v2`).
 
-4. **Match languages** - Ensure the STT and TTS configurations use compatible language codes.
+4. **Match languages correctly** - STT `languageId` should be the source language, TTS `languageId` should be the target language.
 
-5. **Use descriptive chain names** - Chain names should clearly indicate the purpose (e.g., 'customer-support-voice-en').
+5. **Use descriptive chain names** - Chain names should clearly indicate the translation direction (e.g., 'translation-en-to-es').
 
 6. **Validate models before use** - The SDK validates models against the support registry before creating chains.
 
@@ -482,53 +313,33 @@ if (ttsModel?.supportedVoices) {
 }
 ```
 
-### Chain Name Already Exists
-
-**Error:**
-```
-WiilAPIError: Chain name already exists
-```
-
-**Solution:**
-Use unique chain names or check existing chains first:
-
-```typescript
-try {
-  const existing = await client.provisioningConfigs.getByChainName('my-chain');
-  console.log('Chain already exists:', existing.id);
-} catch (error) {
-  // Chain doesn't exist, safe to create
-  const chain = await client.provisioningConfigs.create({
-    chainName: 'my-chain',
-    // ...
-  });
-}
-```
-
 ### Missing Required Configuration
 
 **Error:**
 ```
-WiilValidationError: processingConfig is required
+WiilValidationError: isTranslation is required
 ```
 
 **Solution:**
-Ensure all required configurations are provided:
+Ensure all required fields are provided:
 
 ```typescript
 const chain = await client.provisioningConfigs.create({
-  chainName: 'my-chain',
+  chainName: 'my-translation-chain',
   sttConfig: {
     providerType: SupportedProprietor.DEEPGRAM,
     providerModelId: 'nova-2',
+    languageId: 'en-US',  // Required for translation
   },
-  processingConfig: {  // Required!
+  processingConfig: {
     providerType: SupportedProprietor.OPENAI,
-    providerModelId: 'gpt-4o-mini',
+    providerModelId: 'gpt-4o',
   },
   ttsConfig: {
     providerType: SupportedProprietor.ELEVENLABS,
     providerModelId: 'eleven_multilingual_v2',
+    languageId: 'es-ES',  // Required for translation
   },
+  isTranslation: true,  // Required!
 });
 ```

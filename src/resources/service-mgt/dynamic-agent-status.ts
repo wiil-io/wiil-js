@@ -5,6 +5,8 @@
 
 import {
   DynamicAgentSetupResult,
+  DynamicWebAgentSetupResult,
+  DynamicPhoneAgentSetupResult,
   DynamicAgentProcessingState,
 } from 'wiil-core-js';
 import { HttpClient } from '../../client/HttpClient';
@@ -101,20 +103,34 @@ export class DynamicAgentStatusResource {
    * Retrieves the current status of a dynamic agent setup operation.
    *
    * @param id - Dynamic agent setup ID
-   * @returns Promise resolving to the current setup result with processing state
+   * @returns Promise resolving to the setup result (base, web, or phone agent type)
    *
    * @throws {@link WiilAPIError} - When the setup ID is not found or API returns an error
    * @throws {@link WiilNetworkError} - When network communication fails
+   *
+   * @remarks
+   * The returned type depends on the agent type that was created. Use property
+   * checking to narrow the type and access specialized properties.
    *
    * @example
    * ```typescript
    * const status = await client.dynamicAgentStatus.get('setup_123');
    * console.log('Status:', status.processingState.status);
    * console.log('Progress:', status.processingState.progressPercentage);
+   *
+   * // Access web agent specific properties
+   * if ('integrationSnippets' in status && status.integrationSnippets) {
+   *   console.log('Snippets:', status.integrationSnippets);
+   * }
+   *
+   * // Access phone agent specific properties
+   * if ('phoneNumber' in status && status.phoneNumber) {
+   *   console.log('Phone:', status.phoneNumber);
+   * }
    * ```
    */
-  public async get(id: string): Promise<DynamicAgentSetupResult> {
-    return this.http.get<DynamicAgentSetupResult>(`${this.resource_path}/${id}`);
+  public async get(id: string): Promise<DynamicAgentSetupResult | DynamicWebAgentSetupResult | DynamicPhoneAgentSetupResult> {
+    return this.http.get<DynamicAgentSetupResult | DynamicWebAgentSetupResult | DynamicPhoneAgentSetupResult>(`${this.resource_path}/${id}`);
   }
 
   /**
@@ -122,7 +138,7 @@ export class DynamicAgentStatusResource {
    *
    * @param id - Dynamic agent setup ID
    * @param options - Polling configuration options
-   * @returns Promise resolving to the final setup result when completed or failed
+   * @returns Promise resolving to the final setup result (base, web, or phone agent type)
    *
    * @throws {@link PollTimeoutError} - When polling times out before completion
    * @throws {@link WiilAPIError} - When the setup ID is not found or API returns an error
@@ -133,25 +149,32 @@ export class DynamicAgentStatusResource {
    * 'completed' or 'failed'. If the timeout is reached before completion, a
    * PollTimeoutError is thrown containing the last known state.
    *
+   * The returned type depends on the agent type that was created. Use property
+   * checking to narrow the type and access specialized properties.
+   *
    * @example
    * ```typescript
    * try {
    *   const result = await client.dynamicAgentStatus.poll('setup_123', {
-   *     interval: 5000, // Default to 5 seconds
-   *     timeout: 120000, // Default to 2 minutes
+   *     interval: 5000,
+   *     timeout: 120000,
    *     onProgress: (state) => {
    *       console.log(`Progress: ${state.progressPercentage}%`);
-   *       if (state.message) {
-   *         console.log(`Status: ${state.message}`);
-   *       }
    *     }
    *   });
    *
    *   if (result.success) {
-   *     console.log('Setup completed successfully');
    *     console.log('Agent ID:', result.agentConfigurationId);
-   *   } else {
-   *     console.error('Setup failed:', result.errorMessage);
+   *
+   *     // Web agent: access integration snippets
+   *     if ('integrationSnippets' in result && result.integrationSnippets) {
+   *       console.log('Snippets:', result.integrationSnippets);
+   *     }
+   *
+   *     // Phone agent: access phone number
+   *     if ('phoneNumber' in result && result.phoneNumber) {
+   *       console.log('Phone:', result.phoneNumber);
+   *     }
    *   }
    * } catch (error) {
    *   if (error instanceof PollTimeoutError) {
@@ -163,7 +186,7 @@ export class DynamicAgentStatusResource {
   public async poll(
     id: string,
     options?: PollOptions
-  ): Promise<DynamicAgentSetupResult> {
+  ): Promise<DynamicAgentSetupResult | DynamicWebAgentSetupResult | DynamicPhoneAgentSetupResult> {
     const interval = options?.interval ?? 5000; // Default to 5 seconds
     const timeout = options?.timeout ?? 120000; // Default to 2 minutes
     const onProgress = options?.onProgress;
