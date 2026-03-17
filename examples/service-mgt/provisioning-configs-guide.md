@@ -130,6 +130,73 @@ console.log('Translation chain created:', translationChain.id);
 console.log('Chain name:', translationChain.chainName);
 ```
 
+## Get Translation Chain
+
+### Get by ID
+
+```typescript
+const chain = await client.provisioningConfigs.get('chain_123');
+
+console.log('Chain:', chain.chainName);
+console.log('STT Model:', chain.sttConfig.modelId);
+console.log('Processing Model:', chain.processingModelId);
+console.log('TTS Model:', chain.ttsConfig.modelId);
+```
+
+### Get by Chain Name
+
+```typescript
+const chain = await client.provisioningConfigs.getByChainName('english-spanish-translation');
+
+console.log('Found chain:', chain.id);
+```
+
+## Update Translation Chain
+
+```typescript
+const updated = await client.provisioningConfigs.update({
+  id: 'chain_123',
+  description: 'Updated translation chain description',
+  processingConfig: {
+    providerType: SupportedProprietor.OPENAI,
+    providerModelId: 'gpt-4.1-mini'
+  }
+});
+
+console.log('Updated chain:', updated.id);
+console.log('New description:', updated.description);
+```
+
+## Delete Translation Chain
+
+```typescript
+const deleted = await client.provisioningConfigs.delete('chain_123');
+
+if (deleted) {
+  console.log('Translation chain deleted successfully');
+}
+```
+
+## List Translation Chains
+
+```typescript
+// List all translation chains
+const result = await client.provisioningConfigs.list();
+
+console.log('Total chains:', result.meta.totalCount);
+result.data.forEach(chain => {
+  console.log(`- ${chain.chainName} (${chain.id})`);
+});
+
+// With pagination
+const pagedResult = await client.provisioningConfigs.list({
+  page: 1,
+  pageSize: 10
+});
+
+console.log(`Page ${pagedResult.meta.page} of ${pagedResult.meta.totalPages}`);
+```
+
 ## Voice Configuration
 
 ### STT Configuration (Source Language)

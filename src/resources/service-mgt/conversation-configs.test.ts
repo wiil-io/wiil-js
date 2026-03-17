@@ -42,7 +42,7 @@ describe('ConversationConfigurationsResource', () => {
       };
 
       nock(BASE_URL)
-        .get('/cconversation-configurations/conv_123')
+        .get('/conversation-configurations/conv_123')
         .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
@@ -59,7 +59,7 @@ describe('ConversationConfigurationsResource', () => {
 
     it('should throw API error when conversation configuration not found', async () => {
       nock(BASE_URL)
-        .get('/cconversation-configurations/invalid_id')
+        .get('/conversation-configurations/invalid_id')
         .reply(404, {
           success: false,
           error: { code: 'NOT_FOUND', message: 'Conversation configuration not found' },
@@ -116,7 +116,7 @@ describe('ConversationConfigurationsResource', () => {
       };
 
       nock(BASE_URL)
-        .get('/cconversation-configurations')
+        .get('/conversation-configurations')
         .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,

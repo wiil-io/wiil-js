@@ -7,11 +7,15 @@ import z from 'zod';
 
 /**
  * Contact information for OTT configuration requests.
+ * Either email or phone must be provided.
  */
 export const OttContactInfoSchema = z.object({
   email: z.email().optional().describe('Contact email address.'),
   phone: z.string().optional().describe('Contact phone number.'),
-});
+}).refine(
+  (data) => data.email || data.phone,
+  { message: 'Either email or phone must be provided' }
+);
 
 /**
  * Request payload for fetching OTT connection configuration.
