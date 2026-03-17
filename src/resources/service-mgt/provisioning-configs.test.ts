@@ -69,13 +69,13 @@ describe('ProvisioningConfigurationsResource', () => {
 
       // Mock model validation calls
       nock(BASE_URL)
-        .get('/supports/Deepgram/nova-2')
+        .get('/support-models/supports/Deepgram/nova-2')
         .reply(200, { success: true, data: true, metadata: { timestamp: Date.now(), version: 'v1' } });
       nock(BASE_URL)
-        .get('/supports/OpenAI/gpt-4o-mini')
+        .get('/support-models/supports/OpenAI/gpt-4o-mini')
         .reply(200, { success: true, data: true, metadata: { timestamp: Date.now(), version: 'v1' } });
       nock(BASE_URL)
-        .get('/supports/ElevenLabs/eleven_multilingual_v2')
+        .get('/support-models/supports/ElevenLabs/eleven_multilingual_v2')
         .reply(200, { success: true, data: true, metadata: { timestamp: Date.now(), version: 'v1' } });
 
       nock(BASE_URL)
@@ -217,7 +217,7 @@ describe('ProvisioningConfigurationsResource', () => {
 
       // Mock model validation call for processing config
       nock(BASE_URL)
-        .get('/supports/OpenAI/gpt-4.1-mini')
+        .get('/support-models/supports/OpenAI/gpt-4.1-mini')
         .reply(200, { success: true, data: true, metadata: { timestamp: Date.now(), version: 'v1' } });
 
       nock(BASE_URL)

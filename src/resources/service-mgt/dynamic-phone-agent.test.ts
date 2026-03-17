@@ -102,12 +102,12 @@ describe('DynamicPhoneAgentResource', () => {
 
       // Mock model validation endpoints
       nock(BASE_URL)
-        .get('/supports/Deepgram/nova-2')
+        .get('/support-models/supports/Deepgram/nova-2')
         .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, { success: true, data: true, metadata: { timestamp: Date.now(), version: 'v1' } });
 
       nock(BASE_URL)
-        .get('/supports/ElevenLabs/eleven_turbo_v2')
+        .get('/support-models/supports/ElevenLabs/eleven_turbo_v2')
         .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, { success: true, data: true, metadata: { timestamp: Date.now(), version: 'v1' } });
 
@@ -187,7 +187,7 @@ describe('DynamicPhoneAgentResource', () => {
 
       // Mock model validation endpoint
       nock(BASE_URL)
-        .get('/supports/Google/chirp')
+        .get('/support-models/supports/Google/chirp')
         .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, { success: true, data: true, metadata: { timestamp: Date.now(), version: 'v1' } });
 

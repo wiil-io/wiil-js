@@ -235,7 +235,7 @@ export class ProvisioningConfigurationsResource {
     modelType: string
   ): Promise<void> {
     const isSupported = await this.http.get<boolean>(
-      `/supports/${providerType}/${providerModelId}`
+      `/support-models/supports/${providerType}/${providerModelId}`
     );
 
     if (!isSupported) {
