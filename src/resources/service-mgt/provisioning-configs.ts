@@ -138,7 +138,7 @@ export class ProvisioningConfigurationsResource {
     );
 
     return this.http.patch<UpdateTranslationChainConfig, TranslationChainConfig>(
-      this.resource_path,
+      `${this.resource_path}/${data.id}`,
       data,
       UpdateTranslationChainConfigSchema
     );
