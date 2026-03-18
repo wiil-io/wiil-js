@@ -5,14 +5,14 @@ This guide covers sending outbound messages using the WIIL Platform JS SDK. The 
 ## Quick Start
 
 ```typescript
-import { WiilClient } from 'wiil-js';
+import { WiilService } from 'wiil-js';
 
-const client = new WiilClient({
+const service = new WiilService({
   apiKey: 'your-api-key',
 });
 
 // Send an SMS
-const sms = await client.messaging.sendSms({
+const sms = await service.messaging.sendSms({
   to: '+12125551234',
   body: 'Your appointment is confirmed for tomorrow at 3 PM.',
 });
@@ -25,7 +25,7 @@ console.log('SMS sent:', sms.id);
 Initiate an AI-powered outbound phone call:
 
 ```typescript
-const call = await client.messaging.requestCall({
+const call = await service.messaging.requestCall({
   to: '+12125551234',
   from: '+12125559999',
   agentConfigurationId: 'agent_456',
@@ -39,7 +39,7 @@ console.log('Status:', call.status);
 ### Scheduled Call with Calling Hours
 
 ```typescript
-const scheduledCall = await client.messaging.requestCall({
+const scheduledCall = await service.messaging.requestCall({
   to: '+12125551234',
   from: '+12125559999',
   agentConfigurationId: 'agent_456',
@@ -60,7 +60,7 @@ const scheduledCall = await client.messaging.requestCall({
 Send a text message with optional template variables:
 
 ```typescript
-const sms = await client.messaging.sendSms({
+const sms = await service.messaging.sendSms({
   to: '+12125551234',
   body: 'Hi {{firstName}}, your code is {{code}}.',
   variables: {
@@ -75,7 +75,7 @@ console.log('SMS sent:', sms.id);
 ### Scheduled SMS
 
 ```typescript
-const scheduledSms = await client.messaging.sendSms({
+const scheduledSms = await service.messaging.sendSms({
   to: '+12125551234',
   body: 'Reminder: Your appointment is in 1 hour.',
   scheduledAt: Date.now() + 3600000,
@@ -87,7 +87,7 @@ const scheduledSms = await client.messaging.sendSms({
 Send an email with HTML content:
 
 ```typescript
-const email = await client.messaging.sendEmail({
+const email = await service.messaging.sendEmail({
   to: [{ email: 'customer@example.com', name: 'John Smith' }],
   subject: 'Order Confirmation - #{{orderId}}',
   bodyHtml: '<h1>Thank you, {{name}}!</h1><p>Your order has been confirmed.</p>',
@@ -107,7 +107,7 @@ import * as fs from 'fs';
 
 const pdfContent = fs.readFileSync('invoice.pdf').toString('base64');
 
-const email = await client.messaging.sendEmail({
+const email = await service.messaging.sendEmail({
   to: [{ email: 'customer@example.com', name: 'Customer' }],
   cc: [{ email: 'sales@company.com' }],
   replyTo: 'support@company.com',
@@ -135,22 +135,22 @@ const email = await client.messaging.sendEmail({
 ## Complete Example
 
 ```typescript
-import { WiilClient } from 'wiil-js';
+import { WiilService } from 'wiil-js';
 
-const client = new WiilClient({
+const service = new WiilService({
   apiKey: process.env.WIIL_API_KEY!,
 });
 
 async function sendNotifications(customerId: string, appointmentTime: string) {
   // Send confirmation SMS
-  const sms = await client.messaging.sendSms({
+  const sms = await service.messaging.sendSms({
     to: '+12125551234',
     body: `Your appointment is confirmed for ${appointmentTime}.`,
   });
   console.log('SMS sent:', sms.id);
 
   // Send confirmation email
-  const email = await client.messaging.sendEmail({
+  const email = await service.messaging.sendEmail({
     to: [{ email: 'customer@example.com' }],
     subject: 'Appointment Confirmed',
     bodyHtml: `<p>Your appointment is confirmed for <strong>${appointmentTime}</strong>.</p>`,
@@ -159,7 +159,7 @@ async function sendNotifications(customerId: string, appointmentTime: string) {
 
   // Schedule reminder call 1 hour before
   const reminderTime = new Date(appointmentTime).getTime() - 3600000;
-  const call = await client.messaging.requestCall({
+  const call = await service.messaging.requestCall({
     to: '+12125551234',
     from: '+12125559999',
     agentConfigurationId: 'reminder_agent',

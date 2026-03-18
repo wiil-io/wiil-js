@@ -1,6 +1,6 @@
 /**
  * @fileoverview Extended WIIL SDK client with OTT default base URL.
- * @module client/WillService
+ * @module client/WiilService
  */
 
 import { AxiosRequestConfig } from 'axios';
@@ -13,13 +13,13 @@ import { HttpClient } from './HttpClient';
 import { WiilClientConfig } from './types';
 
 /**
- * Configuration options for {@link WillService}.
+ * Configuration options for {@link WiilService}.
  *
  * @remarks
  * Uses the same options as {@link WiilClientConfig}, but defaults `baseUrl`
  * to `https://ott.wiil.io` when omitted for OTT-based services.
  */
-export type WillServiceConfig = Omit<WiilClientConfig, 'baseUrl'> & {
+export type WiilServiceConfig = Omit<WiilClientConfig, 'baseUrl'> & {
   /**
    * Optional override for the OTT API base URL.
    *
@@ -42,10 +42,10 @@ const DEFAULT_TIMEOUT = 30000;
  * Service-focused WIIL client for OTT endpoints.
  *
  * @remarks
- * `WillService` is an independent implementation that uses {@link HttpClient}
+ * `WiilService` is an independent implementation that uses {@link HttpClient}
  * directly for service workflows and defaults to `https://ott.wiil.io`.
  */
-export class WillService {
+export class WiilService {
   private readonly http: HttpClient;
   private readonly apiHttp: HttpClient;
 
@@ -70,11 +70,11 @@ export class WillService {
   public readonly config: Required<WiilClientConfig>;
 
   /**
-   * Creates a new WillService instance.
+   * Creates a new WiilService instance.
    *
    * @param config - Service configuration
    */
-  constructor(config: WillServiceConfig) {
+  constructor(config: WiilServiceConfig) {
     this.validateConfig(config);
 
     this.config = {
@@ -153,7 +153,7 @@ export class WillService {
   /**
    * Validates the service configuration.
    */
-  private validateConfig(config: WillServiceConfig): void {
+  private validateConfig(config: WiilServiceConfig): void {
     if (!config.apiKey) {
       throw new WiilConfigurationError(
         'API key is required. Please provide a valid API key in the configuration.'

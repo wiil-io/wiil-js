@@ -31,10 +31,10 @@
 
 // Main client
 export { WiilClient } from './client/WiilClient';
-export { WillService } from './client/WillService';
+export { WiilService } from './client/WiilService';
 
 // Configuration types
-export type { WillServiceConfig } from './client/WillService';
+export type { WiilServiceConfig } from './client/WiilService';
 export type { WiilClientConfig, APIResponse, APIErrorResponse } from './client/types';
 
 // Service layer
