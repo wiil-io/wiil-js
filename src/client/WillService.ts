@@ -6,6 +6,7 @@
 import { AxiosRequestConfig } from 'axios';
 import { ZodType } from 'zod';
 import { WiilConfigurationError } from '../errors/WiilError';
+import { MessagingService } from '../services/messaging';
 import { OttService } from '../services/ott';
 import { TranslationService } from '../services/translation';
 import { HttpClient } from './HttpClient';
@@ -16,7 +17,7 @@ import { WiilClientConfig } from './types';
  *
  * @remarks
  * Uses the same options as {@link WiilClientConfig}, but defaults `baseUrl`
- * to `https://ott.wiil.io` when omitted.
+ * to `https://ott.wiil.io` when omitted for OTT-based services.
  */
 export type WillServiceConfig = Omit<WiilClientConfig, 'baseUrl'> & {
   /**
@@ -25,9 +26,16 @@ export type WillServiceConfig = Omit<WiilClientConfig, 'baseUrl'> & {
    * @defaultValue 'https://ott.wiil.io'
    */
   baseUrl?: string;
+  /**
+   * Optional override for API v1 endpoints used by messaging.
+   *
+   * @defaultValue 'https://api.wiil.io/v1'
+   */
+  apiBaseUrl?: string;
 };
 
 const DEFAULT_OTT_BASE_URL = 'https://ott.wiil.io';
+const DEFAULT_API_BASE_URL = 'https://api.wiil.io/v1';
 const DEFAULT_TIMEOUT = 30000;
 
 /**
@@ -39,6 +47,7 @@ const DEFAULT_TIMEOUT = 30000;
  */
 export class WillService {
   private readonly http: HttpClient;
+  private readonly apiHttp: HttpClient;
 
   /**
    * Translation service operations.
@@ -49,6 +58,11 @@ export class WillService {
    * OTT connection configuration operations.
    */
   public readonly ott: OttService;
+
+  /**
+   * Messaging service operations.
+   */
+  public readonly messaging: MessagingService;
 
   /**
    * Resolved service configuration.
@@ -70,8 +84,14 @@ export class WillService {
     };
 
     this.http = new HttpClient(this.config);
+    this.apiHttp = new HttpClient({
+      apiKey: this.config.apiKey,
+      baseUrl: config.apiBaseUrl ?? DEFAULT_API_BASE_URL,
+      timeout: this.config.timeout,
+    });
     this.translation = new TranslationService(this.http);
     this.ott = new OttService(this.http);
+    this.messaging = new MessagingService(this.apiHttp);
   }
 
   /**
@@ -152,6 +172,16 @@ export class WillService {
       } catch {
         throw new WiilConfigurationError(
           `Invalid base URL: ${config.baseUrl}. Please provide a valid URL.`
+        );
+      }
+    }
+
+    if (config.apiBaseUrl !== undefined) {
+      try {
+        new URL(config.apiBaseUrl);
+      } catch {
+        throw new WiilConfigurationError(
+          `Invalid API base URL: ${config.apiBaseUrl}. Please provide a valid URL.`
         );
       }
     }

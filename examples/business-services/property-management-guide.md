@@ -13,7 +13,7 @@ const client = new WiilClient({
 
 // Create a property category
 const category = await client.propertyConfig.createCategory({
-  organizationId: 'org_123',
+
   name: 'Luxury Homes',
   propertyType: PropertyType.RESIDENTIAL,
   isDefault: false,
@@ -21,7 +21,7 @@ const category = await client.propertyConfig.createCategory({
 
 // Create a property address
 const address = await client.propertyConfig.createAddress({
-  organizationId: 'org_123',
+
   street: '123 Ocean View Drive',
   city: 'Miami',
   state: 'FL',
@@ -32,7 +32,7 @@ const address = await client.propertyConfig.createAddress({
 
 // Create a property listing
 const property = await client.propertyConfig.create({
-  organizationId: 'org_123',
+
   categoryId: category.id,
   addressId: address.id,
   title: 'Stunning Oceanfront Villa',
@@ -86,7 +86,7 @@ enum PropertyType {
 
 ```typescript
 const category = await client.propertyConfig.createCategory({
-  organizationId: 'org_123',
+
   name: 'Waterfront Properties',
   description: 'Properties with water access or views',
   propertyType: PropertyType.RESIDENTIAL,
@@ -167,7 +167,7 @@ Property addresses are standalone entities that can be verified and associated w
 
 ```typescript
 const address = await client.propertyConfig.createAddress({
-  organizationId: 'org_123',
+
   street: '456 Park Avenue',
   unit: 'PH-1',
   city: 'New York',
@@ -364,7 +364,7 @@ enum RentalPeriod {
 
 ```typescript
 const property = await client.propertyConfig.create({
-  organizationId: 'org_123',
+
   categoryId: 'cat_luxury',
   addressId: 'addr_123',
   title: 'Modern Downtown Condo',
@@ -403,7 +403,7 @@ console.log('Property created:', property.id);
 
 ```typescript
 const rental = await client.propertyConfig.create({
-  organizationId: 'org_123',
+
   categoryId: 'cat_apartments',
   addressId: 'addr_456',
   title: 'Cozy Studio Apartment',
@@ -436,7 +436,7 @@ console.log('Rental created:', rental.id);
 
 ```typescript
 const commercial = await client.propertyConfig.create({
-  organizationId: 'org_123',
+
   categoryId: 'cat_commercial',
   addressId: 'addr_789',
   title: 'Prime Retail Space',
@@ -572,19 +572,19 @@ Create up to 50 property categories in a single request:
 ```typescript
 const categories = await client.propertyConfig.createCategoryBatch([
   {
-    organizationId: 'org_123',
+  
     name: 'Luxury Homes',
     propertyType: PropertyType.RESIDENTIAL,
     displayOrder: 1,
   },
   {
-    organizationId: 'org_123',
+  
     name: 'Waterfront Properties',
     propertyType: PropertyType.RESIDENTIAL,
     displayOrder: 2,
   },
   {
-    organizationId: 'org_123',
+  
     name: 'Commercial Offices',
     propertyType: PropertyType.COMMERCIAL,
     displayOrder: 3,
@@ -601,7 +601,7 @@ Create up to 50 property addresses in a single request:
 ```typescript
 const addresses = await client.propertyConfig.createAddressBatch([
   {
-    organizationId: 'org_123',
+  
     street: '123 Ocean Drive',
     city: 'Miami',
     state: 'FL',
@@ -609,7 +609,7 @@ const addresses = await client.propertyConfig.createAddressBatch([
     country: 'USA',
   },
   {
-    organizationId: 'org_123',
+  
     street: '456 Park Avenue',
     city: 'New York',
     state: 'NY',
@@ -617,7 +617,7 @@ const addresses = await client.propertyConfig.createAddressBatch([
     country: 'USA',
   },
   {
-    organizationId: 'org_123',
+  
     street: '789 Rodeo Drive',
     city: 'Beverly Hills',
     state: 'CA',
@@ -636,7 +636,7 @@ Create up to 50 properties in a single request:
 ```typescript
 const properties = await client.propertyConfig.createBatch([
   {
-    organizationId: 'org_123',
+  
     categoryId: 'cat_luxury',
     addressId: 'addr_001',
     title: 'Oceanfront Villa',
@@ -648,7 +648,7 @@ const properties = await client.propertyConfig.createBatch([
     isActive: true,
   },
   {
-    organizationId: 'org_123',
+  
     categoryId: 'cat_luxury',
     addressId: 'addr_002',
     title: 'Penthouse Suite',
@@ -749,10 +749,10 @@ enum PropertyInquiryStatus {
 import { PropertyInquiryType, PreferredContactMethod } from 'wiil-js';
 
 const inquiry = await client.propertyInquiries.create({
-  organizationId: 'org_123',
+
   propertyId: 'prop_456',
   customer: {
-    organizationId: 'org_123',
+  
     firstName: 'John',
     lastName: 'Smith',
     email: 'john.smith@example.com',
@@ -777,11 +777,11 @@ console.log('Status:', inquiry.status);
 
 ```typescript
 const offer = await client.propertyInquiries.create({
-  organizationId: 'org_123',
+
   propertyId: 'prop_789',
   customerId: 'cust_existing',
   customer: {
-    organizationId: 'org_123',
+  
     firstName: 'Jane',
     lastName: 'Doe',
     email: 'jane.doe@example.com',
@@ -943,7 +943,7 @@ async function realEstateWorkflow() {
 
   // 1. Create property categories
   const luxuryCategory = await client.propertyConfig.createCategory({
-    organizationId: 'org_123',
+  
     name: 'Luxury Homes',
     description: 'Premium properties over $1M',
     propertyType: PropertyType.RESIDENTIAL,
@@ -955,7 +955,7 @@ async function realEstateWorkflow() {
 
   // 2. Create property address
   const address = await client.propertyConfig.createAddress({
-    organizationId: 'org_123',
+  
     street: '100 Billionaire Row',
     city: 'Palm Beach',
     state: 'FL',
@@ -977,7 +977,7 @@ async function realEstateWorkflow() {
 
   // 4. Create property listing
   const property = await client.propertyConfig.create({
-    organizationId: 'org_123',
+  
     categoryId: luxuryCategory.id,
     addressId: address.id,
     title: 'Oceanfront Estate with Private Beach',
@@ -1030,10 +1030,10 @@ async function realEstateWorkflow() {
 
   // 5. Receive inquiry from interested buyer
   const inquiry = await client.propertyInquiries.create({
-    organizationId: 'org_123',
+  
     propertyId: property.id,
     customer: {
-      organizationId: 'org_123',
+    
       firstName: 'Richard',
       lastName: 'Branson',
       email: 'richard@example.com',
@@ -1080,7 +1080,7 @@ async function realEstateWorkflow() {
 
   // 8. Client makes an offer
   const offerInquiry = await client.propertyInquiries.create({
-    organizationId: 'org_123',
+  
     propertyId: property.id,
     customerId: inquiry.customerId,
     customer: inquiry.customer,
@@ -1247,7 +1247,7 @@ Always include customer details:
 const inquiry = await client.propertyInquiries.create({
   propertyId: 'prop_123',
   customer: {
-    organizationId: 'org_123',
+  
     firstName: 'John',
     lastName: 'Doe',
     email: 'john@example.com',
