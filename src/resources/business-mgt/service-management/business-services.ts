@@ -9,12 +9,12 @@ import {
   CreateBusinessServiceSchema,
   UpdateBusinessService,
   UpdateBusinessServiceSchema,
-  ServiceQRCode,
+  BusinessServiceCatalog,
   PaginatedResultType,
   PaginationRequest,
 } from 'wiil-core-js';
-import { HttpClient } from '../../client/HttpClient';
-import { WiilValidationError } from '../../errors/WiilError';
+import { HttpClient } from '../../../client/HttpClient';
+import { WiilValidationError } from '../../../errors/WiilError';
 
 const BATCH_LIMIT = 50;
 
@@ -56,8 +56,8 @@ const BATCH_LIMIT = 50;
  *   pageSize: 20
  * });
  *
- * // Generate QR code for appointments
- * const qrCode = await client.businessServices.generateQRCode('service_123');
+ * // Get service catalog
+ * const catalog = await client.businessServices.getCatalog();
  *
  * // Delete a business service
  * const deleted = await client.businessServices.delete('service_123');
@@ -230,36 +230,30 @@ export class BusinessServicesResource {
   }
 
   /**
-   * Generates a QR code for service appointment booking.
+   * Retrieves the complete service catalog organized by categories.
    *
-   * @param serviceId - Optional specific service ID for direct appointment booking
-   * @returns Promise resolving to QR code data
+   * @returns Promise resolving to the service catalog with categories and services
    *
    * @throws {@link WiilAPIError} - When the API returns an error
    * @throws {@link WiilNetworkError} - When network communication fails
    *
    * @remarks
-   * If serviceId is provided, the QR code will link directly to booking that specific service.
-   * If serviceId is omitted, the QR code will link to a general service selection page.
+   * Returns all service categories with their associated business services.
+   * Useful for displaying a structured service menu to customers.
    *
    * @example
    * ```typescript
-   * // Generate QR code for specific service
-   * const qrCode = await client.businessServices.generateQRCode('service_123');
-   * console.log('QR Code URL:', qrCode.url);
-   * console.log('QR Code Data:', qrCode.qrCodeData);
-   *
-   * // Generate general service QR code
-   * const generalQR = await client.businessServices.generateQRCode();
+   * const catalog = await client.businessServices.getCatalog();
+   * catalog.forEach(entry => {
+   *   console.log('Category:', entry.serviceCategory.name);
+   *   entry.services.forEach(service => {
+   *     console.log(`  - ${service.name}: $${service.basePrice}`);
+   *   });
+   * });
    * ```
    */
-  public async generateQRCode(serviceId?: string): Promise<ServiceQRCode> {
-    const queryParams = new URLSearchParams();
-    if (serviceId) queryParams.append('serviceId', serviceId);
-
-    const path = `${this.resource_path}/qr-code/generate${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-
-    return this.http.get<ServiceQRCode>(path);
+  public async getCatalog(): Promise<BusinessServiceCatalog> {
+    return this.http.get<BusinessServiceCatalog>(`${this.resource_path}/catalog`);
   }
 
   /**

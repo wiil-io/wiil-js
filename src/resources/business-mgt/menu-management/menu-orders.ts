@@ -13,7 +13,7 @@ import {
   PaginationRequest,
   UpdateMenuOrderStatus,
 } from 'wiil-core-js';
-import { HttpClient } from '../../client/HttpClient';
+import { HttpClient } from '../../../client/HttpClient';
 
 /**
  * Resource class for managing menu orders in the WIIL Platform.

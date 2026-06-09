@@ -1,5 +1,5 @@
 /**
- * @fileoverview Extended WIIL SDK client with OTT default base URL.
+ * @fileoverview WIIL SDK client for outbound communication and real-time services.
  * @module client/WiilService
  */
 
@@ -14,10 +14,6 @@ import { WiilClientConfig } from './types';
 
 /**
  * Configuration options for {@link WiilService}.
- *
- * @remarks
- * Uses the same options as {@link WiilClientConfig}, but defaults `baseUrl`
- * to `https://ott.wiil.io` when omitted for OTT-based services.
  */
 export type WiilServiceConfig = Omit<WiilClientConfig, 'baseUrl'> & {
   /**
@@ -39,11 +35,28 @@ const DEFAULT_API_BASE_URL = 'https://api.wiil.io/v1';
 const DEFAULT_TIMEOUT = 30000;
 
 /**
- * Service-focused WIIL client for OTT endpoints.
+ * WIIL SDK client for outbound communication and real-time services.
  *
- * @remarks
- * `WiilService` is an independent implementation that uses {@link HttpClient}
- * directly for service workflows and defaults to `https://ott.wiil.io`.
+ * Provides access to messaging (calls, SMS, email), translation sessions,
+ * and OTT connection services for AI-powered customer interactions.
+ *
+ * @example
+ * ```typescript
+ * import { WiilService } from 'wiil-js';
+ *
+ * const service = new WiilService({
+ *   apiKey: 'your-api-key',
+ * });
+ *
+ * // Request an outbound call
+ * await service.messaging.requestCall({ ... });
+ *
+ * // Send an SMS
+ * await service.messaging.sendSms({ ... });
+ *
+ * // Send an email
+ * await service.messaging.sendEmail({ ... });
+ * ```
  */
 export class WiilService {
   private readonly http: HttpClient;

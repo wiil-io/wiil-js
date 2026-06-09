@@ -14,7 +14,7 @@ import {
   PaginatedResultType,
   PaginationRequest,
 } from 'wiil-core-js';
-import { HttpClient } from '../../client/HttpClient';
+import { HttpClient } from '../../../client/HttpClient';
 
 /**
  * Resource class for managing property inquiries in the WIIL Platform.

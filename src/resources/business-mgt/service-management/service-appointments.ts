@@ -7,10 +7,19 @@ import {
   ServiceAppointment,
   CreateServiceAppointment,
   CreateServiceAppointmentSchema,
+  UpdateServiceAppointment,
+  UpdateServiceAppointmentSchema,
+  AppointmentStatus,
+  ServiceSlotQueryRequest,
+  ServiceSlotQueryRequestSchema,
+  ServiceSlotQueryResponse,
   PaginatedResultType,
   PaginationRequest,
 } from 'wiil-core-js';
-import { HttpClient } from '../../client/HttpClient';
+import { HttpClient } from '../../../client/HttpClient';
+import { WiilValidationError } from '../../../errors/WiilError';
+
+const BATCH_LIMIT = 50;
 
 /**
  * Resource class for managing service appointments in the WIIL Platform.
@@ -116,20 +125,90 @@ export class ServiceAppointmentsResource {
   }
 
   /**
+   * Retrieves service appointments by provider.
+   *
+   * @param providerId - Provider ID (ServicePerson ID)
+   * @param params - Optional pagination parameters
+   * @returns Promise resolving to paginated list of service appointments
+   *
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   */
+  public async getByProvider(
+    providerId: string,
+    params?: Partial<PaginationRequest>
+  ): Promise<PaginatedResultType<ServiceAppointment>> {
+    const queryParams = new URLSearchParams();
+
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
+
+    const path = `${this.resource_path}/by-provider/${providerId}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+
+    return this.http.get<PaginatedResultType<ServiceAppointment>>(path);
+  }
+
+  /**
+   * Retrieves service appointments within a date range.
+   *
+   * @param startDate - Range start timestamp
+   * @param endDate - Range end timestamp
+   * @param params - Optional pagination parameters
+   * @returns Promise resolving to paginated list of service appointments
+   *
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   */
+  public async getByDateRange(
+    startDate: number,
+    endDate: number,
+    params?: Partial<PaginationRequest>
+  ): Promise<PaginatedResultType<ServiceAppointment>> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('startDate', startDate.toString());
+    queryParams.append('endDate', endDate.toString());
+
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
+
+    const path = `${this.resource_path}/by-date-range?${queryParams.toString()}`;
+
+    return this.http.get<PaginatedResultType<ServiceAppointment>>(path);
+  }
+
+  /**
+   * Updates an existing service appointment.
+   *
+   * @param data - Service appointment update data (must include id)
+   * @returns Promise resolving to the updated service appointment
+   *
+   * @throws {@link WiilValidationError} - When input validation fails
+   * @throws {@link WiilAPIError} - When the appointment is not found or API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   */
+  public async update(data: UpdateServiceAppointment): Promise<ServiceAppointment> {
+    return this.http.patch<UpdateServiceAppointment, ServiceAppointment>(
+      this.resource_path,
+      data,
+      UpdateServiceAppointmentSchema
+    );
+  }
+
+  /**
    * Updates appointment status.
    *
    * @param id - Appointment ID
-   * @param data - Status update data
+   * @param status - New appointment status
    * @returns Promise resolving to the updated appointment
    *
    * @throws {@link WiilValidationError} - When input validation fails
    * @throws {@link WiilAPIError} - When the appointment is not found or API returns an error
    * @throws {@link WiilNetworkError} - When network communication fails
    */
-  public async updateStatus(id: string, data: { status: string }): Promise<ServiceAppointment> {
-    return this.http.patch<{ status: string }, ServiceAppointment>(
+  public async updateStatus(id: string, status: AppointmentStatus): Promise<ServiceAppointment> {
+    return this.http.patch<{ status: AppointmentStatus }, ServiceAppointment>(
       `${this.resource_path}/${id}/status`,
-      data
+      { status }
     );
   }
 
@@ -154,7 +233,7 @@ export class ServiceAppointmentsResource {
    * Reschedules a service appointment.
    *
    * @param id - Appointment ID
-   * @param data - New scheduling data
+   * @param data - New scheduling data with timestamps
    * @returns Promise resolving to the rescheduled appointment
    *
    * @throws {@link WiilValidationError} - When input validation fails
@@ -163,9 +242,9 @@ export class ServiceAppointmentsResource {
    */
   public async reschedule(
     id: string,
-    data: { startTime: string; endTime: string; serviceId?: string }
+    data: { startTime: number; endTime?: number; businessServiceId?: string }
   ): Promise<ServiceAppointment> {
-    return this.http.post<{ startTime: string; endTime: string; serviceId?: string }, ServiceAppointment>(
+    return this.http.post<{ startTime: number; endTime?: number; businessServiceId?: string }, ServiceAppointment>(
       `${this.resource_path}/${id}/reschedule`,
       data
     );
@@ -204,5 +283,86 @@ export class ServiceAppointmentsResource {
     const path = `${this.resource_path}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
     return this.http.get<PaginatedResultType<ServiceAppointment>>(path);
+  }
+
+  /**
+   * Creates multiple service appointments in a single batch request.
+   *
+   * @param data - Array of service appointment data (maximum 50 items)
+   * @returns Promise resolving to paginated result of created service appointments
+   *
+   * @throws {@link WiilValidationError} - When input validation fails or batch limit exceeded
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   *
+   * @example
+   * ```typescript
+   * const appointments = await client.serviceAppointments.createBatch([
+   *   { businessServiceId: 'svc_1', customerId: 'cust_1', startTime: Date.now() },
+   *   { businessServiceId: 'svc_1', customerId: 'cust_2', startTime: Date.now() + 3600000 }
+   * ]);
+   * console.log(`Created ${appointments.data.length} appointments`);
+   * ```
+   */
+  public async createBatch(
+    data: CreateServiceAppointment[]
+  ): Promise<PaginatedResultType<ServiceAppointment>> {
+    if (data.length > BATCH_LIMIT) {
+      throw new WiilValidationError(
+        `Batch size exceeds maximum limit of ${BATCH_LIMIT}`,
+        [{ path: ['data'], message: `Array length ${data.length} exceeds maximum of ${BATCH_LIMIT}` }]
+      );
+    }
+
+    for (let i = 0; i < data.length; i++) {
+      const validation = CreateServiceAppointmentSchema.safeParse(data[i]);
+      if (!validation.success) {
+        throw new WiilValidationError(
+          `Validation failed for item at index ${i}`,
+          validation.error.issues
+        );
+      }
+    }
+
+    return this.http.post<CreateServiceAppointment[], PaginatedResultType<ServiceAppointment>>(
+      `${this.resource_path}/batch`,
+      data
+    );
+  }
+
+  /**
+   * Queries available appointment slots for a service.
+   *
+   * @param request - Slot query request parameters
+   * @returns Promise resolving to available appointment slots
+   *
+   * @throws {@link WiilValidationError} - When input validation fails
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   *
+   * @example
+   * ```typescript
+   * const slots = await client.serviceAppointments.queryAvailableSlots({
+   *   organizationId: 'org_123',
+   *   serviceId: 'svc_456',
+   *   localDate: '2024-03-15',
+   *   providerId: 'prov_789',
+   *   maxResults: 10
+   * });
+   *
+   * console.log(`Found ${slots.slots.length} available slots`);
+   * slots.slots.forEach(slot => {
+   *   console.log(`${slot.startTimeOfDay} - Provider: ${slot.providerId}`);
+   * });
+   * ```
+   */
+  public async queryAvailableSlots(
+    request: ServiceSlotQueryRequest
+  ): Promise<ServiceSlotQueryResponse> {
+    return this.http.post<ServiceSlotQueryRequest, ServiceSlotQueryResponse>(
+      `${this.resource_path}/query-slots`,
+      request,
+      ServiceSlotQueryRequestSchema
+    );
   }
 }

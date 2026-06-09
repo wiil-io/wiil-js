@@ -9,13 +9,44 @@ import { OrganizationsResource, ProjectsResource } from '../resources/account';
 import {
   BusinessServicesResource,
   CustomersResource,
+  CustomerGroupsResource,
+  ShippingAddressesResource,
   MenuOrdersResource,
   MenusResource,
+  MenuItemVariantsResource,
+  ModifiersResource,
+  MenuSetsResource,
+  MenuPricingRulesResource,
+  TaxRulesResource,
+  DiscountRulesResource,
   ProductOrdersResource,
   ProductsResource,
+  ProductVariantsResource,
+  ProductVariantAxesResource,
+  ProductAxisBindingsResource,
+  ProductSetsResource,
+  ProductPricingRulesResource,
   ReservationResourcesResource,
-  ReservationsResource,
+  ResourceCategoriesResource,
+  ResourceInstancesResource,
+  TableReservationsResource,
+  RoomReservationsResource,
+  RentalReservationsResource,
+  ReservationSettingsResource,
+  FloorPlansResource,
+  FloorPlanSectionsResource,
+  MaintenanceBlocksResource,
+  TableAssignmentsResource,
+  RoomAssignmentsResource,
+  RentalAssignmentsResource,
   ServiceAppointmentsResource,
+  ServiceCategoriesResource,
+  ServicePersonsResource,
+  ServiceProvidersResource,
+  ServicePricingRulesResource,
+  ServiceTimeOffsResource,
+  AppointmentAdditionalInfoResource,
+  AppointmentFieldConfigsResource,
   PropertyConfigResource,
   PropertyInquiryResource,
 } from '../resources/business-mgt';
@@ -35,6 +66,14 @@ import {
   DynamicWebAgentResource,
   DynamicAgentStatusResource,
 } from '../resources/service-mgt';
+import {
+  ConversationsResource,
+  OutboundCallsResource,
+  OutboundEmailsResource,
+  OutboundSmsResource,
+  OutboundTemplatesResource,
+  TranslationServicesResource,
+} from '../resources/conversation';
 import { WiilConfigurationError } from '../errors/WiilError';
 
 /**
@@ -127,6 +166,16 @@ export class WiilClient {
   public readonly customers: CustomersResource;
 
   /**
+   * Customer Groups resource for managing customer segmentation.
+   */
+  public readonly customerGroups: CustomerGroupsResource;
+
+  /**
+   * Shipping Addresses resource for managing customer delivery addresses.
+   */
+  public readonly shippingAddresses: ShippingAddressesResource;
+
+  /**
    * Menu Orders resource for managing menu-based orders.
    */
   public readonly menuOrders: MenuOrdersResource;
@@ -135,6 +184,69 @@ export class WiilClient {
    * Menus resource for managing restaurant/service menus.
    */
   public readonly menus: MenusResource;
+
+  /**
+   * Menu Item Variants resource for managing menu item size/option variants.
+   */
+  public readonly menuItemVariants: MenuItemVariantsResource;
+
+  /**
+   * Modifiers resource for managing modifier groups, options, and bindings.
+   */
+  public readonly modifiers: ModifiersResource;
+
+  /**
+   * Menu Sets resource for managing menu collections and time-based menus.
+   */
+  public readonly menuSets: MenuSetsResource;
+
+  /**
+   * Menu Pricing Rules resource for managing menu-specific discounts.
+   */
+  public readonly menuPricingRules: MenuPricingRulesResource;
+
+  /**
+   * Tax Rules resource for managing order tax configurations.
+   *
+   * @remarks
+   * Provides methods for creating, retrieving, updating, and listing tax rules.
+   * Tax rules define tax configurations including percentage and fixed taxes,
+   * compound taxes, and inclusive/exclusive calculations.
+   *
+   * @example
+   * ```typescript
+   * const taxRule = await client.taxRules.create({
+   *   name: 'State Sales Tax',
+   *   scope: 'ORDER',
+   *   rateType: 'PERCENTAGE',
+   *   rateValue: 8.25,
+   *   isInclusive: false
+   * });
+   * ```
+   */
+  public readonly taxRules: TaxRulesResource;
+
+  /**
+   * Discount Rules resource for managing order discount configurations.
+   *
+   * @remarks
+   * Provides methods for creating, retrieving, updating, and listing discount rules.
+   * Discount rules define discount configurations including percentage and fixed
+   * discounts, promo codes, customer segments, and usage limits.
+   *
+   * @example
+   * ```typescript
+   * const discount = await client.discountRules.create({
+   *   name: 'Summer Sale',
+   *   code: 'SUMMER20',
+   *   scope: 'ORDER',
+   *   type: 'PERCENTAGE',
+   *   value: 20,
+   *   isActive: true
+   * });
+   * ```
+   */
+  public readonly discountRules: DiscountRulesResource;
 
   /**
    * Product Orders resource for managing product-based orders.
@@ -147,19 +259,255 @@ export class WiilClient {
   public readonly products: ProductsResource;
 
   /**
+   * Product Variants resource for managing SKU-level product variants.
+   */
+  public readonly productVariants: ProductVariantsResource;
+
+  /**
+   * Product Variant Axes resource for managing variant dimensions (Size, Color, etc.).
+   */
+  public readonly productVariantAxes: ProductVariantAxesResource;
+
+  /**
+   * Product Axis Bindings resource for linking products to variant axes.
+   */
+  public readonly productAxisBindings: ProductAxisBindingsResource;
+
+  /**
+   * Product Sets resource for managing product bundles.
+   */
+  public readonly productSets: ProductSetsResource;
+
+  /**
+   * Product Pricing Rules resource for managing product promotions and discounts.
+   */
+  public readonly productPricingRules: ProductPricingRulesResource;
+
+  /**
    * Reservation Resources resource for managing bookable resources.
    */
   public readonly reservationResources: ReservationResourcesResource;
 
   /**
-   * Reservations resource for managing customer reservations.
+   * Resource Categories resource for managing reservation resource groupings.
    */
-  public readonly reservations: ReservationsResource;
+  public readonly resourceCategories: ResourceCategoriesResource;
+
+  /**
+   * Resource Instances resource for managing physical reservation units.
+   */
+  public readonly resourceInstances: ResourceInstancesResource;
+
+  /**
+   * Table Reservations resource for managing restaurant table bookings.
+   */
+  public readonly tableReservations: TableReservationsResource;
+
+  /**
+   * Room Reservations resource for managing lodging bookings.
+   */
+  public readonly roomReservations: RoomReservationsResource;
+
+  /**
+   * Rental Reservations resource for managing equipment rental bookings.
+   */
+  public readonly rentalReservations: RentalReservationsResource;
+
+  /**
+   * Reservation Settings resource for managing location-level reservation configurations.
+   *
+   * @remarks
+   * Provides methods for creating, retrieving, updating, and listing reservation
+   * settings. Settings define configurations for table, room, and rental reservations
+   * including durations, booking windows, and policies.
+   *
+   * @example
+   * ```typescript
+   * const settings = await client.reservationSettings.create({
+   *   locationId: 'loc_123',
+   *   supportTableReservations: true,
+   *   table: { defaultDurationMinutes: 90 }
+   * });
+   * ```
+   */
+  public readonly reservationSettings: ReservationSettingsResource;
+
+  /**
+   * Floor Plans resource for managing table layout canvases.
+   *
+   * @remarks
+   * Provides methods for creating, retrieving, updating, and listing floor plans.
+   * Floor plans define the coordinate space for section and table placement.
+   *
+   * @example
+   * ```typescript
+   * const floorPlan = await client.floorPlans.create({
+   *   locationId: 'loc_123',
+   *   name: 'Main Dining Room',
+   *   capacity: 80
+   * });
+   * ```
+   */
+  public readonly floorPlans: FloorPlansResource;
+
+  /**
+   * Floor Plan Sections resource for managing seating sections within floor plans.
+   *
+   * @remarks
+   * Provides methods for managing sections and table placements within floor plans,
+   * including position and rotation management.
+   *
+   * @example
+   * ```typescript
+   * const section = await client.floorPlanSections.create({
+   *   floorPlanId: 'fp_123',
+   *   name: 'Patio Section',
+   *   capacity: 20
+   * });
+   * ```
+   */
+  public readonly floorPlanSections: FloorPlanSectionsResource;
+
+  /**
+   * Maintenance Blocks resource for managing resource unavailability periods.
+   *
+   * @remarks
+   * Provides methods for creating, retrieving, updating, and listing maintenance
+   * blocks that mark resources as unavailable for specific time periods.
+   *
+   * @example
+   * ```typescript
+   * const block = await client.maintenanceBlocks.create({
+   *   resourceInstanceId: 'ri_123',
+   *   startTime: Date.now(),
+   *   endTime: Date.now() + 86400000,
+   *   reason: 'Scheduled maintenance'
+   * });
+   * ```
+   */
+  public readonly maintenanceBlocks: MaintenanceBlocksResource;
+
+  /**
+   * Table Assignments resource for managing table-to-reservation assignments.
+   *
+   * @remarks
+   * Provides methods for assigning, releasing, and tracking table assignments
+   * for restaurant reservations with support for soft and hard locks.
+   *
+   * @example
+   * ```typescript
+   * const assignment = await client.tableAssignments.create({
+   *   reservationId: 'res_123',
+   *   tableInstanceId: 'ti_456',
+   *   assignmentType: 'hard'
+   * });
+   * ```
+   */
+  public readonly tableAssignments: TableAssignmentsResource;
+
+  /**
+   * Room Assignments resource for managing room-to-reservation assignments.
+   *
+   * @remarks
+   * Provides methods for assigning, releasing, and tracking room assignments
+   * for lodging reservations with housekeeping notes support.
+   *
+   * @example
+   * ```typescript
+   * const assignment = await client.roomAssignments.create({
+   *   reservationId: 'res_123',
+   *   roomInstanceId: 'ri_456',
+   *   assignmentType: 'hard'
+   * });
+   * ```
+   */
+  public readonly roomAssignments: RoomAssignmentsResource;
+
+  /**
+   * Rental Assignments resource for managing rental-to-reservation assignments.
+   *
+   * @remarks
+   * Provides methods for assigning, releasing, and tracking rental assignments
+   * with condition tracking at pickup and return.
+   *
+   * @example
+   * ```typescript
+   * const assignment = await client.rentalAssignments.create({
+   *   reservationId: 'res_123',
+   *   rentalInstanceId: 'ri_456',
+   *   assignmentType: 'hard'
+   * });
+   * ```
+   */
+  public readonly rentalAssignments: RentalAssignmentsResource;
 
   /**
    * Service Appointments resource for managing service appointments.
    */
   public readonly serviceAppointments: ServiceAppointmentsResource;
+
+  /**
+   * Service Categories resource for managing service category groupings.
+   */
+  public readonly serviceCategories: ServiceCategoriesResource;
+
+  /**
+   * Service Persons resource for managing service providers/staff.
+   */
+  public readonly servicePersons: ServicePersonsResource;
+
+  /**
+   * Service Providers resource for managing service-to-provider assignments.
+   */
+  public readonly serviceProviders: ServiceProvidersResource;
+
+  /**
+   * Service Pricing Rules resource for managing service pricing adjustments.
+   */
+  public readonly servicePricingRules: ServicePricingRulesResource;
+
+  /**
+   * Service Time Offs resource for managing provider unavailability periods.
+   */
+  public readonly serviceTimeOffs: ServiceTimeOffsResource;
+
+  /**
+   * Appointment Additional Info resource for managing dynamic field values.
+   *
+   * @remarks
+   * Provides methods for creating, retrieving, updating, and listing appointment
+   * additional info records. These store custom field values captured during
+   * appointment booking.
+   *
+   * @example
+   * ```typescript
+   * const info = await client.appointmentAdditionalInfo.create({
+   *   appointmentId: 'apt_123',
+   *   customerId: 'cust_456',
+   *   data: { allergies: 'None', notes: 'First visit' }
+   * });
+   * ```
+   */
+  public readonly appointmentAdditionalInfo: AppointmentAdditionalInfoResource;
+
+  /**
+   * Appointment Field Configs resource for managing organization-level field configurations.
+   *
+   * @remarks
+   * Provides methods for creating, retrieving, updating, and listing appointment
+   * field configurations. These define reusable field libraries for appointment
+   * booking forms.
+   *
+   * @example
+   * ```typescript
+   * const config = await client.appointmentFieldConfigs.create({
+   *   fields: [{ fieldKey: 'allergies', fieldType: 'text', label: 'Allergies' }],
+   *   reuseDetails: true,
+   *   ensureEmail: true
+   * });
+   * ```
+   */
+  public readonly appointmentFieldConfigs: AppointmentFieldConfigsResource;
 
   /**
    * Property Configuration resource for managing property listings, categories, and addresses.
@@ -331,6 +679,113 @@ export class WiilClient {
    */
   public readonly dynamicAgentStatus: DynamicAgentStatusResource;
 
+  /**
+   * Conversations resource for managing conversation sessions.
+   *
+   * @remarks
+   * Provides methods for retrieving, updating, and listing conversations.
+   * Conversations represent interaction sessions between users and AI agents.
+   *
+   * @example
+   * ```typescript
+   * const conversation = await client.conversations.get('conv_123');
+   * const customerConvos = await client.conversations.getByCustomer('cust_123');
+   * ```
+   */
+  public readonly conversations: ConversationsResource;
+
+  /**
+   * Outbound Calls resource for managing AI-powered voice call requests.
+   *
+   * @remarks
+   * Provides methods for creating, scheduling, and managing outbound calls
+   * with retry logic and calling hours compliance.
+   *
+   * @example
+   * ```typescript
+   * const call = await client.outboundCalls.create({
+   *   to: '+14155551234',
+   *   from: '+14155555678',
+   *   agentConfigurationId: 'agent_123',
+   *   scheduleType: 'IMMEDIATE'
+   * });
+   * ```
+   */
+  public readonly outboundCalls: OutboundCallsResource;
+
+  /**
+   * Outbound Emails resource for managing email requests.
+   *
+   * @remarks
+   * Provides methods for creating, scheduling, and tracking email delivery
+   * with template support and retry logic.
+   *
+   * @example
+   * ```typescript
+   * const email = await client.outboundEmails.create({
+   *   to: [{ email: 'customer@example.com' }],
+   *   subject: 'Order Confirmation',
+   *   bodyHtml: '<h1>Thank you!</h1>'
+   * });
+   * ```
+   */
+  public readonly outboundEmails: OutboundEmailsResource;
+
+  /**
+   * Outbound SMS resource for managing SMS requests.
+   *
+   * @remarks
+   * Provides methods for creating, scheduling, and tracking SMS delivery
+   * with template support and retry logic.
+   *
+   * @example
+   * ```typescript
+   * const sms = await client.outboundSms.create({
+   *   to: '+14155551234',
+   *   body: 'Your appointment is confirmed.'
+   * });
+   * ```
+   */
+  public readonly outboundSms: OutboundSmsResource;
+
+  /**
+   * Outbound Templates resource for managing message templates.
+   *
+   * @remarks
+   * Provides methods for creating and managing email, SMS, and WhatsApp
+   * templates with variable substitution support.
+   *
+   * @example
+   * ```typescript
+   * const template = await client.outboundTemplates.createEmailTemplate({
+   *   name: 'Welcome',
+   *   code: 'welcome',
+   *   channel: 'EMAIL',
+   *   subjectTemplate: 'Welcome, {{name}}!',
+   *   bodyHtmlTemplate: '<h1>Hello {{name}}</h1>'
+   * });
+   * ```
+   */
+  public readonly outboundTemplates: OutboundTemplatesResource;
+
+  /**
+   * Translation Services resource for managing real-time translation sessions.
+   *
+   * @remarks
+   * Provides methods for initiating, managing, and tracking translation
+   * sessions for cross-language communication.
+   *
+   * @example
+   * ```typescript
+   * const config = await client.translationServices.initiate({
+   *   initiator_id: 'user_123',
+   *   initiator_language_code: 'en',
+   *   participant_language_code: 'es'
+   * });
+   * ```
+   */
+  public readonly translationServices: TranslationServicesResource;
+
   private readonly http: HttpClient;
 
   /**
@@ -375,13 +830,44 @@ export class WiilClient {
     // Business Management resources
     this.businessServices = new BusinessServicesResource(this.http);
     this.customers = new CustomersResource(this.http);
+    this.customerGroups = new CustomerGroupsResource(this.http);
+    this.shippingAddresses = new ShippingAddressesResource(this.http);
     this.menuOrders = new MenuOrdersResource(this.http);
     this.menus = new MenusResource(this.http);
+    this.menuItemVariants = new MenuItemVariantsResource(this.http);
+    this.modifiers = new ModifiersResource(this.http);
+    this.menuSets = new MenuSetsResource(this.http);
+    this.menuPricingRules = new MenuPricingRulesResource(this.http);
+    this.taxRules = new TaxRulesResource(this.http);
+    this.discountRules = new DiscountRulesResource(this.http);
     this.productOrders = new ProductOrdersResource(this.http);
     this.products = new ProductsResource(this.http);
+    this.productVariants = new ProductVariantsResource(this.http);
+    this.productVariantAxes = new ProductVariantAxesResource(this.http);
+    this.productAxisBindings = new ProductAxisBindingsResource(this.http);
+    this.productSets = new ProductSetsResource(this.http);
+    this.productPricingRules = new ProductPricingRulesResource(this.http);
     this.reservationResources = new ReservationResourcesResource(this.http);
-    this.reservations = new ReservationsResource(this.http);
+    this.resourceCategories = new ResourceCategoriesResource(this.http);
+    this.resourceInstances = new ResourceInstancesResource(this.http);
+    this.tableReservations = new TableReservationsResource(this.http);
+    this.roomReservations = new RoomReservationsResource(this.http);
+    this.rentalReservations = new RentalReservationsResource(this.http);
+    this.reservationSettings = new ReservationSettingsResource(this.http);
+    this.floorPlans = new FloorPlansResource(this.http);
+    this.floorPlanSections = new FloorPlanSectionsResource(this.http);
+    this.maintenanceBlocks = new MaintenanceBlocksResource(this.http);
+    this.tableAssignments = new TableAssignmentsResource(this.http);
+    this.roomAssignments = new RoomAssignmentsResource(this.http);
+    this.rentalAssignments = new RentalAssignmentsResource(this.http);
     this.serviceAppointments = new ServiceAppointmentsResource(this.http);
+    this.serviceCategories = new ServiceCategoriesResource(this.http);
+    this.servicePersons = new ServicePersonsResource(this.http);
+    this.serviceProviders = new ServiceProvidersResource(this.http);
+    this.servicePricingRules = new ServicePricingRulesResource(this.http);
+    this.serviceTimeOffs = new ServiceTimeOffsResource(this.http);
+    this.appointmentAdditionalInfo = new AppointmentAdditionalInfoResource(this.http);
+    this.appointmentFieldConfigs = new AppointmentFieldConfigsResource(this.http);
     this.propertyConfig = new PropertyConfigResource(this.http);
     this.propertyInquiries = new PropertyInquiryResource(this.http);
 
@@ -400,6 +886,14 @@ export class WiilClient {
     this.dynamicPhoneAgent = new DynamicPhoneAgentResource(this.http);
     this.dynamicWebAgent = new DynamicWebAgentResource(this.http);
     this.dynamicAgentStatus = new DynamicAgentStatusResource(this.http);
+
+    // Conversation resources
+    this.conversations = new ConversationsResource(this.http);
+    this.outboundCalls = new OutboundCallsResource(this.http);
+    this.outboundEmails = new OutboundEmailsResource(this.http);
+    this.outboundSms = new OutboundSmsResource(this.http);
+    this.outboundTemplates = new OutboundTemplatesResource(this.http);
+    this.translationServices = new TranslationServicesResource(this.http);
   }
 
   /**

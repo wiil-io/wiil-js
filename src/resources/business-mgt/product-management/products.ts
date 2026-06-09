@@ -17,8 +17,8 @@ import {
   PaginatedResultType,
   PaginationRequest,
 } from 'wiil-core-js';
-import { HttpClient } from '../../client/HttpClient';
-import { WiilValidationError } from '../../errors/WiilError';
+import { HttpClient } from '../../../client/HttpClient';
+import { WiilValidationError } from '../../../errors/WiilError';
 
 const CATEGORY_BATCH_LIMIT = 50;
 const PRODUCT_BATCH_LIMIT = 100;

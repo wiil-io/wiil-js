@@ -3,14 +3,10 @@
  * @module sdk/business-mgt
  */
 
-export * from './business-services';
-export * from './customers';
-export * from './menu-orders';
-export * from './menus';
-export * from './product-orders';
-export * from './products';
-export * from './reservation-resources';
-export * from './reservations';
-export * from './service-appointments';
-export * from './property-config';
-export * from './property-inquiry';
+export * from './customer-management';
+export * from './menu-management';
+export * from './pricing-rules';
+export * from './product-management';
+export * from './property-management';
+export * from './reservation-mgt';
+export * from './service-management';
