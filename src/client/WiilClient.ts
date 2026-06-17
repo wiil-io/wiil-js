@@ -67,7 +67,6 @@ import {
   DynamicAgentStatusResource,
 } from '../resources/service-mgt';
 import {
-  ConversationsResource,
   OutboundCallsResource,
   OutboundEmailsResource,
   OutboundSmsResource,
@@ -680,21 +679,6 @@ export class WiilClient {
   public readonly dynamicAgentStatus: DynamicAgentStatusResource;
 
   /**
-   * Conversations resource for managing conversation sessions.
-   *
-   * @remarks
-   * Provides methods for retrieving, updating, and listing conversations.
-   * Conversations represent interaction sessions between users and AI agents.
-   *
-   * @example
-   * ```typescript
-   * const conversation = await client.conversations.get('conv_123');
-   * const customerConvos = await client.conversations.getByCustomer('cust_123');
-   * ```
-   */
-  public readonly conversations: ConversationsResource;
-
-  /**
    * Outbound Calls resource for managing AI-powered voice call requests.
    *
    * @remarks
@@ -888,7 +872,6 @@ export class WiilClient {
     this.dynamicAgentStatus = new DynamicAgentStatusResource(this.http);
 
     // Conversation resources
-    this.conversations = new ConversationsResource(this.http);
     this.outboundCalls = new OutboundCallsResource(this.http);
     this.outboundEmails = new OutboundEmailsResource(this.http);
     this.outboundSms = new OutboundSmsResource(this.http);

@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import nock from 'nock';
-import { WiilClient } from '../../client/WiilClient';
+import { WiilClient } from '../../../client/WiilClient';
 import {
   PropertyCategory,
   PropertyAddress,
@@ -16,7 +16,7 @@ import {
   ListingStatus,
   RentalPeriod,
 } from 'wiil-core-js';
-import { WiilAPIError } from '../../errors/WiilError';
+import { WiilAPIError } from '../../../errors/WiilError';
 
 const BASE_URL = 'https://api.wiil.io/v1';
 const API_KEY = 'test-api-key';
@@ -573,12 +573,14 @@ describe('PropertyConfigResource', () => {
           rentalPriceCurrency: 'USD',
           priceNegotiable: true,
           features: {
-            bedrooms: 2,
-            bathrooms: 2,
-            squareFootage: 1200,
             parkingSpaces: 1,
             amenities: ['pool', 'gym', 'concierge'],
             utilities: ['gas', 'electric', 'water'],
+          },
+          residentialDetails: {
+            bedrooms: 2,
+            bathrooms: 2,
+            squareFootage: 1200,
             lotSizeUnit: 'sqft' as const,
           },
           images: ['https://example.com/image1.jpg', 'https://example.com/image2.jpg'],
@@ -603,12 +605,14 @@ describe('PropertyConfigResource', () => {
           rentalPriceCurrency: 'USD',
           priceNegotiable: true,
           features: {
-            bedrooms: 2,
-            bathrooms: 2,
-            squareFootage: 1200,
             parkingSpaces: 1,
             amenities: ['pool', 'gym', 'concierge'],
             utilities: ['gas', 'electric', 'water'],
+          },
+          residentialDetails: {
+            bedrooms: 2,
+            bathrooms: 2,
+            squareFootage: 1200,
             lotSizeUnit: 'sqft',
           },
           images: ['https://example.com/image1.jpg', 'https://example.com/image2.jpg'],
@@ -634,7 +638,7 @@ describe('PropertyConfigResource', () => {
         expect(result.id).toBe('property_123');
         expect(result.title).toBe('Beautiful Downtown Condo');
         expect(result.salePrice).toBe(450000);
-        expect(result.features?.bedrooms).toBe(2);
+        expect(result.residentialDetails?.bedrooms).toBe(2);
       });
 
       it('should create a rental property', async () => {
@@ -1127,11 +1131,13 @@ describe('PropertyConfigResource', () => {
         const updateData = {
           id: 'property_456',
           features: {
+            amenities: ['pool', 'gym', 'parking'],
+            utilities: [] as string[],
+          },
+          residentialDetails: {
             bedrooms: 3,
             bathrooms: 2.5,
             squareFootage: 1800,
-            amenities: ['pool', 'gym', 'parking'],
-            utilities: [] as string[],
             lotSizeUnit: 'sqft' as const,
           },
         };
@@ -1150,11 +1156,13 @@ describe('PropertyConfigResource', () => {
           rentalPriceCurrency: 'USD',
           priceNegotiable: false,
           features: {
+            amenities: ['pool', 'gym', 'parking'],
+            utilities: [],
+          },
+          residentialDetails: {
             bedrooms: 3,
             bathrooms: 2.5,
             squareFootage: 1800,
-            amenities: ['pool', 'gym', 'parking'],
-            utilities: [],
             lotSizeUnit: 'sqft',
           },
           furnished: false,
@@ -1177,8 +1185,8 @@ describe('PropertyConfigResource', () => {
 
         const result = await client.propertyConfig.update(updateData);
 
-        expect(result.features?.bedrooms).toBe(3);
-        expect(result.features?.squareFootage).toBe(1800);
+        expect(result.residentialDetails?.bedrooms).toBe(3);
+        expect(result.residentialDetails?.squareFootage).toBe(1800);
       });
     });
 

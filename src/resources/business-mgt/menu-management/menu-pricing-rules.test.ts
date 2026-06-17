@@ -29,10 +29,10 @@ describe('MenuPricingRulesResource', () => {
     it('should create a new menu pricing rule', async () => {
       const input = {
         name: 'Happy Hour 20% Off',
-        menuSetId: 'set_123',
         discountId: 'discount_456',
-        discountType: 'percentage' as const,
-        discountValue: 20,
+        condition: {
+          menuSetId: 'set_123',
+        },
         effectiveFrom: Date.now(),
         effectiveTo: Date.now() + 86400000,
         isActive: true,
@@ -41,10 +41,10 @@ describe('MenuPricingRulesResource', () => {
       const mockResponse: MenuPricingRule = {
         id: 'rule_123',
         name: 'Happy Hour 20% Off',
-        menuSetId: 'set_123',
         discountId: 'discount_456',
-        discountType: 'percentage',
-        discountValue: 20,
+        condition: {
+          menuSetId: 'set_123',
+        },
         effectiveFrom: Date.now(),
         effectiveTo: Date.now() + 86400000,
         isActive: true,
@@ -65,26 +65,28 @@ describe('MenuPricingRulesResource', () => {
 
       expect(result.id).toBe('rule_123');
       expect(result.name).toBe('Happy Hour 20% Off');
-      expect(result.discountType).toBe('percentage');
-      expect(result.discountValue).toBe(20);
+      expect(result.discountId).toBe('discount_456');
+      expect(result.condition.menuSetId).toBe('set_123');
       expect(result.isActive).toBe(true);
     });
 
-    it('should create a fixed amount discount rule', async () => {
+    it('should create a pricing rule with minimal fields', async () => {
       const input = {
         name: '$5 Off All Items',
-        menuSetId: 'set_789',
-        discountType: 'fixed' as const,
-        discountValue: 5.00,
+        discountId: 'discount_789',
+        condition: {
+          menuSetId: 'set_789',
+        },
         isActive: true,
       };
 
       const mockResponse: MenuPricingRule = {
         id: 'rule_456',
         name: '$5 Off All Items',
-        menuSetId: 'set_789',
-        discountType: 'fixed',
-        discountValue: 5.00,
+        discountId: 'discount_789',
+        condition: {
+          menuSetId: 'set_789',
+        },
         isActive: true,
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -102,8 +104,8 @@ describe('MenuPricingRulesResource', () => {
       const result = await client.menuPricingRules.create(input);
 
       expect(result.id).toBe('rule_456');
-      expect(result.discountType).toBe('fixed');
-      expect(result.discountValue).toBe(5.00);
+      expect(result.discountId).toBe('discount_789');
+      expect(result.condition.menuSetId).toBe('set_789');
     });
   });
 
@@ -112,9 +114,10 @@ describe('MenuPricingRulesResource', () => {
       const mockResponse: MenuPricingRule = {
         id: 'rule_123',
         name: 'Weekend Special',
-        menuSetId: 'set_123',
-        discountType: 'percentage',
-        discountValue: 15,
+        discountId: 'discount_123',
+        condition: {
+          menuSetId: 'set_123',
+        },
         isActive: true,
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -133,7 +136,7 @@ describe('MenuPricingRulesResource', () => {
 
       expect(result.id).toBe('rule_123');
       expect(result.name).toBe('Weekend Special');
-      expect(result.discountValue).toBe(15);
+      expect(result.discountId).toBe('discount_123');
     });
 
     it('should throw API error when pricing rule not found', async () => {
@@ -157,9 +160,10 @@ describe('MenuPricingRulesResource', () => {
         {
           id: 'rule_1',
           name: 'Morning Discount',
-          menuSetId: 'set_123',
-          discountType: 'percentage',
-          discountValue: 10,
+          discountId: 'discount_1',
+          condition: {
+            menuSetId: 'set_123',
+          },
           isActive: true,
           createdAt: Date.now(),
           updatedAt: Date.now(),
@@ -167,9 +171,10 @@ describe('MenuPricingRulesResource', () => {
         {
           id: 'rule_2',
           name: 'Afternoon Special',
-          menuSetId: 'set_123',
-          discountType: 'fixed',
-          discountValue: 3,
+          discountId: 'discount_2',
+          condition: {
+            menuSetId: 'set_123',
+          },
           isActive: true,
           createdAt: Date.now(),
           updatedAt: Date.now(),
@@ -243,10 +248,10 @@ describe('MenuPricingRulesResource', () => {
         {
           id: 'rule_1',
           name: 'Lunch Menu Discount',
-          menuSetId: 'set_1',
           discountId: 'discount_456',
-          discountType: 'percentage',
-          discountValue: 15,
+          condition: {
+            menuSetId: 'set_1',
+          },
           isActive: true,
           createdAt: Date.now(),
           updatedAt: Date.now(),
@@ -287,9 +292,10 @@ describe('MenuPricingRulesResource', () => {
         {
           id: 'rule_1',
           name: 'Current Promotion',
-          menuSetId: 'set_1',
-          discountType: 'percentage',
-          discountValue: 10,
+          discountId: 'discount_1',
+          condition: {
+            menuSetId: 'set_1',
+          },
           isActive: true,
           effectiveFrom: Date.now() - 3600000,
           effectiveTo: Date.now() + 3600000,
@@ -361,15 +367,15 @@ describe('MenuPricingRulesResource', () => {
       const updateData = {
         id: 'rule_123',
         name: 'Updated Happy Hour',
-        discountValue: 25,
       };
 
       const mockResponse: MenuPricingRule = {
         id: 'rule_123',
         name: 'Updated Happy Hour',
-        menuSetId: 'set_123',
-        discountType: 'percentage',
-        discountValue: 25,
+        discountId: 'discount_123',
+        condition: {
+          menuSetId: 'set_123',
+        },
         isActive: true,
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -387,7 +393,7 @@ describe('MenuPricingRulesResource', () => {
       const result = await client.menuPricingRules.update('rule_123', updateData);
 
       expect(result.name).toBe('Updated Happy Hour');
-      expect(result.discountValue).toBe(25);
+      expect(result.discountId).toBe('discount_123');
     });
 
     it('should update isActive status', async () => {
@@ -399,9 +405,10 @@ describe('MenuPricingRulesResource', () => {
       const mockResponse: MenuPricingRule = {
         id: 'rule_123',
         name: 'Expired Promotion',
-        menuSetId: 'set_123',
-        discountType: 'percentage',
-        discountValue: 10,
+        discountId: 'discount_123',
+        condition: {
+          menuSetId: 'set_123',
+        },
         isActive: false,
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -458,9 +465,10 @@ describe('MenuPricingRulesResource', () => {
         {
           id: 'rule_1',
           name: 'Rule One',
-          menuSetId: 'set_1',
-          discountType: 'percentage',
-          discountValue: 10,
+          discountId: 'discount_1',
+          condition: {
+            menuSetId: 'set_1',
+          },
           isActive: true,
           createdAt: Date.now(),
           updatedAt: Date.now(),
@@ -468,9 +476,10 @@ describe('MenuPricingRulesResource', () => {
         {
           id: 'rule_2',
           name: 'Rule Two',
-          menuSetId: 'set_2',
-          discountType: 'fixed',
-          discountValue: 5,
+          discountId: 'discount_2',
+          condition: {
+            menuSetId: 'set_2',
+          },
           isActive: true,
           createdAt: Date.now(),
           updatedAt: Date.now(),
@@ -541,17 +550,18 @@ describe('MenuPricingRulesResource', () => {
   describe('createBatch', () => {
     it('should create multiple menu pricing rules in batch', async () => {
       const inputData = [
-        { name: 'Rule A', menuSetId: 'set_1', discountType: 'percentage' as const, discountValue: 10, isActive: true },
-        { name: 'Rule B', menuSetId: 'set_2', discountType: 'fixed' as const, discountValue: 5, isActive: true },
+        { name: 'Rule A', discountId: 'discount_1', condition: { menuSetId: 'set_1' }, isActive: true },
+        { name: 'Rule B', discountId: 'discount_2', condition: { menuSetId: 'set_2' }, isActive: true },
       ];
 
       const mockRules: MenuPricingRule[] = [
         {
           id: 'rule_1',
           name: 'Rule A',
-          menuSetId: 'set_1',
-          discountType: 'percentage',
-          discountValue: 10,
+          discountId: 'discount_1',
+          condition: {
+            menuSetId: 'set_1',
+          },
           isActive: true,
           createdAt: Date.now(),
           updatedAt: Date.now(),
@@ -559,9 +569,10 @@ describe('MenuPricingRulesResource', () => {
         {
           id: 'rule_2',
           name: 'Rule B',
-          menuSetId: 'set_2',
-          discountType: 'fixed',
-          discountValue: 5,
+          discountId: 'discount_2',
+          condition: {
+            menuSetId: 'set_2',
+          },
           isActive: true,
           createdAt: Date.now(),
           updatedAt: Date.now(),

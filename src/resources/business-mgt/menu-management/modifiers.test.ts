@@ -32,20 +32,67 @@ describe('ModifiersResource', () => {
       const input = {
         name: 'Size',
         description: 'Choose your drink size',
-        selectionType: 'single' as const,
         isRequired: true,
-        minSelections: 1,
-        maxSelections: 1,
+        minSelection: 1,
+        maxSelection: 1,
+        options: [
+          {
+            name: 'Small',
+            priceDelta: 0,
+          },
+          {
+            name: 'Medium',
+            priceDelta: 0.50,
+          },
+          {
+            name: 'Large',
+            priceDelta: 1.00,
+          },
+        ],
       };
 
       const mockResponse: ModifierGroup = {
         id: 'group_123',
         name: 'Size',
         description: 'Choose your drink size',
-        selectionType: 'single',
         isRequired: true,
-        minSelections: 1,
-        maxSelections: 1,
+        minSelection: 1,
+        maxSelection: 1,
+        options: [
+          {
+            id: 'option_1',
+            modifierGroupId: 'group_123',
+            name: 'Small',
+            priceDelta: 0,
+            isDefault: false,
+            displayOrder: 0,
+            isActive: true,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          },
+          {
+            id: 'option_2',
+            modifierGroupId: 'group_123',
+            name: 'Medium',
+            priceDelta: 0.50,
+            isDefault: false,
+            displayOrder: 1,
+            isActive: true,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          },
+          {
+            id: 'option_3',
+            modifierGroupId: 'group_123',
+            name: 'Large',
+            priceDelta: 1.00,
+            isDefault: false,
+            displayOrder: 2,
+            isActive: true,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          },
+        ],
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -63,8 +110,8 @@ describe('ModifiersResource', () => {
 
       expect(result.id).toBe('group_123');
       expect(result.name).toBe('Size');
-      expect(result.selectionType).toBe('single');
       expect(result.isRequired).toBe(true);
+      expect(result.options).toHaveLength(3);
     });
   });
 
@@ -74,10 +121,10 @@ describe('ModifiersResource', () => {
         id: 'group_123',
         name: 'Toppings',
         description: 'Choose your toppings',
-        selectionType: 'multiple',
         isRequired: false,
-        minSelections: 0,
-        maxSelections: 5,
+        minSelection: 0,
+        maxSelection: 5,
+        options: [],
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -95,7 +142,7 @@ describe('ModifiersResource', () => {
 
       expect(result.id).toBe('group_123');
       expect(result.name).toBe('Toppings');
-      expect(result.selectionType).toBe('multiple');
+      expect(result.isRequired).toBe(false);
     });
 
     it('should throw API error when modifier group not found', async () => {
@@ -119,20 +166,20 @@ describe('ModifiersResource', () => {
         {
           id: 'group_1',
           name: 'Size',
-          selectionType: 'single',
           isRequired: true,
-          minSelections: 1,
-          maxSelections: 1,
+          minSelection: 1,
+          maxSelection: 1,
+          options: [],
           createdAt: Date.now(),
           updatedAt: Date.now(),
         },
         {
           id: 'group_2',
           name: 'Extras',
-          selectionType: 'multiple',
           isRequired: false,
-          minSelections: 0,
-          maxSelections: 10,
+          minSelection: 0,
+          maxSelection: 10,
+          options: [],
           createdAt: Date.now(),
           updatedAt: Date.now(),
         },
@@ -172,16 +219,16 @@ describe('ModifiersResource', () => {
       const updateData = {
         id: 'group_123',
         name: 'Drink Size',
-        maxSelections: 1,
+        maxSelection: 1,
       };
 
       const mockResponse: ModifierGroup = {
         id: 'group_123',
         name: 'Drink Size',
-        selectionType: 'single',
         isRequired: true,
-        minSelections: 1,
-        maxSelections: 1,
+        minSelection: 1,
+        maxSelection: 1,
+        options: [],
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -220,28 +267,33 @@ describe('ModifiersResource', () => {
   describe('createGroupBatch', () => {
     it('should create multiple modifier groups in batch', async () => {
       const inputData = [
-        { name: 'Size', selectionType: 'single' as const, isRequired: true, minSelections: 1, maxSelections: 1 },
-        { name: 'Extras', selectionType: 'multiple' as const, isRequired: false, minSelections: 0, maxSelections: 5 },
+        { name: 'Size', isRequired: true, minSelection: 1, maxSelection: 1, options: [{ name: 'Small', priceDelta: 0 }, { name: 'Large', priceDelta: 1.00 }] },
+        { name: 'Extras', isRequired: false, minSelection: 0, maxSelection: 1, options: [{ name: 'Extra Cheese', priceDelta: 0.50 }] },
       ];
 
       const mockGroups: ModifierGroup[] = [
         {
           id: 'group_1',
           name: 'Size',
-          selectionType: 'single',
           isRequired: true,
-          minSelections: 1,
-          maxSelections: 1,
+          minSelection: 1,
+          maxSelection: 1,
+          options: [
+            { id: 'opt_1', modifierGroupId: 'group_1', name: 'Small', priceDelta: 0, isDefault: false, displayOrder: 0, isActive: true, createdAt: Date.now(), updatedAt: Date.now() },
+            { id: 'opt_2', modifierGroupId: 'group_1', name: 'Large', priceDelta: 1.00, isDefault: false, displayOrder: 1, isActive: true, createdAt: Date.now(), updatedAt: Date.now() },
+          ],
           createdAt: Date.now(),
           updatedAt: Date.now(),
         },
         {
           id: 'group_2',
           name: 'Extras',
-          selectionType: 'multiple',
           isRequired: false,
-          minSelections: 0,
-          maxSelections: 5,
+          minSelection: 0,
+          maxSelection: 1,
+          options: [
+            { id: 'opt_3', modifierGroupId: 'group_2', name: 'Extra Cheese', priceDelta: 0.50, isDefault: false, displayOrder: 0, isActive: true, createdAt: Date.now(), updatedAt: Date.now() },
+          ],
           createdAt: Date.now(),
           updatedAt: Date.now(),
         },
@@ -283,8 +335,8 @@ describe('ModifiersResource', () => {
       const input = {
         modifierGroupId: 'group_123',
         name: 'Large',
-        priceAdjustment: 1.50,
-        sortOrder: 3,
+        priceDelta: 1.50,
+        displayOrder: 3,
         isDefault: false,
       };
 
@@ -292,8 +344,8 @@ describe('ModifiersResource', () => {
         id: 'option_123',
         modifierGroupId: 'group_123',
         name: 'Large',
-        priceAdjustment: 1.50,
-        sortOrder: 3,
+        priceDelta: 1.50,
+        displayOrder: 3,
         isDefault: false,
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -312,7 +364,7 @@ describe('ModifiersResource', () => {
 
       expect(result.id).toBe('option_123');
       expect(result.name).toBe('Large');
-      expect(result.priceAdjustment).toBe(1.50);
+      expect(result.priceDelta).toBe(1.50);
     });
   });
 
@@ -322,8 +374,8 @@ describe('ModifiersResource', () => {
         id: 'option_123',
         modifierGroupId: 'group_123',
         name: 'Medium',
-        priceAdjustment: 0.75,
-        sortOrder: 2,
+        priceDelta: 0.75,
+        displayOrder: 2,
         isDefault: true,
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -353,8 +405,8 @@ describe('ModifiersResource', () => {
           id: 'option_1',
           modifierGroupId: 'group_123',
           name: 'Small',
-          priceAdjustment: 0,
-          sortOrder: 1,
+          priceDelta: 0,
+          displayOrder: 1,
           isDefault: false,
           createdAt: Date.now(),
           updatedAt: Date.now(),
@@ -363,8 +415,8 @@ describe('ModifiersResource', () => {
           id: 'option_2',
           modifierGroupId: 'group_123',
           name: 'Medium',
-          priceAdjustment: 0.50,
-          sortOrder: 2,
+          priceDelta: 0.50,
+          displayOrder: 2,
           isDefault: true,
           createdAt: Date.now(),
           updatedAt: Date.now(),
@@ -434,15 +486,15 @@ describe('ModifiersResource', () => {
       const updateData = {
         id: 'option_123',
         name: 'Extra Large',
-        priceAdjustment: 2.00,
+        priceDelta: 2.00,
       };
 
       const mockResponse: ModifierOption = {
         id: 'option_123',
         modifierGroupId: 'group_123',
         name: 'Extra Large',
-        priceAdjustment: 2.00,
-        sortOrder: 4,
+        priceDelta: 2.00,
+        displayOrder: 4,
         isDefault: false,
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -460,7 +512,7 @@ describe('ModifiersResource', () => {
       const result = await client.modifiers.updateOption('option_123', updateData);
 
       expect(result.name).toBe('Extra Large');
-      expect(result.priceAdjustment).toBe(2.00);
+      expect(result.priceDelta).toBe(2.00);
     });
   });
 
@@ -483,8 +535,8 @@ describe('ModifiersResource', () => {
   describe('createOptionBatch', () => {
     it('should create multiple modifier options in batch', async () => {
       const inputData = [
-        { modifierGroupId: 'group_1', name: 'Small', priceAdjustment: 0, sortOrder: 1, isDefault: false },
-        { modifierGroupId: 'group_1', name: 'Large', priceAdjustment: 1.00, sortOrder: 2, isDefault: false },
+        { modifierGroupId: 'group_1', name: 'Small', priceDelta: 0, displayOrder: 1, isDefault: false },
+        { modifierGroupId: 'group_1', name: 'Large', priceDelta: 1.00, displayOrder: 2, isDefault: false },
       ];
 
       const mockOptions: ModifierOption[] = [
@@ -492,8 +544,8 @@ describe('ModifiersResource', () => {
           id: 'option_1',
           modifierGroupId: 'group_1',
           name: 'Small',
-          priceAdjustment: 0,
-          sortOrder: 1,
+          priceDelta: 0,
+          displayOrder: 1,
           isDefault: false,
           createdAt: Date.now(),
           updatedAt: Date.now(),
@@ -502,8 +554,8 @@ describe('ModifiersResource', () => {
           id: 'option_2',
           modifierGroupId: 'group_1',
           name: 'Large',
-          priceAdjustment: 1.00,
-          sortOrder: 2,
+          priceDelta: 1.00,
+          displayOrder: 2,
           isDefault: false,
           createdAt: Date.now(),
           updatedAt: Date.now(),
@@ -547,7 +599,7 @@ describe('ModifiersResource', () => {
         menuItemId: 'item_123',
         modifierGroupId: 'group_123',
         menuSetId: 'set_456',
-        sortOrder: 1,
+        displayOrder: 1,
       };
 
       const mockResponse: ItemModifierBinding = {
@@ -555,7 +607,7 @@ describe('ModifiersResource', () => {
         menuItemId: 'item_123',
         modifierGroupId: 'group_123',
         menuSetId: 'set_456',
-        sortOrder: 1,
+        displayOrder: 1,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -584,7 +636,7 @@ describe('ModifiersResource', () => {
         menuItemId: 'item_123',
         modifierGroupId: 'group_123',
         menuSetId: 'set_456',
-        sortOrder: 1,
+        displayOrder: 1,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -612,7 +664,7 @@ describe('ModifiersResource', () => {
           id: 'binding_1',
           menuItemId: 'item_123',
           modifierGroupId: 'group_1',
-          sortOrder: 1,
+          displayOrder: 1,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         },
@@ -620,7 +672,7 @@ describe('ModifiersResource', () => {
           id: 'binding_2',
           menuItemId: 'item_123',
           modifierGroupId: 'group_2',
-          sortOrder: 2,
+          displayOrder: 2,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         },
@@ -663,7 +715,7 @@ describe('ModifiersResource', () => {
           menuItemId: 'item_1',
           modifierGroupId: 'group_1',
           menuSetId: 'set_456',
-          sortOrder: 1,
+          displayOrder: 1,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         },
@@ -730,14 +782,14 @@ describe('ModifiersResource', () => {
     it('should update a binding', async () => {
       const updateData = {
         id: 'binding_123',
-        sortOrder: 5,
+        displayOrder: 5,
       };
 
       const mockResponse: ItemModifierBinding = {
         id: 'binding_123',
         menuItemId: 'item_123',
         modifierGroupId: 'group_123',
-        sortOrder: 5,
+        displayOrder: 5,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -753,7 +805,7 @@ describe('ModifiersResource', () => {
 
       const result = await client.modifiers.updateBinding('binding_123', updateData);
 
-      expect(result.sortOrder).toBe(5);
+      expect(result.displayOrder).toBe(5);
     });
   });
 
@@ -776,8 +828,8 @@ describe('ModifiersResource', () => {
   describe('createBindingBatch', () => {
     it('should create multiple bindings in batch', async () => {
       const inputData = [
-        { menuItemId: 'item_1', modifierGroupId: 'group_1', sortOrder: 1 },
-        { menuItemId: 'item_1', modifierGroupId: 'group_2', sortOrder: 2 },
+        { menuItemId: 'item_1', modifierGroupId: 'group_1', displayOrder: 1 },
+        { menuItemId: 'item_1', modifierGroupId: 'group_2', displayOrder: 2 },
       ];
 
       const mockBindings: ItemModifierBinding[] = [
@@ -785,7 +837,7 @@ describe('ModifiersResource', () => {
           id: 'binding_1',
           menuItemId: 'item_1',
           modifierGroupId: 'group_1',
-          sortOrder: 1,
+          displayOrder: 1,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         },
@@ -793,7 +845,7 @@ describe('ModifiersResource', () => {
           id: 'binding_2',
           menuItemId: 'item_1',
           modifierGroupId: 'group_2',
-          sortOrder: 2,
+          displayOrder: 2,
           createdAt: Date.now(),
           updatedAt: Date.now(),
         },

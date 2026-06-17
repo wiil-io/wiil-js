@@ -238,24 +238,22 @@ describe('MenuSetsResource', () => {
       expect(result.data[1].isActive).toBe(true);
     });
 
-    it('should retrieve active menu sets at a specific timestamp', async () => {
-      const timestamp = Date.now();
-
+    it('should retrieve active menu sets with pagination', async () => {
       const mockResponse: PaginatedResultType<MenuSet> = {
         data: [],
         meta: {
-          page: 1,
-          pageSize: 20,
+          page: 2,
+          pageSize: 10,
           totalCount: 0,
           totalPages: 0,
           hasNextPage: false,
-          hasPreviousPage: false,
+          hasPreviousPage: true,
         },
       };
 
       nock(BASE_URL)
         .get('/menu-sets/active')
-        .query({ effectiveAt: timestamp.toString() })
+        .query({ page: '2', pageSize: '10' })
         .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
@@ -263,9 +261,10 @@ describe('MenuSetsResource', () => {
           metadata: { timestamp: Date.now(), version: 'v1' },
         });
 
-      const result = await client.menuSets.getActive(timestamp);
+      const result = await client.menuSets.getActive({ page: 2, pageSize: 10 });
 
       expect(result.data).toHaveLength(0);
+      expect(result.meta.page).toBe(2);
     });
   });
 

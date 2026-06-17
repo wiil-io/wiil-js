@@ -4,9 +4,9 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import nock from 'nock';
-import { WiilClient } from '../../client/WiilClient';
+import { WiilClient } from '../../../client/WiilClient';
 import { ServiceAppointment, PaginatedResultType, AppointmentStatus, CalendarProvider } from 'wiil-core-js';
-import { WiilAPIError } from '../../errors/WiilError';
+import { WiilAPIError } from '../../../errors/WiilError';
 
 const BASE_URL = 'https://api.wiil.io/v1';
 const API_KEY = 'test-api-key';
@@ -452,7 +452,7 @@ describe('ServiceAppointmentsResource', () => {
           metadata: { timestamp: Date.now(), version: 'v1' },
         });
 
-      const result = await client.serviceAppointments.updateStatus('appointment_123', { status: AppointmentStatus.CONFIRMED });
+      const result = await client.serviceAppointments.updateStatus('appointment_123', AppointmentStatus.CONFIRMED);
 
       expect(result.status).toBe(AppointmentStatus.CONFIRMED);
     });
@@ -480,7 +480,7 @@ describe('ServiceAppointmentsResource', () => {
           metadata: { timestamp: Date.now(), version: 'v1' },
         });
 
-      const result = await client.serviceAppointments.updateStatus('appointment_456', { status: AppointmentStatus.NO_SHOW });
+      const result = await client.serviceAppointments.updateStatus('appointment_456', AppointmentStatus.NO_SHOW);
 
       expect(result.status).toBe(AppointmentStatus.NO_SHOW);
     });
@@ -508,7 +508,7 @@ describe('ServiceAppointmentsResource', () => {
           metadata: { timestamp: Date.now(), version: 'v1' },
         });
 
-      const result = await client.serviceAppointments.updateStatus('appointment_789', { status: AppointmentStatus.COMPLETED });
+      const result = await client.serviceAppointments.updateStatus('appointment_789', AppointmentStatus.COMPLETED);
 
       expect(result.status).toBe(AppointmentStatus.COMPLETED);
     });
@@ -531,7 +531,7 @@ describe('ServiceAppointmentsResource', () => {
       };
 
       nock(BASE_URL)
-        .post('/service-appointments/appointment_123/cancel', { reason: 'Customer requested cancellation' })
+        .post('/service-appointments/appointment_123/cancel', { cancelReason: 'Customer requested cancellation' })
         .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
           success: true,
@@ -539,7 +539,7 @@ describe('ServiceAppointmentsResource', () => {
           metadata: { timestamp: Date.now(), version: 'v1' },
         });
 
-      const result = await client.serviceAppointments.cancel('appointment_123', { reason: 'Customer requested cancellation' });
+      const result = await client.serviceAppointments.cancel('appointment_123', { cancelReason: 'Customer requested cancellation' });
 
       expect(result.status).toBe(AppointmentStatus.CANCELLED);
       expect(result.cancelReason).toBe('Customer requested cancellation');
@@ -595,8 +595,8 @@ describe('ServiceAppointmentsResource', () => {
 
       nock(BASE_URL)
         .post('/service-appointments/appointment_123/reschedule', {
-          startTime: newStartTime.toString(),
-          endTime: newEndTime.toString(),
+          startTime: newStartTime,
+          endTime: newEndTime,
         })
         .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
@@ -606,8 +606,8 @@ describe('ServiceAppointmentsResource', () => {
         });
 
       const result = await client.serviceAppointments.reschedule('appointment_123', {
-        startTime: newStartTime.toString(),
-        endTime: newEndTime.toString(),
+        startTime: newStartTime,
+        endTime: newEndTime,
       });
 
       expect(result.startTime).toBe(newStartTime);
@@ -634,9 +634,9 @@ describe('ServiceAppointmentsResource', () => {
 
       nock(BASE_URL)
         .post('/service-appointments/appointment_123/reschedule', {
-          startTime: newStartTime.toString(),
-          endTime: newEndTime.toString(),
-          serviceId: 'service_456',
+          startTime: newStartTime,
+          endTime: newEndTime,
+          businessServiceId: 'service_456',
         })
         .matchHeader('X-Wiil-Api-Key', API_KEY)
         .reply(200, {
@@ -646,9 +646,9 @@ describe('ServiceAppointmentsResource', () => {
         });
 
       const result = await client.serviceAppointments.reschedule('appointment_123', {
-        startTime: newStartTime.toString(),
-        endTime: newEndTime.toString(),
-        serviceId: 'service_456',
+        startTime: newStartTime,
+        endTime: newEndTime,
+        businessServiceId: 'service_456',
       });
 
       expect(result.businessServiceId).toBe('service_456');

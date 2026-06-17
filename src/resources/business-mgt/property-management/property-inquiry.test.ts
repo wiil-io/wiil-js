@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import nock from 'nock';
-import { WiilClient } from '../../client/WiilClient';
+import { WiilClient } from '../../../client/WiilClient';
 import {
   PropertyInquiry,
   PaginatedResultType,
@@ -14,7 +14,7 @@ import {
   UpdatePropertyInquiry,
   UpdatePropertyInquiryStatus,
 } from 'wiil-core-js';
-import { WiilAPIError } from '../../errors/WiilError';
+import { WiilAPIError } from '../../../errors/WiilError';
 
 const BASE_URL = 'https://api.wiil.io/v1';
 const API_KEY = 'test-api-key';
@@ -38,13 +38,6 @@ describe('PropertyInquiryResource', () => {
       const input = {
         propertyId: 'property_123',
         customerId: 'cust_456',
-        customer: {
-          id: 'cust_456',
-          firstname: 'John',
-          lastname: 'Doe',
-          phone_number: '+12125551234',
-          email: 'john@example.com',
-        },
         inquiryType: PropertyInquiryType.OFFER,
         message: 'I would like to schedule a viewing for this property.',
         source: 'website',
@@ -108,13 +101,6 @@ describe('PropertyInquiryResource', () => {
       const input = {
         propertyId: 'property_456',
         customerId: 'cust_789',
-        customer: {
-          id: 'cust_789',
-          firstname: 'Jane',
-          lastname: 'Smith',
-          phone_number: '+13105559876',
-          email: 'jane@example.com',
-        },
         inquiryType: PropertyInquiryType.GENERAL,
         message: 'Is this property available for a 12-month lease?',
         source: 'referral',

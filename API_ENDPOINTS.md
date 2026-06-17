@@ -749,20 +749,6 @@
 
 ## Conversation Resources
 
-### ConversationsResource `/conversations`
-| Method | HTTP | Endpoint |
-|--------|------|----------|
-| `get(id)` | GET | `/conversations/{id}` |
-| `getByCustomer(id)` | GET | `/conversations/by-customer/{id}` |
-| `getByChannel(id)` | GET | `/conversations/by-channel/{id}` |
-| `getByDeployment(id)` | GET | `/conversations/by-deployment/{id}` |
-| `getByDateRange(start, end)` | GET | `/conversations/by-date-range` |
-| `updateStatus(id)` | PATCH | `/conversations/{id}/status` |
-| `getMessages(id)` | GET | `/conversations/{id}/messages` |
-| `generateSummary(id)` | POST | `/conversations/{id}/generate-summary` |
-| `delete(id)` | DELETE | `/conversations/{id}` |
-| `list()` | GET | `/conversations` |
-
 ### OutboundCallsResource `/outbound-calls`
 | Method | HTTP | Endpoint |
 |--------|------|----------|
@@ -853,9 +839,25 @@
 
 ---
 
+## Services
+
+### MessagingService `/messaging`
+
+| Method | HTTP | Endpoint |
+|--------|------|----------|
+| `requestCall()` | POST | `/messaging/call` |
+| `requestCallBatch()` | POST | `/messaging/call/batch` |
+| `sendSms()` | POST | `/messaging/sms` |
+| `sendSmsBatch()` | POST | `/messaging/sms/batch` |
+| `sendEmail()` | POST | `/messaging/email` |
+| `sendEmailBatch()` | POST | `/messaging/email/batch` |
+
+---
+
 ## Summary
 
 - **Total Resource Classes:** 59+
-- **Total Endpoints:** 528+
+- **Total Services:** 1
+- **Total Endpoints:** 534+
 - **HTTP Methods:** GET, POST, PATCH, DELETE
-- **Batch Operations:** 38+ batch endpoints
+- **Batch Operations:** 41+ batch endpoints

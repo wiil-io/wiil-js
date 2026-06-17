@@ -4,9 +4,9 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import nock from 'nock';
-import { WiilClient } from '../../client/WiilClient';
+import { WiilClient } from '../../../client/WiilClient';
 import { MenuOrder, PaginatedResultType, MenuOrderType, OrderStatus, PaymentStatus } from 'wiil-core-js';
-import { WiilAPIError } from '../../errors/WiilError';
+import { WiilAPIError } from '../../../errors/WiilError';
 
 const BASE_URL = 'https://api.wiil.io/v1';
 const API_KEY = 'test-api-key';
@@ -33,6 +33,7 @@ describe('MenuOrdersResource', () => {
         items: [
           {
             menuItemId: 'item_123',
+            variantId: 'variant_123',
             itemName: 'Cheeseburger',
             quantity: 2,
             unitPrice: 12.99,
@@ -50,11 +51,6 @@ describe('MenuOrdersResource', () => {
           },
         ],
         customerId: 'cust_456',
-        customer: {
-          name: 'John Doe',
-          phone: '+12125551234',
-          email: 'john@example.com',
-        },
         pricing: {
           subtotal: 25.98,
           tax: 2.60,
@@ -69,8 +65,6 @@ describe('MenuOrdersResource', () => {
         orderDate: Date.now(),
         requestedTime: Date.now() + 3600000,
         specialInstructions: 'Call upon arrival',
-        source: 'web',
-        serviceConversationConfigId: 'config_789',
       };
 
       const mockResponse: MenuOrder = {
@@ -83,6 +77,7 @@ describe('MenuOrdersResource', () => {
             id: 'orderitem_1',
             menuOrderId: 'order_123',
             menuItemId: 'item_123',
+            variantId: 'variant_123',
             itemName: 'Cheeseburger',
             quantity: 2,
             unitPrice: 12.99,
@@ -100,11 +95,6 @@ describe('MenuOrdersResource', () => {
           },
         ],
         customerId: 'cust_456',
-        customer: {
-          name: 'John Doe',
-          phone: '+12125551234',
-          email: 'john@example.com',
-        },
         pricing: {
           subtotal: 25.98,
           tax: 2.60,
@@ -120,7 +110,6 @@ describe('MenuOrdersResource', () => {
         requestedTime: Date.now() + 3600000,
         estimatedReadyTime: Date.now() + 1800000,
         specialInstructions: 'Call upon arrival',
-        source: 'web',
         serviceConversationConfigId: 'config_789',
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -151,6 +140,7 @@ describe('MenuOrdersResource', () => {
         items: [
           {
             menuItemId: 'item_456',
+            variantId: 'variant_456',
             itemName: 'Pizza',
             quantity: 1,
             unitPrice: 18.99,
@@ -170,7 +160,6 @@ describe('MenuOrdersResource', () => {
         },
         paymentStatus: PaymentStatus.PAID,
         orderDate: Date.now(),
-        source: 'direct',
         deliveryAddress: {
           street: '123 Main St',
           city: 'New York',
@@ -188,6 +177,7 @@ describe('MenuOrdersResource', () => {
             id: 'orderitem_2',
             menuOrderId: 'order_456',
             menuItemId: 'item_456',
+            variantId: 'variant_456',
             itemName: 'Pizza',
             quantity: 1,
             unitPrice: 18.99,
@@ -207,7 +197,6 @@ describe('MenuOrdersResource', () => {
         },
         paymentStatus: PaymentStatus.PAID,
         orderDate: Date.now(),
-        source: 'direct',
         deliveryAddress: {
           street: '123 Main St',
           city: 'New York',

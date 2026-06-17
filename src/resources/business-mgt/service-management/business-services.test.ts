@@ -4,9 +4,9 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import nock from 'nock';
-import { WiilClient } from '../../client/WiilClient';
-import { BusinessService, ServiceQRCode, PaginatedResultType } from 'wiil-core-js';
-import { WiilAPIError } from '../../errors/WiilError';
+import { WiilClient } from '../../../client/WiilClient';
+import { BusinessService, PaginatedResultType } from 'wiil-core-js';
+import { WiilAPIError } from '../../../errors/WiilError';
 
 const BASE_URL = 'https://api.wiil.io/v1';
 const API_KEY = 'test-api-key';
@@ -28,24 +28,24 @@ describe('BusinessServicesResource', () => {
   describe('create', () => {
     it('should create a new business service', async () => {
       const input = {
+        organizationId: 'org_123',
         name: 'Professional Haircut',
         description: 'Premium haircut service with styling',
-        duration: 45,
-        bufferTime: 15,
-        isBookable: true,
-        price: 50.00,
-        isActive: true,
       };
 
       const mockResponse: BusinessService = {
         id: 'service_123',
         name: 'Professional Haircut',
         description: 'Premium haircut service with styling',
-        duration: 45,
-        bufferTime: 15,
+        duration: 60,
+        bufferBefore: 0,
+        bufferAfter: 0,
         isBookable: true,
-        price: 50.00,
+        basePrice: 0,
         isActive: true,
+        lateCancelFeePercent: 0,
+        noShowFeePercent: 0,
+        requiredResources: [],
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -63,8 +63,7 @@ describe('BusinessServicesResource', () => {
 
       expect(result.id).toBe('service_123');
       expect(result.name).toBe('Professional Haircut');
-      expect(result.duration).toBe(45);
-      expect(result.price).toBe(50.00);
+      expect(result.duration).toBe(60);
     });
   });
 
@@ -274,57 +273,6 @@ describe('BusinessServicesResource', () => {
       expect(result.meta.page).toBe(2);
       expect(result.meta.pageSize).toBe(50);
       expect(result.meta.hasPreviousPage).toBe(true);
-    });
-  });
-
-  describe('generateQRCode', () => {
-    it('should generate QR code for specific service', async () => {
-      const mockResponse: ServiceQRCode = {
-        id: 'qr_123',
-        appointmentUrl: 'https://booking.example.com/service/service_123',
-        qrCodeImage: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUg...',
-        serviceId: 'service_123',
-      };
-
-      nock(BASE_URL)
-        .get('/business-services/qr-code/generate')
-        .query({ serviceId: 'service_123' })
-        .matchHeader('X-Wiil-Api-Key', API_KEY)
-        .reply(200, {
-          success: true,
-          data: mockResponse,
-          metadata: { timestamp: Date.now(), version: 'v1' },
-        });
-
-      const result = await client.businessServices.generateQRCode('service_123');
-
-      expect(result.id).toBe('qr_123');
-      expect(result.serviceId).toBe('service_123');
-      expect(result.appointmentUrl).toContain('service_123');
-      expect(result.qrCodeImage).toBeDefined();
-    });
-
-    it('should generate general service QR code without serviceId', async () => {
-      const mockResponse: ServiceQRCode = {
-        id: 'qr_456',
-        appointmentUrl: 'https://booking.example.com/services',
-        qrCodeImage: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUg...',
-      };
-
-      nock(BASE_URL)
-        .get('/business-services/qr-code/generate')
-        .matchHeader('X-Wiil-Api-Key', API_KEY)
-        .reply(200, {
-          success: true,
-          data: mockResponse,
-          metadata: { timestamp: Date.now(), version: 'v1' },
-        });
-
-      const result = await client.businessServices.generateQRCode();
-
-      expect(result.id).toBe('qr_456');
-      expect(result.serviceId).toBeUndefined();
-      expect(result.appointmentUrl).toBe('https://booking.example.com/services');
     });
   });
 });

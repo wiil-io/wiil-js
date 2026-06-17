@@ -221,7 +221,7 @@ describe('ProvisioningConfigurationsResource', () => {
         .reply(200, { success: true, data: true, metadata: { timestamp: Date.now(), version: 'v1' } });
 
       nock(BASE_URL)
-        .patch('/provisioning-configurations', {
+        .patch('/provisioning-configurations/trans_123', {
           id: 'trans_123',
           description: 'Updated translation chain',
           processingConfig: {

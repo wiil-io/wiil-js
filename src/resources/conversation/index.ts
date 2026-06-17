@@ -3,7 +3,6 @@
  * @module sdk/conversation
  */
 
-export * from './conversations';
 export * from './outbound-calls';
 export * from './outbound-emails';
 export * from './outbound-sms';

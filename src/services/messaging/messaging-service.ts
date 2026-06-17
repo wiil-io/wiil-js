@@ -16,6 +16,7 @@ import {
   CreateSmsRequestSchema,
   EmailRequest,
   EmailRequestSchema,
+  PaginatedResultType,
   SmsRequest,
   SmsRequestSchema,
 } from 'wiil-core-js';
@@ -23,6 +24,7 @@ import {
 const CALL_REQUEST_RESOURCE_PATH = '/messaging/call';
 const SMS_REQUEST_RESOURCE_PATH = '/messaging/sms';
 const EMAIL_REQUEST_RESOURCE_PATH = '/messaging/email';
+const BATCH_LIMIT = 100;
 
 /**
  * Service class for outbound messaging workflows.
@@ -194,5 +196,146 @@ export class MessagingService {
     }
 
     return parsed.data;
+  }
+
+  /**
+   * Requests multiple outbound AI-powered phone calls in a single batch operation.
+   *
+   * Schedules or immediately initiates multiple outbound calls using the configured AI agent.
+   * Useful for campaign launches, bulk notifications, or scheduled outreach programs.
+   *
+   * @param requests - Array of call request configurations (max 100 items)
+   *
+   * @returns Paginated result containing created call request records
+   *
+   * @throws {WiilValidationError} When batch size exceeds limit or item validation fails
+   *
+   * @example
+   * ```typescript
+   * const calls = await messaging.requestCallBatch([
+   *   { to: '+12125551234', from: '+12125559999', agentConfigurationId: 'agent_1', scheduleType: 'IMMEDIATE' },
+   *   { to: '+12125551235', from: '+12125559999', agentConfigurationId: 'agent_1', scheduleType: 'IMMEDIATE' }
+   * ]);
+   * console.log(`Scheduled ${calls.data.length} calls`);
+   * ```
+   */
+  public async requestCallBatch(
+    requests: CreateCallRequest[]
+  ): Promise<PaginatedResultType<BusinessCallRequest>> {
+    if (requests.length > BATCH_LIMIT) {
+      throw new WiilValidationError(
+        `Batch size exceeds maximum limit of ${BATCH_LIMIT}`,
+        [{ path: ['requests'], message: `Array length ${requests.length} exceeds maximum of ${BATCH_LIMIT}` }]
+      );
+    }
+
+    for (let i = 0; i < requests.length; i++) {
+      const validation = CreateCallRequestSchema.safeParse(requests[i]);
+      if (!validation.success) {
+        throw new WiilValidationError(
+          `Validation failed for call request at index ${i}`,
+          validation.error.issues
+        );
+      }
+    }
+
+    return this.http.post<CreateCallRequest[], PaginatedResultType<BusinessCallRequest>>(
+      `${CALL_REQUEST_RESOURCE_PATH}/batch`,
+      requests
+    );
+  }
+
+  /**
+   * Sends multiple outbound SMS text messages in a single batch operation.
+   *
+   * Delivers text messages to multiple recipients efficiently. Useful for
+   * bulk notifications, marketing campaigns, or scheduled reminders.
+   *
+   * @param requests - Array of SMS request configurations (max 100 items)
+   *
+   * @returns Paginated result containing created SMS request records
+   *
+   * @throws {WiilValidationError} When batch size exceeds limit or item validation fails
+   *
+   * @example
+   * ```typescript
+   * const smsMessages = await messaging.sendSmsBatch([
+   *   { to: '+12125551234', body: 'Your appointment is confirmed.' },
+   *   { to: '+12125551235', body: 'Your appointment is confirmed.' }
+   * ]);
+   * console.log(`Sent ${smsMessages.data.length} SMS messages`);
+   * ```
+   */
+  public async sendSmsBatch(
+    requests: CreateSmsRequest[]
+  ): Promise<PaginatedResultType<SmsRequest>> {
+    if (requests.length > BATCH_LIMIT) {
+      throw new WiilValidationError(
+        `Batch size exceeds maximum limit of ${BATCH_LIMIT}`,
+        [{ path: ['requests'], message: `Array length ${requests.length} exceeds maximum of ${BATCH_LIMIT}` }]
+      );
+    }
+
+    for (let i = 0; i < requests.length; i++) {
+      const validation = CreateSmsRequestSchema.safeParse(requests[i]);
+      if (!validation.success) {
+        throw new WiilValidationError(
+          `Validation failed for SMS request at index ${i}`,
+          validation.error.issues
+        );
+      }
+    }
+
+    return this.http.post<CreateSmsRequest[], PaginatedResultType<SmsRequest>>(
+      `${SMS_REQUEST_RESOURCE_PATH}/batch`,
+      requests
+    );
+  }
+
+  /**
+   * Sends multiple outbound email messages in a single batch operation.
+   *
+   * Delivers emails to multiple recipients efficiently. Useful for
+   * bulk communications, newsletters, or transactional email campaigns.
+   *
+   * @param requests - Array of email request configurations (max 100 items)
+   *
+   * @returns Paginated result containing created email request records
+   *
+   * @throws {WiilValidationError} When batch size exceeds limit or item validation fails
+   *
+   * @example
+   * ```typescript
+   * const emails = await messaging.sendEmailBatch([
+   *   { to: [{ email: 'user1@example.com' }], subject: 'Welcome!', bodyHtml: '<h1>Hello</h1>' },
+   *   { to: [{ email: 'user2@example.com' }], subject: 'Welcome!', bodyHtml: '<h1>Hello</h1>' }
+   * ]);
+   * console.log(`Sent ${emails.data.length} emails`);
+   * ```
+   */
+  public async sendEmailBatch(
+    requests: CreateEmailRequest[]
+  ): Promise<PaginatedResultType<EmailRequest>> {
+    if (requests.length > BATCH_LIMIT) {
+      throw new WiilValidationError(
+        `Batch size exceeds maximum limit of ${BATCH_LIMIT}`,
+        [{ path: ['requests'], message: `Array length ${requests.length} exceeds maximum of ${BATCH_LIMIT}` }]
+      );
+    }
+
+    for (let i = 0; i < requests.length; i++) {
+      const validation = CreateEmailRequestSchema.safeParse(requests[i]);
+      if (!validation.success) {
+        throw new WiilValidationError(
+          `Validation failed for email request at index ${i}`,
+          validation.error.issues
+        );
+      }
+    }
+
+    return this.http.post<CreateEmailRequest[], PaginatedResultType<EmailRequest>>(
+      `${EMAIL_REQUEST_RESOURCE_PATH}/batch`,
+      requests
+    );
   }
 }

@@ -4,9 +4,9 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import nock from 'nock';
-import { WiilClient } from '../../client/WiilClient';
+import { WiilClient } from '../../../client/WiilClient';
 import { Customer, PaginatedResultType, PreferredContactMethod, BestTimeToCall } from 'wiil-core-js';
-import { WiilAPIError } from '../../errors/WiilError';
+import { WiilAPIError } from '../../../errors/WiilError';
 
 const BASE_URL = 'https://api.wiil.io/v1';
 const API_KEY = 'test-api-key';
