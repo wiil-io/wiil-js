@@ -156,8 +156,9 @@ export class ServiceTimeOffsResource {
   }
 
   /**
-   * Retrieves time off records within a date range.
+   * Retrieves time off records within a date range for a specific provider.
    *
+   * @param providerId - Provider ID (ServicePerson ID)
    * @param startDate - Range start timestamp
    * @param endDate - Range end timestamp
    * @param params - Optional pagination parameters
@@ -169,11 +170,12 @@ export class ServiceTimeOffsResource {
    * @example
    * ```typescript
    * const nextWeek = Date.now() + 7 * 24 * 60 * 60 * 1000;
-   * const timeOffs = await client.serviceTimeOffs.getByDateRange(Date.now(), nextWeek);
+   * const timeOffs = await client.serviceTimeOffs.getByDateRange('person_123', Date.now(), nextWeek);
    * console.log(`Found ${timeOffs.meta.totalCount} upcoming time off records`);
    * ```
    */
   public async getByDateRange(
+    providerId: string,
     startDate: number,
     endDate: number,
     params?: Partial<PaginationRequest>
@@ -185,7 +187,7 @@ export class ServiceTimeOffsResource {
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
 
-    const path = `${this.resource_path}/by-date-range?${queryParams.toString()}`;
+    const path = `${this.resource_path}/by-date-range/${providerId}?${queryParams.toString()}`;
 
     return this.http.get<PaginatedResultType<ServiceProviderTimeOff>>(path);
   }

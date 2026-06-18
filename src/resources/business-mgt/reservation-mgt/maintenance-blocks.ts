@@ -218,7 +218,7 @@ export class MaintenanceBlocksResource {
    */
   public async update(data: UpdateMaintenanceBlock): Promise<MaintenanceBlock> {
     return this.http.patch<UpdateMaintenanceBlock, MaintenanceBlock>(
-      this.resource_path,
+      `${this.resource_path}/${data.id}`,
       data,
       UpdateMaintenanceBlockSchema
     );
