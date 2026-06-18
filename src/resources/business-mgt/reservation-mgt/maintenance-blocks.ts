@@ -127,7 +127,7 @@ export class MaintenanceBlocksResource {
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
 
-    const path = `${this.resource_path}/by-resource-instance/${resourceInstanceId}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const path = `${this.resource_path}/by-resource/${resourceInstanceId}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
     return this.http.get<PaginatedResultType<MaintenanceBlock>>(path);
   }

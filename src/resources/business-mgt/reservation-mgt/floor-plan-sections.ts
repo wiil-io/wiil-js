@@ -189,7 +189,7 @@ export class FloorPlanSectionsResource {
    */
   public async update(data: UpdateSection): Promise<Section> {
     return this.http.patch<UpdateSection, Section>(
-      this.resource_path,
+      `${this.resource_path}/${data.id}`,
       data,
       UpdateSectionSchema
     );

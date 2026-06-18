@@ -29,7 +29,7 @@ const BATCH_LIMIT = 100;
  */
 export class ProductAxisBindingsResource {
   private readonly http: HttpClient;
-  private readonly resource_path = '/product-axis-bindings';
+  private readonly resource_path = '/product-management/axis-bindings';
 
   /**
    * Creates a new ProductAxisBindingsResource instance.

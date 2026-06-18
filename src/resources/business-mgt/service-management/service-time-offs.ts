@@ -48,7 +48,7 @@ const BATCH_LIMIT = 50;
  */
 export class ServiceTimeOffsResource {
   private readonly http: HttpClient;
-  private readonly resource_path = '/service-time-offs';
+  private readonly resource_path = '/service-providers/time-off';
 
   /**
    * Creates a new ServiceTimeOffsResource instance.
@@ -212,7 +212,7 @@ export class ServiceTimeOffsResource {
    */
   public async update(data: UpdateServiceProviderTimeOff): Promise<ServiceProviderTimeOff> {
     return this.http.patch<UpdateServiceProviderTimeOff, ServiceProviderTimeOff>(
-      this.resource_path,
+      `${this.resource_path}/${data.id}`,
       data,
       UpdateServiceProviderTimeOffSchema
     );

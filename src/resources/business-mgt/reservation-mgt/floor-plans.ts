@@ -182,7 +182,7 @@ export class FloorPlansResource {
    */
   public async update(data: UpdateFloorPlan): Promise<FloorPlan> {
     return this.http.patch<UpdateFloorPlan, FloorPlan>(
-      this.resource_path,
+      `${this.resource_path}/${data.id}`,
       data,
       UpdateFloorPlanSchema
     );

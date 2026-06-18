@@ -1,14 +1,10 @@
 /**
- * @fileoverview Rental Assignments resource for managing rental-to-reservation assignments.
+ * @fileoverview Rental Assignments resource for reading rental-to-reservation assignments.
  * @module resources/reservation-mgt/assignment/rental-assignments
  */
 
 import {
   RentalAssignment,
-  CreateRentalAssignment,
-  CreateRentalAssignmentSchema,
-  UpdateRentalAssignment,
-  UpdateRentalAssignmentSchema,
   RentalAssignmentStatus,
   PaginatedResultType,
   PaginationRequest,
@@ -16,26 +12,22 @@ import {
 import { HttpClient } from '../../../../client/HttpClient';
 
 /**
- * Resource class for managing rental assignments in the WIIL Platform.
+ * Resource class for reading rental assignments in the WIIL Platform.
  *
  * @remarks
- * Provides methods for creating, retrieving, updating, and listing rental
- * assignments. Rental assignments record the physical rental unit assigned
- * to a rental reservation, with support for condition tracking at pickup
- * and return.
+ * Provides read-only methods for retrieving and listing rental assignments.
+ * Rental assignments record the physical rental unit assigned to a rental
+ * reservation. Assignments are managed by the system and are read-only
+ * through this API.
  * All methods require proper authentication via API key.
  *
  * @example
  * ```typescript
  * const client = new WiilClient({ apiKey: 'your-api-key' });
  *
- * // Assign a rental unit to a reservation
- * const assignment = await client.rentalAssignments.create({
- *   reservationId: 'res_123',
- *   rentalInstanceId: 'ri_456',
- *   assignmentType: 'hard',
- *   assignedAt: Date.now()
- * });
+ * // Get a rental assignment
+ * const assignment = await client.rentalAssignments.get('rna_123');
+ * console.log('Rental unit:', assignment.rentalInstanceId);
  * ```
  */
 export class RentalAssignmentsResource {
@@ -51,42 +43,6 @@ export class RentalAssignmentsResource {
    */
   constructor(http: HttpClient) {
     this.http = http;
-  }
-
-  /**
-   * Creates a new rental assignment.
-   *
-   * @param data - Rental assignment data
-   * @returns Promise resolving to the created rental assignment
-   *
-   * @throws {@link WiilValidationError} - When input validation fails
-   * @throws {@link WiilAPIError} - When the API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   *
-   * @example
-   * ```typescript
-   * const assignment = await client.rentalAssignments.create({
-   *   locationId: 'loc_123',
-   *   reservationId: 'res_456',
-   *   rentalInstanceId: 'ri_789',
-   *   assignmentType: 'hard',
-   *   assignedAt: Date.now(),
-   *   assignedBy: 'user_123',
-   *   conditionAtPickup: {
-   *     recordedAt: Date.now(),
-   *     recordedBy: 'user_123',
-   *     notes: 'Minor scratches on rear bumper',
-   *     damageReported: false
-   *   }
-   * });
-   * ```
-   */
-  public async create(data: CreateRentalAssignment): Promise<RentalAssignment> {
-    return this.http.post<CreateRentalAssignment, RentalAssignment>(
-      this.resource_path,
-      data,
-      CreateRentalAssignmentSchema
-    );
   }
 
   /**
@@ -227,84 +183,6 @@ export class RentalAssignmentsResource {
     const path = `${this.resource_path}/with-damage?${queryParams.toString()}`;
 
     return this.http.get<PaginatedResultType<RentalAssignment>>(path);
-  }
-
-  /**
-   * Updates an existing rental assignment.
-   *
-   * @param data - Rental assignment update data (must include id)
-   * @returns Promise resolving to the updated rental assignment
-   *
-   * @throws {@link WiilValidationError} - When input validation fails
-   * @throws {@link WiilAPIError} - When the assignment is not found or API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   *
-   * @example
-   * ```typescript
-   * const updated = await client.rentalAssignments.update({
-   *   id: 'rna_123',
-   *   conditionAtReturn: {
-   *     recordedAt: Date.now(),
-   *     recordedBy: 'user_456',
-   *     notes: 'New scratch on driver door',
-   *     damageReported: true,
-   *     imageUrls: ['https://example.com/damage1.jpg']
-   *   },
-   *   status: 'released',
-   *   releasedAt: Date.now()
-   * });
-   * ```
-   */
-  public async update(data: UpdateRentalAssignment): Promise<RentalAssignment> {
-    return this.http.patch<UpdateRentalAssignment, RentalAssignment>(
-      this.resource_path,
-      data,
-      UpdateRentalAssignmentSchema
-    );
-  }
-
-  /**
-   * Releases a rental assignment.
-   *
-   * @param id - Rental assignment ID
-   * @param releasedBy - Staff user ID releasing the assignment
-   * @returns Promise resolving to the released rental assignment
-   *
-   * @throws {@link WiilAPIError} - When the assignment is not found or API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   *
-   * @example
-   * ```typescript
-   * const released = await client.rentalAssignments.release('rna_123', 'user_456');
-   * console.log('Released at:', released.releasedAt);
-   * ```
-   */
-  public async release(id: string, releasedBy?: string): Promise<RentalAssignment> {
-    return this.http.post<{ releasedBy?: string }, RentalAssignment>(
-      `${this.resource_path}/${id}/release`,
-      { releasedBy }
-    );
-  }
-
-  /**
-   * Deletes a rental assignment.
-   *
-   * @param id - Rental assignment ID
-   * @returns Promise resolving to boolean indicating deletion success
-   *
-   * @throws {@link WiilAPIError} - When the assignment is not found or API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   *
-   * @example
-   * ```typescript
-   * const deleted = await client.rentalAssignments.delete('rna_123');
-   * if (deleted) {
-   *   console.log('Rental assignment deleted');
-   * }
-   * ```
-   */
-  public async delete(id: string): Promise<boolean> {
-    return this.http.delete<boolean>(`${this.resource_path}/${id}`);
   }
 
   /**

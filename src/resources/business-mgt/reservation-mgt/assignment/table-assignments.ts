@@ -1,14 +1,10 @@
 /**
- * @fileoverview Table Assignments resource for managing table-to-reservation assignments.
+ * @fileoverview Table Assignments resource for reading table-to-reservation assignments.
  * @module resources/reservation-mgt/assignment/table-assignments
  */
 
 import {
   TableAssignment,
-  CreateTableAssignment,
-  CreateTableAssignmentSchema,
-  UpdateTableAssignment,
-  UpdateTableAssignmentSchema,
   TableAssignmentStatus,
   PaginatedResultType,
   PaginationRequest,
@@ -16,26 +12,22 @@ import {
 import { HttpClient } from '../../../../client/HttpClient';
 
 /**
- * Resource class for managing table assignments in the WIIL Platform.
+ * Resource class for reading table assignments in the WIIL Platform.
  *
  * @remarks
- * Provides methods for creating, retrieving, updating, and listing table
- * assignments. Table assignments record the physical table instance assigned
- * to a table reservation, supporting both soft and hard lock types.
+ * Provides read-only methods for retrieving and listing table assignments.
+ * Table assignments record the physical table instance assigned to a table
+ * reservation. Assignments are managed by the system and are read-only
+ * through this API.
  * All methods require proper authentication via API key.
  *
  * @example
  * ```typescript
  * const client = new WiilClient({ apiKey: 'your-api-key' });
  *
- * // Assign a table to a reservation
- * const assignment = await client.tableAssignments.create({
- *   reservationId: 'res_123',
- *   tableInstanceId: 'ti_456',
- *   floorPlanId: 'fp_789',
- *   assignmentType: 'hard',
- *   assignedAt: Date.now()
- * });
+ * // Get a table assignment
+ * const assignment = await client.tableAssignments.get('ta_123');
+ * console.log('Table:', assignment.tableInstanceId);
  * ```
  */
 export class TableAssignmentsResource {
@@ -51,38 +43,6 @@ export class TableAssignmentsResource {
    */
   constructor(http: HttpClient) {
     this.http = http;
-  }
-
-  /**
-   * Creates a new table assignment.
-   *
-   * @param data - Table assignment data
-   * @returns Promise resolving to the created table assignment
-   *
-   * @throws {@link WiilValidationError} - When input validation fails
-   * @throws {@link WiilAPIError} - When the API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   *
-   * @example
-   * ```typescript
-   * const assignment = await client.tableAssignments.create({
-   *   locationId: 'loc_123',
-   *   reservationId: 'res_456',
-   *   tableInstanceId: 'ti_789',
-   *   floorPlanId: 'fp_abc',
-   *   floorPlanSectionId: 'sec_def',
-   *   assignmentType: 'soft',
-   *   assignedAt: Date.now(),
-   *   assignedBy: 'user_123'
-   * });
-   * ```
-   */
-  public async create(data: CreateTableAssignment): Promise<TableAssignment> {
-    return this.http.post<CreateTableAssignment, TableAssignment>(
-      this.resource_path,
-      data,
-      CreateTableAssignmentSchema
-    );
   }
 
   /**
@@ -194,78 +154,6 @@ export class TableAssignmentsResource {
     const path = `${this.resource_path}/by-status?${queryParams.toString()}`;
 
     return this.http.get<PaginatedResultType<TableAssignment>>(path);
-  }
-
-  /**
-   * Updates an existing table assignment.
-   *
-   * @param data - Table assignment update data (must include id)
-   * @returns Promise resolving to the updated table assignment
-   *
-   * @throws {@link WiilValidationError} - When input validation fails
-   * @throws {@link WiilAPIError} - When the assignment is not found or API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   *
-   * @example
-   * ```typescript
-   * const updated = await client.tableAssignments.update({
-   *   id: 'ta_123',
-   *   status: 'released',
-   *   releasedAt: Date.now(),
-   *   releasedBy: 'user_456'
-   * });
-   * ```
-   */
-  public async update(data: UpdateTableAssignment): Promise<TableAssignment> {
-    return this.http.patch<UpdateTableAssignment, TableAssignment>(
-      this.resource_path,
-      data,
-      UpdateTableAssignmentSchema
-    );
-  }
-
-  /**
-   * Releases a table assignment.
-   *
-   * @param id - Table assignment ID
-   * @param releasedBy - Staff user ID releasing the assignment
-   * @returns Promise resolving to the released table assignment
-   *
-   * @throws {@link WiilAPIError} - When the assignment is not found or API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   *
-   * @example
-   * ```typescript
-   * const released = await client.tableAssignments.release('ta_123', 'user_456');
-   * console.log('Released at:', released.releasedAt);
-   * ```
-   */
-  public async release(id: string, releasedBy?: string): Promise<TableAssignment> {
-    return this.http.post<{ releasedBy?: string }, TableAssignment>(
-      `${this.resource_path}/${id}/release`,
-      { releasedBy }
-    );
-  }
-
-  /**
-   * Deletes a table assignment.
-   *
-   * @param id - Table assignment ID
-   * @returns Promise resolving to boolean indicating deletion success
-   *
-   * @throws {@link WiilAPIError} - When the assignment is not found or API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   *
-   * @example
-   * ```typescript
-   * const deleted = await client.tableAssignments.delete('ta_123');
-   * if (deleted) {
-   *   console.log('Table assignment deleted');
-   * }
-   * ```
-   */
-  public async delete(id: string): Promise<boolean> {
-    return this.http.delete<boolean>(`${this.resource_path}/${id}`);
   }
 
   /**

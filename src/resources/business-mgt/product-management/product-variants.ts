@@ -10,7 +10,6 @@ import {
   UpdateProductVariant,
   UpdateProductVariantSchema,
   PaginatedResultType,
-  PaginationRequest,
 } from 'wiil-core-js';
 import { HttpClient } from '../../../client/HttpClient';
 import { WiilValidationError } from '../../../errors/WiilError';
@@ -29,7 +28,7 @@ const BATCH_LIMIT = 100;
  */
 export class ProductVariantsResource {
   private readonly http: HttpClient;
-  private readonly resource_path = '/product-variants';
+  private readonly resource_path = '/product-management/variants';
 
   /**
    * Creates a new ProductVariantsResource instance.
@@ -71,30 +70,6 @@ export class ProductVariantsResource {
    */
   public async get(id: string): Promise<ProductVariant> {
     return this.http.get<ProductVariant>(`${this.resource_path}/${id}`);
-  }
-
-  /**
-   * Retrieves product variants by parent product ID.
-   *
-   * @param productId - Parent product ID
-   * @param params - Optional pagination parameters
-   * @returns Promise resolving to paginated list of product variants
-   *
-   * @throws {@link WiilAPIError} - When the API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   */
-  public async getByProduct(
-    productId: string,
-    params?: Partial<PaginationRequest>
-  ): Promise<PaginatedResultType<ProductVariant>> {
-    const queryParams = new URLSearchParams();
-
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
-
-    const path = `${this.resource_path}/by-product/${productId}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-
-    return this.http.get<PaginatedResultType<ProductVariant>>(path);
   }
 
   /**
@@ -153,28 +128,6 @@ export class ProductVariantsResource {
    */
   public async delete(id: string): Promise<boolean> {
     return this.http.delete<boolean>(`${this.resource_path}/${id}`);
-  }
-
-  /**
-   * Lists product variants with optional pagination.
-   *
-   * @param params - Pagination parameters
-   * @returns Promise resolving to paginated list of product variants
-   *
-   * @throws {@link WiilAPIError} - When the API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   */
-  public async list(
-    params?: Partial<PaginationRequest>
-  ): Promise<PaginatedResultType<ProductVariant>> {
-    const queryParams = new URLSearchParams();
-
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
-
-    const path = `${this.resource_path}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-
-    return this.http.get<PaginatedResultType<ProductVariant>>(path);
   }
 
   /**

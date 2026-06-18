@@ -14,6 +14,7 @@ import {
   CreateBusinessMenuItemSchema,
   UpdateBusinessMenuItem,
   UpdateBusinessMenuItemSchema,
+  MenuItemCatalog,
   PaginatedResultType,
   PaginationRequest,
 } from 'wiil-core-js';
@@ -100,13 +101,33 @@ export class MenusResource {
     return this.http.delete<boolean>(`${this.resource_path}/categories/${id}`);
   }
 
+  /**
+   * Sets the display order for a menu category.
+   */
+  public async setCategoryDisplayOrder(id: string, displayOrder: number): Promise<MenuCategory> {
+    return this.http.patch<{ displayOrder: number }, MenuCategory>(
+      `${this.resource_path}/categories/${id}/display-order`,
+      { displayOrder }
+    );
+  }
+
+  /**
+   * Reorders menu items within a category.
+   */
+  public async reorderItems(categoryId: string, itemIds: string[]): Promise<boolean> {
+    return this.http.post<{ itemIds: string[] }, boolean>(
+      `${this.resource_path}/categories/${categoryId}/reorder-items`,
+      { itemIds }
+    );
+  }
+
   // =============== Menu Item Methods ===============
 
   /**
    * Creates a new menu item.
    */
-  public async createItem(data: CreateBusinessMenuItem): Promise<BusinessMenuItem> {
-    return this.http.post<CreateBusinessMenuItem, BusinessMenuItem>(
+  public async createItem(data: CreateBusinessMenuItem): Promise<MenuItemCatalog> {
+    return this.http.post<CreateBusinessMenuItem, MenuItemCatalog>(
       `${this.resource_path}/items`,
       data,
       CreateBusinessMenuItemSchema
@@ -187,6 +208,48 @@ export class MenusResource {
    */
   public async deleteItem(id: string): Promise<boolean> {
     return this.http.delete<boolean>(`${this.resource_path}/items/${id}`);
+  }
+
+  /**
+   * Toggles the active status of a menu item.
+   */
+  public async toggleItemActive(id: string): Promise<BusinessMenuItem> {
+    return this.http.patch<Record<string, never>, BusinessMenuItem>(
+      `${this.resource_path}/items/${id}/toggle-active`,
+      {}
+    );
+  }
+
+  /**
+   * Toggles the availability status of a menu item.
+   */
+  public async toggleItemAvailability(id: string): Promise<BusinessMenuItem> {
+    return this.http.patch<Record<string, never>, BusinessMenuItem>(
+      `${this.resource_path}/items/${id}/toggle-availability`,
+      {}
+    );
+  }
+
+  /**
+   * Sets the display order for a menu item.
+   */
+  public async setItemDisplayOrder(id: string, displayOrder: number): Promise<BusinessMenuItem> {
+    return this.http.patch<{ displayOrder: number }, BusinessMenuItem>(
+      `${this.resource_path}/items/${id}/display-order`,
+      { displayOrder }
+    );
+  }
+
+  /**
+   * Updates availability for multiple menu items in bulk.
+   */
+  public async updateItemsAvailabilityBulk(
+    data: { itemIds: string[]; isAvailable: boolean }
+  ): Promise<{ updated: number }> {
+    return this.http.patch<{ itemIds: string[]; isAvailable: boolean }, { updated: number }>(
+      `${this.resource_path}/items/availability/bulk`,
+      data
+    );
   }
 
   /**

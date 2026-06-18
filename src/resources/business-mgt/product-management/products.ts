@@ -14,6 +14,7 @@ import {
   CreateBusinessProductSchema,
   UpdateBusinessProduct,
   UpdateBusinessProductSchema,
+  ProductDisplay,
   PaginatedResultType,
   PaginationRequest,
 } from 'wiil-core-js';
@@ -73,10 +74,20 @@ export class ProductsResource {
     return this.http.delete<boolean>(`${this.resource_path}/categories/${id}`);
   }
 
+  /**
+   * Sets the display order for a product category.
+   */
+  public async setCategoryDisplayOrder(id: string, displayOrder: number): Promise<ProductCategory> {
+    return this.http.patch<{ displayOrder: number }, ProductCategory>(
+      `${this.resource_path}/categories/${id}/display-order`,
+      { displayOrder }
+    );
+  }
+
   // =============== Product Methods ===============
 
-  public async create(data: CreateBusinessProduct): Promise<BusinessProduct> {
-    return this.http.post<CreateBusinessProduct, BusinessProduct>(
+  public async create(data: CreateBusinessProduct): Promise<ProductDisplay> {
+    return this.http.post<CreateBusinessProduct, ProductDisplay>(
       `${this.resource_path}/products`,
       data,
       CreateBusinessProductSchema
@@ -148,6 +159,16 @@ export class ProductsResource {
 
   public async delete(id: string): Promise<boolean> {
     return this.http.delete<boolean>(`${this.resource_path}/products/${id}`);
+  }
+
+  /**
+   * Updates the status of a product (active/inactive).
+   */
+  public async updateStatus(id: string, isActive: boolean): Promise<BusinessProduct> {
+    return this.http.patch<{ isActive: boolean }, BusinessProduct>(
+      `${this.resource_path}/products/${id}/status`,
+      { isActive }
+    );
   }
 
   /**

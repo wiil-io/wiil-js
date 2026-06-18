@@ -10,7 +10,6 @@ import {
   UpdateMenuItemVariant,
   UpdateMenuItemVariantSchema,
   PaginatedResultType,
-  PaginationRequest,
 } from 'wiil-core-js';
 import { HttpClient } from '../../../client/HttpClient';
 import { WiilValidationError } from '../../../errors/WiilError';
@@ -28,7 +27,7 @@ const BATCH_LIMIT = 100;
  */
 export class MenuItemVariantsResource {
   private readonly http: HttpClient;
-  private readonly resource_path = '/menu-item-variants';
+  private readonly resource_path = '/menu-management/variants';
 
   /**
    * Creates a new MenuItemVariantsResource instance.
@@ -70,30 +69,6 @@ export class MenuItemVariantsResource {
    */
   public async get(id: string): Promise<MenuItemVariant> {
     return this.http.get<MenuItemVariant>(`${this.resource_path}/${id}`);
-  }
-
-  /**
-   * Retrieves menu item variants by parent menu item ID.
-   *
-   * @param menuItemId - Parent menu item ID
-   * @param params - Optional pagination parameters
-   * @returns Promise resolving to paginated list of menu item variants
-   *
-   * @throws {@link WiilAPIError} - When the API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   */
-  public async getByMenuItem(
-    menuItemId: string,
-    params?: Partial<PaginationRequest>
-  ): Promise<PaginatedResultType<MenuItemVariant>> {
-    const queryParams = new URLSearchParams();
-
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
-
-    const path = `${this.resource_path}/by-menu-item/${menuItemId}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-
-    return this.http.get<PaginatedResultType<MenuItemVariant>>(path);
   }
 
   /**
@@ -139,28 +114,6 @@ export class MenuItemVariantsResource {
    */
   public async delete(id: string): Promise<boolean> {
     return this.http.delete<boolean>(`${this.resource_path}/${id}`);
-  }
-
-  /**
-   * Lists menu item variants with optional pagination.
-   *
-   * @param params - Pagination parameters
-   * @returns Promise resolving to paginated list of menu item variants
-   *
-   * @throws {@link WiilAPIError} - When the API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   */
-  public async list(
-    params?: Partial<PaginationRequest>
-  ): Promise<PaginatedResultType<MenuItemVariant>> {
-    const queryParams = new URLSearchParams();
-
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
-
-    const path = `${this.resource_path}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-
-    return this.http.get<PaginatedResultType<MenuItemVariant>>(path);
   }
 
   /**

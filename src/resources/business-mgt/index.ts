@@ -4,6 +4,7 @@
  */
 
 export * from './customer-management';
+export * from './location-management';
 export * from './menu-management';
 export * from './pricing-rules';
 export * from './product-management';

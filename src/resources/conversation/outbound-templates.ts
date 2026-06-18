@@ -291,7 +291,7 @@ export class OutboundTemplatesResource {
    */
   public async updateEmailTemplate(data: UpdateEmailTemplate): Promise<EmailTemplate> {
     return this.http.patch<UpdateEmailTemplate, EmailTemplate>(
-      `${this.resource_path}/email`,
+      `${this.resource_path}/email/${data.id}`,
       data,
       UpdateEmailTemplateSchema
     );
@@ -317,7 +317,7 @@ export class OutboundTemplatesResource {
    */
   public async updateSmsTemplate(data: UpdateSmsTemplate): Promise<SmsTemplate> {
     return this.http.patch<UpdateSmsTemplate, SmsTemplate>(
-      `${this.resource_path}/sms`,
+      `${this.resource_path}/sms/${data.id}`,
       data,
       UpdateSmsTemplateSchema
     );
@@ -343,7 +343,7 @@ export class OutboundTemplatesResource {
    */
   public async updateWhatsappTemplate(data: UpdateWhatsappTemplate): Promise<WhatsappTemplate> {
     return this.http.patch<UpdateWhatsappTemplate, WhatsappTemplate>(
-      `${this.resource_path}/whatsapp`,
+      `${this.resource_path}/whatsapp/${data.id}`,
       data,
       UpdateWhatsappTemplateSchema
     );

@@ -53,7 +53,7 @@ const BATCH_LIMIT = 50;
  */
 export class ServicePersonsResource {
   private readonly http: HttpClient;
-  private readonly resource_path = '/service-persons';
+  private readonly resource_path = '/service-providers/persons';
 
   /**
    * Creates a new ServicePersonsResource instance.
@@ -171,7 +171,7 @@ export class ServicePersonsResource {
    */
   public async update(data: UpdateServicePerson): Promise<ServicePerson> {
     return this.http.patch<UpdateServicePerson, ServicePerson>(
-      this.resource_path,
+      `${this.resource_path}/${data.id}`,
       data,
       UpdateServicePersonSchema
     );

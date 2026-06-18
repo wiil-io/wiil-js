@@ -21,9 +21,9 @@ import {
   SmsRequestSchema,
 } from 'wiil-core-js';
 
-const CALL_REQUEST_RESOURCE_PATH = '/messaging/call';
-const SMS_REQUEST_RESOURCE_PATH = '/messaging/sms';
-const EMAIL_REQUEST_RESOURCE_PATH = '/messaging/email';
+const CALL_REQUEST_RESOURCE_PATH = '/business-requests/calls';
+const SMS_REQUEST_RESOURCE_PATH = '/business-requests/sms';
+const EMAIL_REQUEST_RESOURCE_PATH = '/business-requests/emails';
 const BATCH_LIMIT = 100;
 
 /**

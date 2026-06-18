@@ -155,7 +155,7 @@ export class ReservationSettingsResource {
    */
   public async update(data: UpdateReservationSettings): Promise<ReservationSettings> {
     return this.http.patch<UpdateReservationSettings, ReservationSettings>(
-      this.resource_path,
+      `${this.resource_path}/${data.id}`,
       data,
       UpdateReservationSettingsSchema
     );

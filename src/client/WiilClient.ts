@@ -7,6 +7,7 @@ import { WiilClientConfig } from './types';
 import { HttpClient } from './HttpClient';
 import { OrganizationsResource, ProjectsResource } from '../resources/account';
 import {
+  BusinessLocationsResource,
   BusinessServicesResource,
   CustomersResource,
   CustomerGroupsResource,
@@ -71,7 +72,7 @@ import {
   OutboundEmailsResource,
   OutboundSmsResource,
   OutboundTemplatesResource,
-  TranslationServicesResource,
+  // TranslationServicesResource,
 } from '../resources/conversation';
 import { WiilConfigurationError } from '../errors/WiilError';
 
@@ -153,6 +154,25 @@ export class WiilClient {
    * ```
    */
   public readonly projects: ProjectsResource;
+
+  /**
+   * Business Locations resource for managing physical/operational business sites.
+   *
+   * @remarks
+   * Provides methods for creating, retrieving, updating, deleting, and listing
+   * business locations. Locations represent physical or operational sites like
+   * stores, branches, or offices with contact details and operating hours.
+   *
+   * @example
+   * ```typescript
+   * const location = await client.businessLocations.create({
+   *   name: 'Downtown Branch',
+   *   timezone: 'America/New_York',
+   *   businessHours: { monday: { open: '09:00', close: '17:00' } }
+   * });
+   * ```
+   */
+  public readonly businessLocations: BusinessLocationsResource;
 
   /**
    * Business Services resource for managing business service offerings.
@@ -768,7 +788,7 @@ export class WiilClient {
    * });
    * ```
    */
-  public readonly translationServices: TranslationServicesResource;
+  // public readonly translationServices: TranslationServicesResource;
 
   private readonly http: HttpClient;
 
@@ -812,6 +832,7 @@ export class WiilClient {
     this.projects = new ProjectsResource(this.http);
 
     // Business Management resources
+    this.businessLocations = new BusinessLocationsResource(this.http);
     this.businessServices = new BusinessServicesResource(this.http);
     this.customers = new CustomersResource(this.http);
     this.customerGroups = new CustomerGroupsResource(this.http);
@@ -876,7 +897,7 @@ export class WiilClient {
     this.outboundEmails = new OutboundEmailsResource(this.http);
     this.outboundSms = new OutboundSmsResource(this.http);
     this.outboundTemplates = new OutboundTemplatesResource(this.http);
-    this.translationServices = new TranslationServicesResource(this.http);
+    // this.translationServices = new TranslationServicesResource(this.http);
   }
 
   /**

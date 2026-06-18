@@ -137,7 +137,7 @@ export class ServiceCategoriesResource {
    */
   public async update(data: UpdateServiceCategory): Promise<ServiceCategory> {
     return this.http.patch<UpdateServiceCategory, ServiceCategory>(
-      this.resource_path,
+      `${this.resource_path}/${data.id}`,
       data,
       UpdateServiceCategorySchema
     );
@@ -166,6 +166,16 @@ export class ServiceCategoriesResource {
    */
   public async delete(id: string): Promise<boolean> {
     return this.http.delete<boolean>(`${this.resource_path}/${id}`);
+  }
+
+  /**
+   * Toggles the active status of a service category.
+   */
+  public async toggleActive(id: string): Promise<ServiceCategory> {
+    return this.http.post<Record<string, never>, ServiceCategory>(
+      `${this.resource_path}/${id}/toggle-active`,
+      {}
+    );
   }
 
   /**
