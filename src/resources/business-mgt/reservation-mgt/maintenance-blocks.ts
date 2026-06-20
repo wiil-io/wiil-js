@@ -186,8 +186,8 @@ export class MaintenanceBlocksResource {
     params?: Partial<PaginationRequest>
   ): Promise<PaginatedResultType<MaintenanceBlock>> {
     const queryParams = new URLSearchParams();
-    queryParams.append('startDate', startDate.toString());
-    queryParams.append('endDate', endDate.toString());
+    queryParams.append('start', startDate.toString());
+    queryParams.append('end', endDate.toString());
 
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());

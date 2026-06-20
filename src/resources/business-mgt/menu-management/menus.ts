@@ -137,8 +137,8 @@ export class MenusResource {
   /**
    * Retrieves a menu item by ID.
    */
-  public async getItem(id: string): Promise<BusinessMenuItem> {
-    return this.http.get<BusinessMenuItem>(`${this.resource_path}/items/${id}`);
+  public async getItem(id: string): Promise<MenuItemCatalog> {
+    return this.http.get<MenuItemCatalog>(`${this.resource_path}/items/${id}`);
   }
 
   /**
@@ -146,7 +146,7 @@ export class MenusResource {
    */
   public async listItems(
     params?: Partial<PaginationRequest & { includeDeleted?: boolean }>
-  ): Promise<PaginatedResultType<BusinessMenuItem>> {
+  ): Promise<PaginatedResultType<MenuItemCatalog>> {
     const queryParams = new URLSearchParams();
 
     if (params?.page) queryParams.append('page', params.page.toString());
@@ -155,7 +155,7 @@ export class MenusResource {
 
     const path = `${this.resource_path}/items${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
-    return this.http.get<PaginatedResultType<BusinessMenuItem>>(path);
+    return this.http.get<PaginatedResultType<MenuItemCatalog>>(path);
   }
 
   /**
@@ -164,7 +164,7 @@ export class MenusResource {
   public async getItemsByCategory(
     categoryId: string,
     params?: Partial<PaginationRequest & { includeUnavailable?: boolean }>
-  ): Promise<PaginatedResultType<BusinessMenuItem>> {
+  ): Promise<PaginatedResultType<MenuItemCatalog>> {
     const queryParams = new URLSearchParams();
 
     if (params?.page) queryParams.append('page', params.page.toString());
@@ -173,7 +173,7 @@ export class MenusResource {
 
     const path = `${this.resource_path}/items/by-category/${categoryId}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
-    return this.http.get<PaginatedResultType<BusinessMenuItem>>(path);
+    return this.http.get<PaginatedResultType<MenuItemCatalog>>(path);
   }
 
   /**
@@ -181,7 +181,7 @@ export class MenusResource {
    */
   public async getPopularItems(
     params?: Partial<PaginationRequest>
-  ): Promise<PaginatedResultType<BusinessMenuItem>> {
+  ): Promise<PaginatedResultType<MenuItemCatalog>> {
     const queryParams = new URLSearchParams();
 
     if (params?.page) queryParams.append('page', params.page.toString());
@@ -189,14 +189,14 @@ export class MenusResource {
 
     const path = `${this.resource_path}/items/popular${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
-    return this.http.get<PaginatedResultType<BusinessMenuItem>>(path);
+    return this.http.get<PaginatedResultType<MenuItemCatalog>>(path);
   }
 
   /**
    * Updates a menu item.
    */
-  public async updateItem(data: UpdateBusinessMenuItem): Promise<BusinessMenuItem> {
-    return this.http.patch<UpdateBusinessMenuItem, BusinessMenuItem>(
+  public async updateItem(data: UpdateBusinessMenuItem): Promise<MenuItemCatalog> {
+    return this.http.patch<UpdateBusinessMenuItem, MenuItemCatalog>(
       `${this.resource_path}/items`,
       data,
       UpdateBusinessMenuItemSchema
@@ -213,8 +213,8 @@ export class MenusResource {
   /**
    * Toggles the active status of a menu item.
    */
-  public async toggleItemActive(id: string): Promise<BusinessMenuItem> {
-    return this.http.patch<Record<string, never>, BusinessMenuItem>(
+  public async toggleItemActive(id: string): Promise<MenuItemCatalog> {
+    return this.http.patch<Record<string, never>, MenuItemCatalog>(
       `${this.resource_path}/items/${id}/toggle-active`,
       {}
     );
@@ -223,8 +223,8 @@ export class MenusResource {
   /**
    * Toggles the availability status of a menu item.
    */
-  public async toggleItemAvailability(id: string): Promise<BusinessMenuItem> {
-    return this.http.patch<Record<string, never>, BusinessMenuItem>(
+  public async toggleItemAvailability(id: string): Promise<MenuItemCatalog> {
+    return this.http.patch<Record<string, never>, MenuItemCatalog>(
       `${this.resource_path}/items/${id}/toggle-availability`,
       {}
     );
@@ -233,8 +233,8 @@ export class MenusResource {
   /**
    * Sets the display order for a menu item.
    */
-  public async setItemDisplayOrder(id: string, displayOrder: number): Promise<BusinessMenuItem> {
-    return this.http.patch<{ displayOrder: number }, BusinessMenuItem>(
+  public async setItemDisplayOrder(id: string, displayOrder: number): Promise<MenuItemCatalog> {
+    return this.http.patch<{ displayOrder: number }, MenuItemCatalog>(
       `${this.resource_path}/items/${id}/display-order`,
       { displayOrder }
     );
@@ -300,7 +300,7 @@ export class MenusResource {
    */
   public async createItemBatch(
     data: CreateBusinessMenuItem[]
-  ): Promise<PaginatedResultType<BusinessMenuItem>> {
+  ): Promise<PaginatedResultType<MenuItemCatalog>> {
     if (data.length > ITEM_BATCH_LIMIT) {
       throw new WiilValidationError(
         `Batch size exceeds maximum limit of ${ITEM_BATCH_LIMIT}`,
@@ -318,7 +318,7 @@ export class MenusResource {
       }
     }
 
-    return this.http.post<CreateBusinessMenuItem[], PaginatedResultType<BusinessMenuItem>>(
+    return this.http.post<CreateBusinessMenuItem[], PaginatedResultType<MenuItemCatalog>>(
       `${this.resource_path}/items/batch`,
       data
     );
