@@ -11,7 +11,6 @@ import {
   UpdateServiceAppointmentSchema,
   AppointmentStatus,
   ServiceSlotQueryRequest,
-  ServiceSlotQueryRequestSchema,
   ServiceSlotQueryResponse,
   PaginatedResultType,
   PaginationRequest,
@@ -331,19 +330,17 @@ export class ServiceAppointmentsResource {
   }
 
   /**
-   * Queries available appointment slots for a service.
+   * Retrieves available appointment slots for a service.
    *
    * @param request - Slot query request parameters
    * @returns Promise resolving to available appointment slots
    *
-   * @throws {@link WiilValidationError} - When input validation fails
    * @throws {@link WiilAPIError} - When the API returns an error
    * @throws {@link WiilNetworkError} - When network communication fails
    *
    * @example
    * ```typescript
-   * const slots = await client.serviceAppointments.queryAvailableSlots({
-   *   organizationId: 'org_123',
+   * const slots = await client.serviceAppointments.getAvailableSlots({
    *   serviceId: 'svc_456',
    *   localDate: '2024-03-15',
    *   providerId: 'prov_789',
@@ -356,13 +353,18 @@ export class ServiceAppointmentsResource {
    * });
    * ```
    */
-  public async queryAvailableSlots(
+  public async getAvailableSlots(
     request: ServiceSlotQueryRequest
   ): Promise<ServiceSlotQueryResponse> {
-    return this.http.post<ServiceSlotQueryRequest, ServiceSlotQueryResponse>(
-      `${this.resource_path}/query-slots`,
-      request,
-      ServiceSlotQueryRequestSchema
+    const queryParams = new URLSearchParams();
+    queryParams.append('serviceId', request.serviceId);
+    queryParams.append('localDate', request.localDate);
+    queryParams.append('providerId', request.providerId);
+    if (request.locationId) queryParams.append('locationId', request.locationId);
+    if (request.maxResults) queryParams.append('maxResults', request.maxResults.toString());
+
+    return this.http.get<ServiceSlotQueryResponse>(
+      `${this.resource_path}/available-slots?${queryParams.toString()}`
     );
   }
 }

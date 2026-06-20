@@ -11,6 +11,8 @@ import {
   UpdateRentalReservationSchema,
   PaginatedResultType,
   PaginationRequest,
+  RentalReservationSlotQueryRequest,
+  RentalReservationSlotQueryResponse,
 } from 'wiil-core-js';
 import { HttpClient } from '../../../client/HttpClient';
 import { WiilValidationError } from '../../../errors/WiilError';
@@ -259,6 +261,33 @@ export class RentalReservationsResource {
     const path = `${this.resource_path}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
     return this.http.get<PaginatedResultType<RentalReservation>>(path);
+  }
+
+  /**
+   * Retrieves available rental reservation time slots for a given date.
+   *
+   * @param request - Slot query request parameters
+   * @returns Promise resolving to available rental slots
+   *
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   */
+  public async getAvailableSlots(
+    request: RentalReservationSlotQueryRequest
+  ): Promise<RentalReservationSlotQueryResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('resourceType', request.resourceType);
+    queryParams.append('localDate', request.localDate);
+    if (request.maxResults) queryParams.append('maxResults', request.maxResults.toString());
+    if (request.locationId) queryParams.append('locationId', request.locationId);
+    if (request.resourceId) queryParams.append('resourceId', request.resourceId);
+    if (request.returnDate) queryParams.append('returnDate', request.returnDate);
+    if (request.tierId) queryParams.append('tierId', request.tierId);
+    if (request.durationMinutes) queryParams.append('durationMinutes', request.durationMinutes.toString());
+
+    return this.http.get<RentalReservationSlotQueryResponse>(
+      `${this.resource_path}/available-slots?${queryParams.toString()}`
+    );
   }
 
   /**

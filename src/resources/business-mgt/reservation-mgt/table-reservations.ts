@@ -11,6 +11,8 @@ import {
   UpdateTableReservationSchema,
   PaginatedResultType,
   PaginationRequest,
+  TableReservationSlotQueryRequest,
+  TableReservationSlotQueryResponse,
 } from 'wiil-core-js';
 import { HttpClient } from '../../../client/HttpClient';
 import { WiilValidationError } from '../../../errors/WiilError';
@@ -217,6 +219,33 @@ export class TableReservationsResource {
     const path = `${this.resource_path}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
     return this.http.get<PaginatedResultType<TableReservation>>(path);
+  }
+
+  /**
+   * Retrieves available table reservation time slots for a given date.
+   *
+   * @param request - Slot query request parameters
+   * @returns Promise resolving to available table slots
+   *
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   */
+  public async getAvailableSlots(
+    request: TableReservationSlotQueryRequest
+  ): Promise<TableReservationSlotQueryResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('resourceType', request.resourceType);
+    queryParams.append('localDate', request.localDate);
+    queryParams.append('partySize', request.partySize.toString());
+    if (request.maxResults) queryParams.append('maxResults', request.maxResults.toString());
+    if (request.locationId) queryParams.append('locationId', request.locationId);
+    if (request.resourceId) queryParams.append('resourceId', request.resourceId);
+    if (request.floorPlanId) queryParams.append('floorPlanId', request.floorPlanId);
+    if (request.floorPlanSectionId) queryParams.append('floorPlanSectionId', request.floorPlanSectionId);
+
+    return this.http.get<TableReservationSlotQueryResponse>(
+      `${this.resource_path}/available-slots?${queryParams.toString()}`
+    );
   }
 
   /**
