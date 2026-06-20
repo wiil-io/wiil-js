@@ -5,6 +5,7 @@
 
 import {
   WiilSupportModel,
+  PaginatedResultType,
 } from 'wiil-core-js';
 import { HttpClient } from '../../client/HttpClient';
 
@@ -82,15 +83,15 @@ export class SupportModelsResource {
    *
    * @example
    * ```typescript
-   * const models = await client.supportModels.list();
-   * console.log(`Found ${models.length} models`);
-   * models.forEach(model => {
+   * const result = await client.supportModels.list();
+   * console.log(`Found ${result.meta.totalCount} models`);
+   * result.data.forEach(model => {
    *   console.log(`- ${model.name} (${model.proprietor})`);
    * });
    * ```
    */
-  public async list(): Promise<WiilSupportModel[]> {
-    return this.http.get<WiilSupportModel[]>(this.resource_path);
+  public async list(): Promise<PaginatedResultType<WiilSupportModel>> {
+    return this.http.get<PaginatedResultType<WiilSupportModel>>(this.resource_path);
   }
 
   /**
