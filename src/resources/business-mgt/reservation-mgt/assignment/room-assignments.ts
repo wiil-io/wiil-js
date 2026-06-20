@@ -157,6 +157,34 @@ export class RoomAssignmentsResource {
   }
 
   /**
+   * Retrieves active room assignments.
+   *
+   * @param params - Optional pagination parameters
+   * @returns Promise resolving to paginated list of active room assignments
+   *
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   *
+   * @example
+   * ```typescript
+   * const activeAssignments = await client.roomAssignments.getActive();
+   * console.log(`Found ${activeAssignments.meta.totalCount} active assignments`);
+   * ```
+   */
+  public async getActive(
+    params?: Partial<PaginationRequest>
+  ): Promise<PaginatedResultType<RoomAssignment>> {
+    const queryParams = new URLSearchParams();
+
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
+
+    const path = `${this.resource_path}/active${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+
+    return this.http.get<PaginatedResultType<RoomAssignment>>(path);
+  }
+
+  /**
    * Lists room assignments with optional pagination.
    *
    * @param params - Pagination parameters

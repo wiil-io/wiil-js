@@ -181,8 +181,8 @@ export class ServiceTimeOffsResource {
     params?: Partial<PaginationRequest>
   ): Promise<PaginatedResultType<ServiceProviderTimeOff>> {
     const queryParams = new URLSearchParams();
-    queryParams.append('fromDate', startDate.toString());
-    queryParams.append('toDate', endDate.toString());
+    queryParams.append('startDate', startDate.toString());
+    queryParams.append('endDate', endDate.toString());
 
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());

@@ -157,6 +157,34 @@ export class RentalAssignmentsResource {
   }
 
   /**
+   * Retrieves active rental assignments.
+   *
+   * @param params - Optional pagination parameters
+   * @returns Promise resolving to paginated list of active rental assignments
+   *
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   *
+   * @example
+   * ```typescript
+   * const activeAssignments = await client.rentalAssignments.getActive();
+   * console.log(`Found ${activeAssignments.meta.totalCount} active assignments`);
+   * ```
+   */
+  public async getActive(
+    params?: Partial<PaginationRequest>
+  ): Promise<PaginatedResultType<RentalAssignment>> {
+    const queryParams = new URLSearchParams();
+
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
+
+    const path = `${this.resource_path}/active${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+
+    return this.http.get<PaginatedResultType<RentalAssignment>>(path);
+  }
+
+  /**
    * Retrieves rental assignments with damage reported.
    *
    * @param params - Optional pagination parameters
