@@ -72,7 +72,7 @@ export class MenusResource {
    */
   public async listCategories(
     params?: Partial<PaginationRequest>
-  ): Promise<MenuCategory[]> {
+  ): Promise<PaginatedResultType<MenuCategory>> {
     const queryParams = new URLSearchParams();
 
     if (params?.page) queryParams.append('page', params.page.toString());
@@ -80,7 +80,7 @@ export class MenusResource {
 
     const path = `${this.resource_path}/categories${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
-    return this.http.get<MenuCategory[]>(path);
+    return this.http.get<PaginatedResultType<MenuCategory>>(path);
   }
 
   /**

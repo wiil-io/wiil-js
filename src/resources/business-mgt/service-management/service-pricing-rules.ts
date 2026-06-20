@@ -178,7 +178,7 @@ export class ServicePricingRulesResource {
    */
   public async update(data: UpdateServicePricingRule): Promise<ServicePricingRule> {
     return this.http.patch<UpdateServicePricingRule, ServicePricingRule>(
-      this.resource_path,
+      `${this.resource_path}/${data.id}`,
       data,
       UpdateServicePricingRuleSchema
     );

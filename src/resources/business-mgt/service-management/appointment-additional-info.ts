@@ -209,7 +209,7 @@ export class AppointmentAdditionalInfoResource {
    */
   public async update(data: UpdateAppointmentAdditionalInfo): Promise<AppointmentAdditionalInfo> {
     return this.http.patch<UpdateAppointmentAdditionalInfo, AppointmentAdditionalInfo>(
-      this.resource_path,
+      `${this.resource_path}/${data.id}`,
       data,
       UpdateAppointmentAdditionalInfoSchema
     );
