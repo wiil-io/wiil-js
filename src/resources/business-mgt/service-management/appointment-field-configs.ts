@@ -221,7 +221,7 @@ export class AppointmentFieldConfigsResource {
    */
   public async update(data: UpdateAppointmentFieldConfig): Promise<AppointmentFieldConfig> {
     return this.http.patch<UpdateAppointmentFieldConfig, AppointmentFieldConfig>(
-      this.resource_path,
+      `${this.resource_path}/${data.id}`,
       data,
       UpdateAppointmentFieldConfigSchema
     );
