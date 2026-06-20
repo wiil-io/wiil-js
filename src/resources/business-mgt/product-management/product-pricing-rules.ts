@@ -200,39 +200,39 @@ export class ProductPricingRulesResource {
     return this.http.get<PaginatedResultType<ProductPricingRule>>(path);
   }
 
-  /**
-   * Creates multiple product pricing rules in a single batch request.
-   *
-   * @param data - Array of pricing rule data (maximum 50 items)
-   * @returns Promise resolving to paginated result of created pricing rules
-   *
-   * @throws {@link WiilValidationError} - When input validation fails or batch limit exceeded
-   * @throws {@link WiilAPIError} - When the API returns an error
-   * @throws {@link WiilNetworkError} - When network communication fails
-   */
-  public async createBatch(
-    data: CreateProductPricingRule[]
-  ): Promise<PaginatedResultType<ProductPricingRule>> {
-    if (data.length > BATCH_LIMIT) {
-      throw new WiilValidationError(
-        `Batch size exceeds maximum limit of ${BATCH_LIMIT}`,
-        [{ path: ['data'], message: `Array length ${data.length} exceeds maximum of ${BATCH_LIMIT}` }]
-      );
-    }
+  // /**
+  //  * Creates multiple product pricing rules in a single batch request.
+  //  *
+  //  * @param data - Array of pricing rule data (maximum 50 items)
+  //  * @returns Promise resolving to paginated result of created pricing rules
+  //  *
+  //  * @throws {@link WiilValidationError} - When input validation fails or batch limit exceeded
+  //  * @throws {@link WiilAPIError} - When the API returns an error
+  //  * @throws {@link WiilNetworkError} - When network communication fails
+  //  */
+  // public async createBatch(
+  //   data: CreateProductPricingRule[]
+  // ): Promise<PaginatedResultType<ProductPricingRule>> {
+  //   if (data.length > BATCH_LIMIT) {
+  //     throw new WiilValidationError(
+  //       `Batch size exceeds maximum limit of ${BATCH_LIMIT}`,
+  //       [{ path: ['data'], message: `Array length ${data.length} exceeds maximum of ${BATCH_LIMIT}` }]
+  //     );
+  //   }
 
-    for (let i = 0; i < data.length; i++) {
-      const validation = CreateProductPricingRuleSchema.safeParse(data[i]);
-      if (!validation.success) {
-        throw new WiilValidationError(
-          `Validation failed for item at index ${i}`,
-          validation.error.issues
-        );
-      }
-    }
+  //   for (let i = 0; i < data.length; i++) {
+  //     const validation = CreateProductPricingRuleSchema.safeParse(data[i]);
+  //     if (!validation.success) {
+  //       throw new WiilValidationError(
+  //         `Validation failed for item at index ${i}`,
+  //         validation.error.issues
+  //       );
+  //     }
+  //   }
 
-    return this.http.post<CreateProductPricingRule[], PaginatedResultType<ProductPricingRule>>(
-      `${this.resource_path}/batch`,
-      data
-    );
-  }
+  //   return this.http.post<CreateProductPricingRule[], PaginatedResultType<ProductPricingRule>>(
+  //     `${this.resource_path}/batch`,
+  //     data
+  //   );
+  // }
 }
