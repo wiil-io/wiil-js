@@ -9,6 +9,9 @@ import {
   CreateFloorPlanSchema,
   UpdateFloorPlan,
   UpdateFloorPlanSchema,
+  CreateFloorPlanDefinition,
+  CreateFloorPlanDefinitionSchema,
+  FloorPlanDefinition,
   PaginatedResultType,
   PaginationRequest,
 } from 'wiil-core-js';
@@ -40,6 +43,7 @@ import { HttpClient } from '../../../client/HttpClient';
 export class FloorPlansResource {
   private readonly http: HttpClient;
   private readonly resource_path = '/floor-plans';
+  private readonly definition_path = '/floor-plans-definition';
 
   /**
    * Creates a new FloorPlansResource instance.
@@ -80,6 +84,93 @@ export class FloorPlansResource {
       data,
       CreateFloorPlanSchema
     );
+  }
+
+  /**
+   * Atomically creates a floor plan together with its sections and table placements
+   * in a single request.
+   *
+   * @param data - Floor plan definition data including nested sections and tables
+   * @returns Promise resolving to the fully hydrated floor plan definition
+   *
+   * @throws {@link WiilValidationError} - When input validation fails
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   *
+   * @example
+   * ```typescript
+   * const definition = await client.floorPlans.createDefinition({
+   *   name: 'Main Dining',
+   *   description: 'Primary dining area',
+   *   capacity: 40,
+   *   canvasDimensions: { width: 800, height: 600, unit: 'px' },
+   *   isActive: true,
+   *   sections: [
+   *     {
+   *       name: 'Section A',
+   *       capacity: 20,
+   *       color: '#FF5733',
+   *       tables: [
+   *         { number: 'T1', x: 100, y: 100, width: 80, height: 80, shape: 'round', minParty: 1, maxParty: 4 },
+   *       ],
+   *     },
+   *   ],
+   * });
+   * ```
+   */
+  public async createDefinition(data: CreateFloorPlanDefinition): Promise<FloorPlanDefinition> {
+    return this.http.post<CreateFloorPlanDefinition, FloorPlanDefinition>(
+      this.definition_path,
+      data,
+      CreateFloorPlanDefinitionSchema
+    );
+  }
+
+  /**
+   * Retrieves a fully hydrated floor plan definition by ID.
+   *
+   * @param id - Floor plan ID
+   * @returns Promise resolving to the floor plan definition with nested sections and tables
+   *
+   * @throws {@link WiilAPIError} - When the floor plan is not found or API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   *
+   * @example
+   * ```typescript
+   * const definition = await client.floorPlans.getDefinition('fp_123');
+   * console.log('Sections:', definition.sections.length);
+   * ```
+   */
+  public async getDefinition(id: string): Promise<FloorPlanDefinition> {
+    return this.http.get<FloorPlanDefinition>(`${this.definition_path}/${id}`);
+  }
+
+  /**
+   * Lists all floor plan definitions with optional pagination.
+   *
+   * @param params - Optional pagination parameters
+   * @returns Promise resolving to paginated list of floor plan definitions
+   *
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   *
+   * @example
+   * ```typescript
+   * const result = await client.floorPlans.listDefinitions({ page: 1, pageSize: 20 });
+   * console.log(`Found ${result.meta.totalCount} definitions`);
+   * ```
+   */
+  public async listDefinitions(
+    params?: Partial<PaginationRequest>
+  ): Promise<PaginatedResultType<FloorPlanDefinition>> {
+    const queryParams = new URLSearchParams();
+
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
+
+    const path = `${this.definition_path}s${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+
+    return this.http.get<PaginatedResultType<FloorPlanDefinition>>(path);
   }
 
   /**

@@ -5,7 +5,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import nock from 'nock';
 import { WiilClient } from '../../../client/WiilClient';
-import { FloorPlan, PaginatedResultType, CanvasUnit } from 'wiil-core-js';
+import { FloorPlan, FloorPlanDefinition, PaginatedResultType, CanvasUnit, TableShape } from 'wiil-core-js';
 import { WiilAPIError } from '../../../errors/WiilError';
 
 const BASE_URL = 'https://api.wiil.io/v1';
@@ -597,6 +597,119 @@ describe('FloorPlansResource', () => {
       expect(result.meta.page).toBe(4);
       expect(result.meta.pageSize).toBe(25);
       expect(result.meta.hasPreviousPage).toBe(true);
+    });
+  });
+
+  describe('createDefinition', () => {
+    it('should atomically create a floor plan with sections and table placements', async () => {
+      const input = {
+        name: 'Main Dining',
+        description: 'Primary dining area',
+        capacity: 20,
+        canvasDimensions: { width: 800, height: 600, unit: CanvasUnit.PX },
+        isActive: true,
+        sections: [
+          {
+            name: 'Section A',
+            capacity: 20,
+            color: '#FF5733',
+            isActive: true,
+            sortOrder: 1,
+            tables: [
+              {
+                number: 'T1',
+                x: 100,
+                y: 100,
+                width: 80,
+                height: 80,
+                shape: TableShape.ROUND,
+                minParty: 1,
+                maxParty: 4,
+                combinableWith: [],
+              },
+            ],
+          },
+        ],
+      };
+
+      const mockResponse: FloorPlanDefinition = {
+        id: 'fp_def_123',
+        name: 'Main Dining',
+        description: 'Primary dining area',
+        capacity: 20,
+        canvasDimensions: { width: 800, height: 600, unit: CanvasUnit.PX },
+        isActive: true,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        sections: [
+          {
+            id: 'sec_001',
+            locationId: 'loc_123',
+            floorPlanId: 'fp_def_123',
+            name: 'Section A',
+            capacity: 20,
+            color: '#FF5733',
+            isActive: true,
+            sortOrder: 1,
+            tables: [
+              {
+                id: 'tbl_001',
+                tableResourceId: 'fp_def_123',
+                floorPlanSectionId: 'sec_001',
+                number: 'T1',
+                x: 100,
+                y: 100,
+                width: 80,
+                height: 80,
+                shape: TableShape.ROUND,
+                minParty: 1,
+                maxParty: 4,
+                combinableWith: [],
+              },
+            ],
+          },
+        ],
+      };
+
+      nock(BASE_URL)
+        .post('/floor-plans-definition', input)
+        .matchHeader('X-Wiil-Api-Key', API_KEY)
+        .reply(200, {
+          success: true,
+          data: mockResponse,
+          metadata: { timestamp: Date.now(), version: 'v1' },
+        });
+
+      const result = await client.floorPlans.createDefinition(input);
+
+      expect(result.id).toBe('fp_def_123');
+      expect(result.name).toBe('Main Dining');
+      expect(result.sections).toHaveLength(1);
+      expect(result.sections[0].name).toBe('Section A');
+      expect(result.sections[0].tables).toHaveLength(1);
+      expect(result.sections[0].tables[0].number).toBe('T1');
+      expect(result.sections[0].tables[0].tableResourceId).toBe('fp_def_123');
+    });
+
+    it('should throw API error on invalid definition payload', async () => {
+      nock(BASE_URL)
+        .post('/floor-plans-definition')
+        .reply(400, {
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'Invalid floor plan definition' },
+          metadata: { timestamp: Date.now(), version: 'v1' },
+        });
+
+      await expect(
+        client.floorPlans.createDefinition({
+          name: 'Bad',
+          description: 'Missing required fields',
+          capacity: 0,
+          isActive: false,
+          canvasDimensions: { width: 0, height: 0, unit: CanvasUnit.PX },
+          sections: [],
+        })
+      ).rejects.toThrow(WiilAPIError);
     });
   });
 });
