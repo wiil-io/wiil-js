@@ -43,7 +43,7 @@ import { HttpClient } from '../../../client/HttpClient';
 export class FloorPlansResource {
   private readonly http: HttpClient;
   private readonly resource_path = '/floor-plans';
-  private readonly definition_path = '/floor-plans-definition';
+  private readonly definition_path = '/floor-plans-definitions';
 
   /**
    * Creates a new FloorPlansResource instance.
@@ -168,7 +168,7 @@ export class FloorPlansResource {
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
 
-    const path = `${this.definition_path}s${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const path = `${this.definition_path}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
     return this.http.get<PaginatedResultType<FloorPlanDefinition>>(path);
   }
