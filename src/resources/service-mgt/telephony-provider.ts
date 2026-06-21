@@ -10,6 +10,7 @@ import {
   BusinessPhoneNumberPurchaseRequest,
   PhoneNumberPurchase,
   PhonePurchaseStatus,
+  PaginatedResultType,
 } from 'wiil-core-js';
 import { HttpClient } from '../../client/HttpClient';
 
@@ -117,7 +118,7 @@ export class TelephonyProviderResource {
    */
   public async getPhoneNumbers(
     options?: PhoneNumberSearchOptions
-  ): Promise<BasePhoneNumberInfo[]> {
+  ): Promise<PaginatedResultType<BasePhoneNumberInfo>> {
     const queryParams = new URLSearchParams();
 
     if (options?.areaCode) queryParams.append('areaCode', options.areaCode);
@@ -125,7 +126,7 @@ export class TelephonyProviderResource {
     if (options?.postalCode) queryParams.append('postalCode', options.postalCode);
 
     const query = queryParams.toString();
-    return this.http.get<BasePhoneNumberInfo[]>(
+    return this.http.get<PaginatedResultType<BasePhoneNumberInfo>>(
       `${this.resource_path}/numbers${query ? `?${query}` : ''}`
     );
   }
@@ -147,8 +148,8 @@ export class TelephonyProviderResource {
    * });
    * ```
    */
-  public async getPricing(): Promise<PhoneNumberPricing[]> {
-    return this.http.get<PhoneNumberPricing[]>(
+  public async getPricing(): Promise<PaginatedResultType<PhoneNumberPricing>> {
+    return this.http.get<PaginatedResultType<PhoneNumberPricing>>(
       `${this.resource_path}/pricing`
     );
   }
