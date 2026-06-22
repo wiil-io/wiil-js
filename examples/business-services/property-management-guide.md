@@ -71,17 +71,6 @@ enum PropertyType {
 }
 ```
 
-### Category Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| organizationId | string | Yes | Business account ID |
-| name | string | Yes | Category name |
-| description | string | No | Category description |
-| propertyType | string | Yes | Type: 'residential', 'commercial', 'land' |
-| displayOrder | number | No | Display order in listings |
-| isDefault | boolean | No | Default category (default: false) |
-
 ### Create Category
 
 ```typescript
@@ -145,23 +134,6 @@ console.log('Deleted:', deleted);
 ## Property Addresses
 
 Property addresses are standalone entities that can be verified and associated with properties.
-
-### Address Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| organizationId | string | Yes | Business account ID |
-| street | string | Yes | Street address |
-| unit | string | No | Unit or apartment number |
-| city | string | Yes | City name |
-| state | string | Yes | State or province |
-| postalCode | string | No | Postal or ZIP code |
-| country | string | Yes | Country |
-| coordinates | object | No | { latitude, longitude } |
-| neighborhood | string | No | Neighborhood or district name |
-| district | string | No | Administrative district |
-| isVerified | boolean | No | Address verified (default: false) |
-| primaryUserAccountId | string | No | User account managing the property |
 
 ### Create Address
 
@@ -312,54 +284,6 @@ enum RentalPeriod {
 }
 ```
 
-### Property Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| organizationId | string | Yes | Business account ID |
-| categoryId | string | Yes | Category ID |
-| addressId | string | Yes | Address ID |
-| title | string | Yes | Listing title |
-| description | string | No | Detailed description |
-| propertyType | string | Yes | Type: 'residential', 'commercial', 'land' |
-| propertySubType | string | Yes | Subtype (house, apartment, etc.) |
-| listingType | string | Yes | Listing type: 'sale', 'rent', 'both' |
-| listingStatus | string | No | Status (default: 'draft') |
-| salePrice | number | No | Sale price |
-| salePriceCurrency | string | No | Currency (default: 'USD') |
-| rentalPrice | number | No | Rental price |
-| rentalPeriod | string | No | Rental period |
-| rentalPriceCurrency | string | No | Currency (default: 'USD') |
-| priceNegotiable | boolean | No | Negotiable (default: false) |
-| features | object | No | Property features (see below) |
-| condition | string | No | Condition |
-| furnished | boolean | No | Furnished (default: false) |
-| images | string[] | No | Image URLs |
-| virtualTourUrl | string | No | Virtual tour URL |
-| videoUrl | string | No | Video URL |
-| availableFrom | number | No | Available from (timestamp) |
-| availableTo | number | No | Available until (timestamp) |
-| isActive | boolean | No | Active (default: true) |
-| isFeatured | boolean | No | Featured (default: false) |
-| isVerified | boolean | No | Verified (default: false) |
-| externalId | string | No | External system ID |
-| mlsNumber | string | No | MLS listing number |
-
-### Property Features Schema
-
-| Field | Type | Description |
-|-------|------|-------------|
-| bedrooms | number | Number of bedrooms |
-| bathrooms | number | Number of bathrooms |
-| parkingSpaces | number | Parking spaces |
-| squareFootage | number | Total square footage |
-| lotSize | number | Lot size |
-| lotSizeUnit | string | Unit: 'sqft', 'acres', 'sqm', 'hectares' |
-| yearBuilt | number | Year built |
-| floors | number | Number of floors |
-| amenities | string[] | List of amenities |
-| utilities | string[] | Available utilities |
-
 ### Create Property for Sale
 
 ```typescript
@@ -425,7 +349,7 @@ const rental = await client.propertyConfig.create({
   },
   condition: PropertyCondition.GOOD,
   furnished: true,
-  availableFrom: Date.now() + 7 * 24 * 60 * 60 * 1000, // 1 week from now
+  availableFrom: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60), // 1 week from now (UTC seconds)
   isActive: true,
 });
 
@@ -714,35 +638,6 @@ enum PropertyInquiryStatus {
 }
 ```
 
-### Inquiry Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| organizationId | string | Yes | Business account ID |
-| propertyId | string | Yes | Property ID |
-| customerId | string | No | Existing customer ID |
-| customer | object | Yes | Customer details |
-| inquiryType | string | Yes | Type: 'offer', 'general' |
-| message | string | No | Inquiry message |
-| source | string | No | Source (default: 'direct') |
-| status | string | No | Status (default: 'new') |
-| preferredViewingDate | number | No | Preferred date (timestamp) |
-| preferredViewingTime | string | No | Preferred time |
-| scheduledViewingDate | number | No | Scheduled date (timestamp) |
-| viewingCompleted | boolean | No | Viewing done (default: false) |
-| viewingNotes | string | No | Viewing notes |
-| followUpDate | number | No | Follow-up date (timestamp) |
-| followUpNotes | string | No | Follow-up notes |
-| assignedAgentId | string | No | Assigned agent ID |
-| convertedToTransaction | boolean | No | Converted (default: false) |
-| transactionId | string | No | Transaction ID |
-| transactionType | string | No | Type: 'purchase', 'lease' |
-| interestedInBuying | boolean | No | Buying interest (default: false) |
-| interestedInRenting | boolean | No | Renting interest (default: false) |
-| budgetMin | number | No | Minimum budget |
-| budgetMax | number | No | Maximum budget |
-| notes | string | No | Internal notes |
-
 ### Create Inquiry
 
 ```typescript
@@ -762,7 +657,7 @@ const inquiry = await client.propertyInquiries.create({
   inquiryType: PropertyInquiryType.GENERAL,
   message: 'I am interested in scheduling a viewing for this property.',
   source: 'website',
-  preferredViewingDate: Date.now() + 3 * 24 * 60 * 60 * 1000, // 3 days
+  preferredViewingDate: Math.floor(Date.now() / 1000) + (3 * 24 * 60 * 60), // 3 days
   preferredViewingTime: '10:00 AM',
   interestedInBuying: true,
   budgetMin: 500000,
@@ -856,7 +751,7 @@ console.log('Total:', result.meta.totalCount);
 const updated = await client.propertyInquiries.update({
   id: 'inq_123',
   assignedAgentId: 'agent_456',
-  scheduledViewingDate: Date.now() + 2 * 24 * 60 * 60 * 1000,
+  scheduledViewingDate: Math.floor(Date.now() / 1000) + (2 * 24 * 60 * 60),
   notes: 'Client prefers morning viewings',
 });
 
@@ -871,7 +766,7 @@ import { PropertyInquiryStatus } from 'wiil-js';
 const updated = await client.propertyInquiries.updateStatus('inq_123', {
   id: 'inq_123',
   status: PropertyInquiryStatus.VIEWING_SCHEDULED,
-  scheduledViewingDate: Date.now() + 2 * 24 * 60 * 60 * 1000,
+  scheduledViewingDate: Math.floor(Date.now() / 1000) + (2 * 24 * 60 * 60),
 });
 
 console.log('Status updated:', updated.status);
@@ -885,7 +780,7 @@ const updated = await client.propertyInquiries.updateStatus('inq_123', {
   status: PropertyInquiryStatus.FOLLOW_UP,
   viewingCompleted: true,
   viewingNotes: 'Client loved the property, interested in making an offer',
-  followUpDate: Date.now() + 1 * 24 * 60 * 60 * 1000,
+  followUpDate: Math.floor(Date.now() / 1000) + (1 * 24 * 60 * 60),
   followUpNotes: 'Call to discuss offer terms',
 });
 
@@ -1043,7 +938,7 @@ async function realEstateWorkflow() {
     inquiryType: PropertyInquiryType.GENERAL,
     message: 'Interested in a private showing of this estate.',
     source: 'agent_referral',
-    preferredViewingDate: Date.now() + 7 * 24 * 60 * 60 * 1000,
+    preferredViewingDate: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60),
     preferredViewingTime: '2:00 PM',
     interestedInBuying: true,
     budgetMin: 40000000,
@@ -1061,7 +956,7 @@ async function realEstateWorkflow() {
   const scheduledInquiry = await client.propertyInquiries.updateStatus(inquiry.id, {
     id: inquiry.id,
     status: PropertyInquiryStatus.VIEWING_SCHEDULED,
-    scheduledViewingDate: Date.now() + 5 * 24 * 60 * 60 * 1000,
+    scheduledViewingDate: Math.floor(Date.now() / 1000) + (5 * 24 * 60 * 60),
   });
 
   console.log('Viewing scheduled for:', new Date(scheduledInquiry.scheduledViewingDate!));
@@ -1072,7 +967,7 @@ async function realEstateWorkflow() {
     status: PropertyInquiryStatus.FOLLOW_UP,
     viewingCompleted: true,
     viewingNotes: 'Client very interested. Loved the private beach and dock.',
-    followUpDate: Date.now() + 1 * 24 * 60 * 60 * 1000,
+    followUpDate: Math.floor(Date.now() / 1000) + (1 * 24 * 60 * 60),
     followUpNotes: 'Client consulting with advisors, will call tomorrow.',
   });
 

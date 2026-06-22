@@ -1,76 +1,94 @@
 # Menu Management Guide
 
-This guide covers managing restaurant menus and food service orders using the WIIL Platform JS SDK.
+**Manage restaurant menus and food service orders using the WIIL Platform JS SDK**
+
+**Setup Time**: ~15 minutes
+
+---
+
+## Overview
+
+The Menu Management system provides comprehensive tools for managing restaurant menus, item variants, modifiers, and customer orders.
+
+**Key Resources:**
+- `client.menus` - Categories and menu items
+- `client.menuItemVariants` - Size/price variations
+- `client.modifiers` - Customization options (toppings, sides)
+- `client.menuOrders` - Customer orders
+
+---
+
+## Prerequisites
+
+1. Active WIIL Platform account
+2. API key with business management permissions
+3. Node.js project with wiil-js SDK installed
+
+---
 
 ## Quick Start
 
 ```typescript
-import { WiilClient, MenuOrderType, OrderStatus, PaymentStatus } from 'wiil-js';
+import { WiilClient } from 'wiil-js';
+import { MenuOrderType } from 'wiil-core-js';
 
-const client = new WiilClient({
-  apiKey: 'your-api-key',
-});
+const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
 
-// Create a menu category
+// 1. Create a menu category
 const category = await client.menus.createCategory({
   name: 'Main Courses',
   description: 'Signature entrees and main dishes',
   displayOrder: 1,
 });
 
-// Create a menu item
+// 2. Create a menu item with required variants
 const menuItem = await client.menus.createItem({
+  categoryId: category.id,
   name: 'Cheeseburger',
   description: 'Angus beef with aged cheddar',
   price: 12.99,
-  categoryId: category.id,
-  ingredients: ['beef', 'cheese', 'lettuce', 'tomato', 'bun'],
-  allergens: ['gluten', 'dairy'],
-  nutritionalInfo: {
-    calories: 650,
-    protein: 35,
-    carbs: 48,
-    fat: 32,
-  },
   isAvailable: true,
-  preparationTime: 15,
   isActive: true,
+  preparationTime: 15,
   displayOrder: 1,
+  variants: [
+    {
+      name: 'Default',
+      price: 12.99,
+      isDefault: true,
+      isActive: true,
+      isAvailable: true,
+    },
+  ],
 });
 
-// Create an order
+// 3. Create an order (requires variantId)
 const order = await client.menuOrders.create({
+  customerId: 'cust_123',
   type: MenuOrderType.TAKEOUT,
+  orderDate: Date.now(),
   items: [
     {
       menuItemId: menuItem.id,
+      variantId: menuItem.variants[0].id,
       itemName: menuItem.name,
       quantity: 2,
-      unitPrice: menuItem.price,
-      totalPrice: menuItem.price * 2,
+      unitPrice: 12.99,
+      totalPrice: 25.98,
     },
   ],
-  customerId: 'cust_123',
   pricing: {
     subtotal: 25.98,
-    tax: 2.60,
-    tip: 5.00,
-    total: 33.58,
+    total: 25.98,
   },
-  orderDate: Date.now(),
-  source: 'web',
 });
+
+console.log(`Order Created: ${order.id}`);
 ```
 
+---
+
 ## Menu Categories
-
-### Category Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| name | string | Yes | Category name |
-| description | string | No | Category description |
-| displayOrder | number | No | Display order for sorting |
 
 ### Create Category
 
@@ -81,7 +99,7 @@ const category = await client.menus.createCategory({
   displayOrder: 1,
 });
 
-console.log('Category created:', category.id);
+console.log(`Category Created: ${category.id}`);
 ```
 
 ### Get Category
@@ -89,19 +107,18 @@ console.log('Category created:', category.id);
 ```typescript
 const category = await client.menus.getCategory('cat_123');
 
-console.log('Category:', category.name);
+console.log(`Category: ${category.name}`);
 ```
 
 ### List Categories
 
 ```typescript
-const result = await client.menus.listCategories({
-  page: 1,
-  pageSize: 20,
-});
+const result = await client.menus.listCategories();
 
-console.log('Categories:', result.data.length);
-console.log('Total:', result.meta.totalCount);
+console.log(`Categories: ${result.data.length}`);
+result.data.forEach(cat => {
+  console.log(`- ${cat.name}`);
+});
 ```
 
 ### Update Category
@@ -113,58 +130,99 @@ const updated = await client.menus.updateCategory({
   displayOrder: 2,
 });
 
-console.log('Category updated:', updated.name);
+console.log(`Updated: ${updated.name}`);
 ```
 
 ### Delete Category
 
 ```typescript
-const deleted = await client.menus.deleteCategory('cat_123');
-
-console.log('Deleted:', deleted);
+await client.menus.deleteCategory('cat_123');
+console.log('Category deleted');
 ```
+
+### Batch Create Categories
+
+```typescript
+const result = await client.menus.createCategoryBatch([
+  { name: 'Appetizers', description: 'Start your meal', displayOrder: 1 },
+  { name: 'Main Courses', description: 'Signature entrees', displayOrder: 2 },
+  { name: 'Desserts', description: 'Sweet treats', displayOrder: 3 },
+]);
+
+console.log(`Created ${result.data.length} categories`);
+```
+
+---
 
 ## Menu Items
 
-### Item Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| name | string | Yes | Item name |
-| description | string | No | Item description |
-| price | number | Yes | Item price |
-| categoryId | string | No | Category ID (nullable) |
-| ingredients | string[] | No | List of ingredients |
-| allergens | string[] | No | Allergen information |
-| nutritionalInfo | object | No | Nutritional data (calories, protein, carbs, fat) |
-| isAvailable | boolean | No | Available for ordering (default: true) |
-| preparationTime | number | No | Preparation time in minutes |
-| isActive | boolean | No | Item is active (default: true) |
-| displayOrder | number | No | Display order for sorting |
+Menu items **require at least one variant** for pricing.
 
 ### Create Item
 
 ```typescript
 const item = await client.menus.createItem({
+  categoryId: 'cat_123',
   name: 'Caesar Salad',
   description: 'Fresh romaine with house-made dressing',
   price: 9.99,
-  categoryId: 'cat_123',
-  ingredients: ['romaine lettuce', 'parmesan', 'croutons', 'caesar dressing'],
-  allergens: ['dairy', 'gluten', 'eggs'],
-  nutritionalInfo: {
-    calories: 320,
-    protein: 8,
-    carbs: 22,
-    fat: 18,
-  },
   isAvailable: true,
-  preparationTime: 10,
   isActive: true,
+  preparationTime: 10,
   displayOrder: 1,
+  variants: [
+    {
+      name: 'Default',
+      price: 9.99,
+      isDefault: true,
+      isActive: true,
+      isAvailable: true,
+    },
+  ],
 });
 
-console.log('Item created:', item.id);
+console.log(`Item Created: ${item.id}`);
+console.log(`Variant ID: ${item.variants[0].id}`);
+```
+
+### Create Item with Multiple Variants
+
+```typescript
+const pizza = await client.menus.createItem({
+  categoryId: 'cat_main',
+  name: 'Margherita Pizza',
+  description: 'Classic tomato and mozzarella',
+  price: 14.99,
+  isAvailable: true,
+  isActive: true,
+  preparationTime: 20,
+  displayOrder: 1,
+  variants: [
+    {
+      name: 'Small (10")',
+      price: 14.99,
+      isDefault: true,
+      isActive: true,
+      isAvailable: true,
+    },
+    {
+      name: 'Medium (12")',
+      price: 18.99,
+      isDefault: false,
+      isActive: true,
+      isAvailable: true,
+    },
+    {
+      name: 'Large (14")',
+      price: 22.99,
+      isDefault: false,
+      isActive: true,
+      isAvailable: true,
+    },
+  ],
+});
+
+console.log(`Created pizza with ${pizza.variants.length} sizes`);
 ```
 
 ### Get Item
@@ -172,43 +230,17 @@ console.log('Item created:', item.id);
 ```typescript
 const item = await client.menus.getItem('item_123');
 
-console.log('Item:', item.name);
-console.log('Price:', item.price);
+console.log(`Item: ${item.name}`);
+console.log(`Price: $${item.price}`);
+console.log(`Variants: ${item.variants?.length}`);
 ```
 
-### List All Items
+### List Items
 
 ```typescript
-const result = await client.menus.listItems({
-  page: 1,
-  pageSize: 50,
-  includeDeleted: false,
-});
+const result = await client.menus.listItems();
 
-console.log('Items:', result.data.length);
-```
-
-### Get Items by Category
-
-```typescript
-const result = await client.menus.getItemsByCategory('cat_123', {
-  page: 1,
-  pageSize: 20,
-  includeUnavailable: false,
-});
-
-console.log('Items in category:', result.data.length);
-```
-
-### Get Popular Items
-
-```typescript
-const result = await client.menus.getPopularItems({
-  page: 1,
-  pageSize: 10,
-});
-
-console.log('Top items:', result.data.map(item => item.name));
+console.log(`Items: ${result.data.length}`);
 ```
 
 ### Update Item
@@ -216,222 +248,333 @@ console.log('Top items:', result.data.map(item => item.name));
 ```typescript
 const updated = await client.menus.updateItem({
   id: 'item_123',
-  price: 10.99,
+  description: 'Updated: Fresh romaine with premium Caesar dressing',
   isAvailable: true,
+  isActive: true,
 });
 
-console.log('Item updated:', updated.name);
+console.log(`Updated: ${updated.description}`);
 ```
 
 ### Delete Item
 
 ```typescript
-const deleted = await client.menus.deleteItem('item_123');
-
-console.log('Deleted:', deleted);
+await client.menus.deleteItem('item_123');
+console.log('Item deleted');
 ```
 
-## Batch Operations
-
-Batch operations allow you to create multiple resources in a single API request, improving performance for bulk data imports.
-
-### Batch Create Categories
-
-Create up to 50 menu categories in a single request:
+### Batch Create Items
 
 ```typescript
-const categories = await client.menus.createCategoryBatch([
-  { name: 'Appetizers', description: 'Start your meal', displayOrder: 1 },
-  { name: 'Main Courses', description: 'Signature entrees', displayOrder: 2 },
-  { name: 'Desserts', description: 'Sweet treats', displayOrder: 3 },
-  { name: 'Beverages', description: 'Drinks and refreshments', displayOrder: 4 },
-]);
-
-console.log(`Created ${categories.data.length} categories`);
-categories.data.forEach(cat => {
-  console.log(`- ${cat.name}: ${cat.id}`);
-});
-```
-
-### Batch Create Menu Items
-
-Create up to 100 menu items in a single request:
-
-```typescript
-const items = await client.menus.createItemBatch([
+const result = await client.menus.createItemBatch([
   {
+    categoryId: 'cat_appetizers',
     name: 'Buffalo Wings',
     description: 'Crispy wings with hot sauce',
     price: 11.99,
-    categoryId: 'cat_appetizers',
-    ingredients: ['chicken wings', 'buffalo sauce'],
-    allergens: ['dairy'],
     isAvailable: true,
-    preparationTime: 20,
     isActive: true,
+    variants: [{ name: 'Default', price: 11.99, isDefault: true, isActive: true, isAvailable: true }],
   },
   {
-    name: 'Caesar Salad',
-    description: 'Fresh romaine with house dressing',
-    price: 9.99,
     categoryId: 'cat_appetizers',
-    ingredients: ['romaine', 'parmesan', 'croutons'],
-    allergens: ['dairy', 'gluten'],
+    name: 'Mozzarella Sticks',
+    description: 'Breaded and fried with marinara',
+    price: 8.99,
     isAvailable: true,
-    preparationTime: 10,
     isActive: true,
-  },
-  {
-    name: 'Classic Burger',
-    description: 'Angus beef with all the fixings',
-    price: 14.99,
-    categoryId: 'cat_main',
-    ingredients: ['beef', 'lettuce', 'tomato', 'onion'],
-    allergens: ['gluten'],
-    isAvailable: true,
-    preparationTime: 15,
-    isActive: true,
+    variants: [{ name: 'Default', price: 8.99, isDefault: true, isActive: true, isAvailable: true }],
   },
 ]);
 
-console.log(`Created ${items.data.length} menu items`);
+console.log(`Created ${result.data.length} items`);
 ```
 
-### Batch Limits
+---
 
-| Resource     | Maximum per Batch |
-|--------------|-------------------|
-| Categories   | 50                |
-| Menu Items   | 100               |
+## Menu Item Variants
 
-**Note:** Batch operations validate each item individually. If validation fails for any item, the entire batch request fails with an error indicating the index of the failing item.
+Manage size/price variations for menu items separately.
+
+### Create Variant
 
 ```typescript
-try {
-  const items = await client.menus.createItemBatch(menuItems);
-} catch (error) {
-  // Error message includes the index: "Validation failed for item at index 2"
-  console.error('Batch creation failed:', error.message);
+const variant = await client.menuItemVariants.create({
+  menuItemId: 'item_123',
+  name: 'Extra Large',
+  sku: 'PIZZA-XL-001',
+  price: 26.99,
+  isDefault: false,
+  displayOrder: 4,
+});
+
+console.log(`Variant Created: ${variant.id}`);
+```
+
+### Get Variant
+
+```typescript
+const variant = await client.menuItemVariants.get('variant_123');
+
+console.log(`Variant: ${variant.name} - $${variant.price}`);
+```
+
+### Get Default Variant
+
+```typescript
+const defaultVariant = await client.menuItemVariants.getDefault('item_123');
+
+if (defaultVariant) {
+  console.log(`Default: ${defaultVariant.name} - $${defaultVariant.price}`);
 }
 ```
 
+### Update Variant
+
+```typescript
+const updated = await client.menuItemVariants.update('variant_123', {
+  id: 'variant_123',
+  price: 27.99,
+  isAvailable: true,
+});
+
+console.log(`Updated price: $${updated.price}`);
+```
+
+### Delete Variant
+
+```typescript
+await client.menuItemVariants.delete('variant_123');
+console.log('Variant deleted');
+```
+
+### Batch Create Variants
+
+```typescript
+const result = await client.menuItemVariants.createBatch([
+  {
+    menuItemId: 'item_123',
+    name: 'Medium',
+    price: 18.99,
+    isDefault: false,
+    isActive: true,
+    isAvailable: true,
+  },
+  {
+    menuItemId: 'item_123',
+    name: 'Large',
+    price: 22.99,
+    isDefault: false,
+    isActive: true,
+    isAvailable: true,
+  },
+]);
+
+console.log(`Created ${result.data.length} variants`);
+```
+
+---
+
+## Modifiers
+
+Modifiers allow customers to customize menu items (toppings, sides, cooking preferences).
+
+### Modifier Groups
+
+Groups organize related modifier options.
+
+```typescript
+// Create modifier group with options
+const toppingsGroup = await client.modifiers.createGroup({
+  name: 'Toppings',
+  description: 'Add extra toppings',
+  isRequired: false,
+  minSelection: 0,
+  maxSelection: 3,
+  displayOrder: 1,
+  isActive: true,
+  options: [
+    {
+      name: 'Extra Cheese',
+      priceDelta: 1.50,
+      displayOrder: 1,
+      isDefault: false,
+      isActive: true,
+    },
+    {
+      name: 'Bacon',
+      priceDelta: 2.00,
+      displayOrder: 2,
+      isDefault: false,
+      isActive: true,
+    },
+    {
+      name: 'Avocado',
+      priceDelta: 2.50,
+      displayOrder: 3,
+      isDefault: false,
+      isActive: true,
+    },
+  ],
+});
+
+console.log(`Group Created: ${toppingsGroup.id}`);
+```
+
+### Get Modifier Group
+
+```typescript
+const group = await client.modifiers.getGroup('group_123');
+
+console.log(`Group: ${group.name}`);
+console.log(`Required: ${group.isRequired}`);
+console.log(`Max Selection: ${group.maxSelection}`);
+```
+
+### List Modifier Groups
+
+```typescript
+const result = await client.modifiers.listGroups();
+
+console.log(`Groups: ${result.data.length}`);
+```
+
+### Update Modifier Group
+
+```typescript
+const updated = await client.modifiers.updateGroup('group_123', {
+  id: 'group_123',
+  description: 'Updated: Premium toppings',
+});
+
+console.log(`Updated: ${updated.description}`);
+```
+
+### Delete Modifier Group
+
+```typescript
+await client.modifiers.deleteGroup('group_123');
+console.log('Group deleted');
+```
+
+### Modifier Options
+
+Add individual options to a group.
+
+```typescript
+// Create option
+const option = await client.modifiers.createOption({
+  modifierGroupId: 'group_123',
+  name: 'Jalapenos',
+  description: 'Spicy sliced jalapenos',
+  priceDelta: 0.75,
+  displayOrder: 4,
+  isDefault: false,
+  isActive: true,
+});
+
+console.log(`Option Created: ${option.id}`);
+
+// Get options by group
+const options = await client.modifiers.getOptionsByGroup('group_123');
+console.log(`Options: ${options.data.length}`);
+
+// Update option
+const updated = await client.modifiers.updateOption('option_123', {
+  id: 'option_123',
+  priceDelta: 1.00,
+});
+
+// Delete option
+await client.modifiers.deleteOption('option_123');
+```
+
+### Item Modifier Bindings
+
+Link modifier groups to menu items.
+
+```typescript
+// Create binding
+const binding = await client.modifiers.createBinding({
+  menuItemId: 'item_burger',
+  modifierGroupId: 'group_toppings',
+  displayOrder: 1,
+  isRequired: false,
+});
+
+console.log(`Binding Created: ${binding.id}`);
+
+// Get bindings for menu item
+const bindings = await client.modifiers.getBindingsByMenuItem('item_burger');
+console.log(`Item has ${bindings.data.length} modifier groups`);
+
+// Update binding
+const updated = await client.modifiers.updateBinding('binding_123', {
+  id: 'binding_123',
+  displayOrder: 2,
+  isActive: true,
+});
+
+// Delete binding
+await client.modifiers.deleteBinding('binding_123');
+```
+
+---
+
 ## Menu Orders
-
-### Order Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| type | string | Yes | Order type: 'dine_in', 'takeout', 'delivery' |
-| items | array | Yes | Order items (see Item Schema below) |
-| customerId | string | Yes | Customer ID |
-| customer | object | No | Customer information (name, phone, email, address) |
-| pricing | object | Yes | Pricing breakdown (subtotal, tax, tip, shippingAmount, discount, total, currency) |
-| orderDate | number | Yes | Order date (Unix timestamp) |
-| paymentStatus | string | No | Payment status (default: 'pending') |
-| paymentMethod | string | No | Payment method |
-| paymentReference | string | No | Payment reference number |
-| requestedTime | number | No | Requested pickup/delivery time |
-| estimatedReadyTime | number | No | Estimated ready time |
-| specialInstructions | string | No | Special instructions |
-| allergies | string[] | No | Customer allergies |
-| tableNumber | string | No | Table number (for dine-in) |
-| externalOrderId | string | No | External order ID |
-| source | string | No | Order source (default: 'direct') |
-| deliveryAddress | object | No | Delivery address (street, city, postalCode) |
-
-### Order Item Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| menuItemId | string | Yes | Menu item ID |
-| itemName | string | Yes | Item name |
-| quantity | number | Yes | Quantity ordered |
-| unitPrice | number | Yes | Price per unit |
-| totalPrice | number | Yes | Total price for this item |
-| specialInstructions | string | No | Special preparation instructions |
-| customizations | array | No | Customizations (name, value, additionalCost) |
-| preparationTime | number | No | Preparation time in minutes |
-| notes | string | No | Additional notes |
-
-Note: Status defaults to 'pending' and should not be included in create requests.
 
 ### Create Order
 
 ```typescript
+import { MenuOrderType } from 'wiil-core-js';
+
 const order = await client.menuOrders.create({
-  type: MenuOrderType.TAKEOUT,
+  customerId: 'cust_456',
+  type: MenuOrderType.DINE_IN,
+  orderDate: Date.now(),
   items: [
     {
       menuItemId: 'item_123',
+      variantId: 'variant_456',
       itemName: 'Cheeseburger',
       quantity: 2,
       unitPrice: 12.99,
       totalPrice: 25.98,
-      specialInstructions: 'No onions',
-      customizations: [
-        {
-          name: 'Extra Cheese',
-          value: 'Yes',
-          additionalCost: 1.50,
-        },
-      ],
-      preparationTime: 15,
     },
   ],
-  customerId: 'cust_456',
-  customer: {
-    name: 'John Doe',
-    phone: '+12125551234',
-    email: 'john@example.com',
-  },
   pricing: {
     subtotal: 25.98,
-    tax: 2.60,
-    tip: 5.00,
-    total: 33.58,
-    currency: 'USD',
+    total: 25.98,
   },
-  orderDate: Date.now(),
-  requestedTime: Date.now() + 3600000,
-  specialInstructions: 'Call upon arrival',
-  source: 'web',
 });
 
-console.log('Order created:', order.id);
-console.log('Order number:', order.orderNumber);
+console.log(`Order Created: ${order.id}`);
 ```
 
 ### Create Delivery Order
 
 ```typescript
 const order = await client.menuOrders.create({
+  customerId: 'cust_789',
   type: MenuOrderType.DELIVERY,
+  orderDate: Date.now(),
   items: [
     {
-      menuItemId: 'item_456',
-      itemName: 'Pizza',
+      menuItemId: 'item_pizza',
+      variantId: 'variant_large',
+      itemName: 'Margherita Pizza (Large)',
       quantity: 1,
-      unitPrice: 18.99,
-      totalPrice: 18.99,
+      unitPrice: 22.99,
+      totalPrice: 22.99,
     },
   ],
-  customerId: 'cust_789',
   pricing: {
-    subtotal: 18.99,
-    tax: 1.90,
-    shippingAmount: 5.00,
-    total: 25.89,
-  },
-  orderDate: Date.now(),
-  source: 'direct',
-  deliveryAddress: {
-    street: '123 Main St',
-    city: 'New York',
-    postalCode: '10001',
+    subtotal: 22.99,
+    total: 22.99,
   },
 });
 
-console.log('Delivery order created:', order.id);
+console.log(`Delivery Order: ${order.id}`);
 ```
 
 ### Get Order
@@ -439,20 +582,20 @@ console.log('Delivery order created:', order.id);
 ```typescript
 const order = await client.menuOrders.get('order_123');
 
-console.log('Order:', order.orderNumber);
-console.log('Status:', order.status);
-console.log('Items:', order.items.length);
+console.log(`Order: ${order.id}`);
+console.log(`Status: ${order.status}`);
+console.log(`Total: $${order.pricing.total}`);
 ```
 
-### Get Orders by Customer
+### List Orders
 
 ```typescript
-const result = await client.menuOrders.getByCustomer('cust_123', {
-  page: 1,
-  pageSize: 20,
-});
+const result = await client.menuOrders.list();
 
-console.log('Customer orders:', result.data.length);
+console.log(`Orders: ${result.data.length}`);
+result.data.forEach(order => {
+  console.log(`- ${order.id}: ${order.status} ($${order.pricing.total})`);
+});
 ```
 
 ### Update Order
@@ -460,345 +603,362 @@ console.log('Customer orders:', result.data.length);
 ```typescript
 const updated = await client.menuOrders.update({
   id: 'order_123',
-  status: OrderStatus.READY,
-  estimatedReadyTime: Date.now() + 600000,
+  pricing: {
+    subtotal: 35.00,
+    total: 35.00,
+  },
 });
 
-console.log('Order updated:', updated.status);
+console.log(`Updated total: $${updated.pricing.total}`);
 ```
 
 ### Update Order Status
 
 ```typescript
+import { OrderStatus } from 'wiil-core-js';
+
 const updated = await client.menuOrders.updateStatus('order_123', {
-  status: OrderStatus.PREPARING,
+  id: 'order_123',
+  status: OrderStatus.CONFIRMED,
+  estimatedReadyTime: null,
+  actualReadyTime: null,
 });
 
-console.log('Status updated:', updated.status);
+console.log(`Status: ${updated.status}`);
 ```
 
 ### Cancel Order
 
 ```typescript
 const cancelled = await client.menuOrders.cancel('order_123', {
-  reason: 'Customer requested cancellation',
+  cancelReason: 'Customer requested cancellation',
 });
 
-console.log('Order cancelled:', cancelled.status);
-console.log('Reason:', cancelled.cancelReason);
+console.log(`Status: ${cancelled.status}`);
 ```
 
 ### Delete Order
 
 ```typescript
-const deleted = await client.menuOrders.delete('order_123');
-
-console.log('Deleted:', deleted);
+await client.menuOrders.delete('order_123');
+console.log('Order deleted');
 ```
 
-### List Orders
+---
+
+## Status Enums
+
+### Order Status
 
 ```typescript
-const result = await client.menuOrders.list({
-  page: 1,
-  pageSize: 20,
-});
+import { OrderStatus } from 'wiil-core-js';
 
-console.log('Orders:', result.data.length);
-console.log('Total:', result.meta.totalCount);
+// OrderStatus.PENDING        - 'pending'
+// OrderStatus.CONFIRMED      - 'confirmed'
+// OrderStatus.PREPARING      - 'preparing'
+// OrderStatus.READY          - 'ready'
+// OrderStatus.OUT_FOR_DELIVERY - 'out_for_delivery'
+// OrderStatus.COMPLETED      - 'completed'
+// OrderStatus.CANCELLED      - 'cancelled'
+// OrderStatus.RETURNED       - 'returned'
 ```
 
-## Order Status Values
-
-Order status follows this enum:
+### Order Type
 
 ```typescript
-enum OrderStatus {
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  PREPARING = 'preparing',
-  READY = 'ready',
-  OUT_FOR_DELIVERY = 'out_for_delivery',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
-  RETURNED = 'returned'
-}
+import { MenuOrderType } from 'wiil-core-js';
+
+// MenuOrderType.DINE_IN   - 'dine_in'
+// MenuOrderType.TAKEOUT   - 'takeout'
+// MenuOrderType.DELIVERY  - 'delivery'
 ```
 
-## Payment Status Values
+---
 
-Payment status follows this enum:
-
-```typescript
-enum PaymentStatus {
-  PENDING = 'pending',
-  PAID = 'paid',
-  PARTIAL = 'partial',
-  FAILED = 'failed',
-  REFUNDED = 'refunded'
-}
-```
-
-## Order Type Values
-
-Order type follows this enum:
+## Complete Example: Restaurant Setup
 
 ```typescript
-enum MenuOrderType {
-  DINE_IN = 'dine_in',
-  TAKEOUT = 'takeout',
-  DELIVERY = 'delivery'
-}
-```
+import { WiilClient } from 'wiil-js';
+import { MenuOrderType, OrderStatus, PreferredContactMethod } from 'wiil-core-js';
 
-## Complete Example: Restaurant Menu Setup
+async function setupRestaurant() {
+  const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
 
-```typescript
-import { WiilClient, MenuOrderType, OrderStatus, PaymentStatus } from 'wiil-js';
-
-async function setupRestaurantMenu() {
-  const client = new WiilClient({
-    apiKey: process.env.WIIL_API_KEY!,
+  // 1. Create customer
+  console.log('Creating customer...');
+  const customer = await client.customers.create({
+    phone_number: '+15551234567',
+    firstname: 'John',
+    lastname: 'Doe',
+    preferred_language: 'en',
+    preferred_contact_method: PreferredContactMethod.SMS,
+    isValidatedNames: false,
   });
+  console.log(`Customer: ${customer.id}`);
 
-  // 1. Create menu categories
+  // 2. Create menu categories
+  console.log('\nCreating categories...');
   const appetizers = await client.menus.createCategory({
     name: 'Appetizers',
-    description: 'Start your meal right',
+    description: 'Start your meal',
     displayOrder: 1,
   });
 
   const entrees = await client.menus.createCategory({
-    name: 'Main Courses',
-    description: 'Signature entrees',
+    name: 'Entrees',
+    description: 'Main courses',
     displayOrder: 2,
   });
+  console.log('Categories created');
 
-  // 2. Create menu items
+  // 3. Create menu items with variants
+  console.log('\nCreating menu items...');
   const wings = await client.menus.createItem({
-    name: 'Buffalo Wings',
-    description: 'Crispy chicken wings with hot sauce',
-    price: 11.99,
     categoryId: appetizers.id,
-    ingredients: ['chicken wings', 'buffalo sauce', 'celery', 'ranch dressing'],
-    allergens: ['dairy'],
-    nutritionalInfo: {
-      calories: 540,
-      protein: 42,
-      carbs: 18,
-      fat: 32,
-    },
+    name: 'Buffalo Wings',
+    description: 'Crispy wings with hot sauce',
+    price: 11.99,
     isAvailable: true,
-    preparationTime: 20,
     isActive: true,
+    preparationTime: 15,
     displayOrder: 1,
+    variants: [
+      { name: '6 pieces', price: 11.99, isDefault: true, isActive: true, isAvailable: true },
+      { name: '12 pieces', price: 19.99, isDefault: false, isActive: true, isAvailable: true },
+    ],
   });
 
   const burger = await client.menus.createItem({
+    categoryId: entrees.id,
     name: 'Classic Burger',
     description: 'Angus beef with all the fixings',
     price: 14.99,
-    categoryId: entrees.id,
-    ingredients: ['beef', 'lettuce', 'tomato', 'onion', 'bun'],
-    allergens: ['gluten'],
-    nutritionalInfo: {
-      calories: 680,
-      protein: 38,
-      carbs: 52,
-      fat: 34,
-    },
     isAvailable: true,
-    preparationTime: 15,
     isActive: true,
+    preparationTime: 12,
     displayOrder: 1,
+    variants: [
+      { name: 'Default', price: 14.99, isDefault: true, isActive: true, isAvailable: true },
+    ],
+  });
+  console.log('Menu items created');
+
+  // 4. Create modifier group for burger
+  console.log('\nCreating modifiers...');
+  const toppings = await client.modifiers.createGroup({
+    name: 'Extra Toppings',
+    description: 'Customize your burger',
+    isRequired: false,
+    minSelection: 0,
+    maxSelection: 3,
+    displayOrder: 1,
+    isActive: true,
+    options: [
+      { name: 'Bacon', priceDelta: 2.00, displayOrder: 1, isDefault: false, isActive: true },
+      { name: 'Extra Cheese', priceDelta: 1.50, displayOrder: 2, isDefault: false, isActive: true },
+      { name: 'Avocado', priceDelta: 2.50, displayOrder: 3, isDefault: false, isActive: true },
+    ],
   });
 
-  // 3. Process a customer order
+  // Link modifiers to burger
+  await client.modifiers.createBinding({
+    menuItemId: burger.id,
+    modifierGroupId: toppings.id,
+    displayOrder: 1,
+    isRequired: false,
+  });
+  console.log('Modifiers linked to burger');
+
+  // 5. Create an order
+  console.log('\nCreating order...');
   const order = await client.menuOrders.create({
+    customerId: customer.id,
     type: MenuOrderType.DINE_IN,
+    orderDate: Date.now(),
     items: [
       {
         menuItemId: wings.id,
-        itemName: wings.name,
+        variantId: wings.variants[1].id, // 12 pieces
+        itemName: 'Buffalo Wings (12 pieces)',
         quantity: 1,
-        unitPrice: wings.price,
-        totalPrice: wings.price,
+        unitPrice: 19.99,
+        totalPrice: 19.99,
       },
       {
         menuItemId: burger.id,
-        itemName: burger.name,
+        variantId: burger.variants[0].id,
+        itemName: 'Classic Burger',
         quantity: 2,
-        unitPrice: burger.price,
-        totalPrice: burger.price * 2,
-        specialInstructions: 'Medium rare',
+        unitPrice: 14.99,
+        totalPrice: 29.98,
       },
     ],
-    customerId: 'cust_123',
-    customer: {
-      name: 'Sarah Johnson',
-      phone: '+12125555678',
-      email: 'sarah@example.com',
-    },
     pricing: {
-      subtotal: 41.97,
-      tax: 4.20,
-      tip: 8.00,
-      total: 54.17,
-      currency: 'USD',
+      subtotal: 49.97,
+      total: 49.97,
     },
-    orderDate: Date.now(),
-    tableNumber: 'T-12',
-    source: 'direct',
   });
+  console.log(`Order Created: ${order.id}`);
 
-  console.log('Order created:', order.orderNumber);
-
-  // 4. Update order status as it progresses
+  // 6. Update order status through lifecycle
+  console.log('\nProcessing order...');
+  
   await client.menuOrders.updateStatus(order.id, {
+    id: order.id,
     status: OrderStatus.CONFIRMED,
+    estimatedReadyTime: null,
+    actualReadyTime: null,
   });
+  console.log('Order confirmed');
+
+  // API expects Unix timestamps (seconds)
+  const nowSec = Math.floor(Date.now() / 1000);
+  
+  await client.menuOrders.updateStatus(order.id, {
+    id: order.id,
+    status: OrderStatus.PREPARING,
+    estimatedReadyTime: nowSec + (15 * 60), // 15 minutes from now
+    actualReadyTime: null,
+  });
+  console.log('Order preparing');
 
   await client.menuOrders.updateStatus(order.id, {
-    status: OrderStatus.PREPARING,
-  });
-
-  await client.menuOrders.update({
     id: order.id,
     status: OrderStatus.READY,
-    estimatedReadyTime: Date.now() + 300000,
+    estimatedReadyTime: null,
+    actualReadyTime: Math.floor(Date.now() / 1000),
   });
+  console.log('Order ready');
 
-  // 5. Complete the order
   await client.menuOrders.updateStatus(order.id, {
+    id: order.id,
     status: OrderStatus.COMPLETED,
+    estimatedReadyTime: null,
+    actualReadyTime: null,
   });
+  console.log('Order completed');
 
-  // 6. Get customer's order history
-  const customerOrders = await client.menuOrders.getByCustomer('cust_123');
-  console.log('Customer has', customerOrders.data.length, 'orders');
+  return { customer, categories: [appetizers, entrees], items: [wings, burger], order };
 }
+
+setupRestaurant().catch(console.error);
 ```
+
+---
 
 ## Best Practices
 
-### Menu Organization
-- Use categories to organize your menu logically
-- Set displayOrder for both categories and items to control presentation
-- Keep descriptions clear and concise
+### 1. Always Include Variants
 
-### Item Management
-- Always include allergen information for food safety
-- Provide accurate nutritional information when possible
-- Use preparationTime to help estimate order completion
-- Mark items as unavailable rather than deleting when out of stock
+```typescript
+// Every menu item needs at least one variant
+const item = await client.menus.createItem({
+  categoryId: 'cat_123',
+  name: 'Caesar Salad',
+  price: 9.99,
+  isAvailable: true,
+  isActive: true,
+  variants: [
+    { name: 'Default', price: 9.99, isDefault: true, isActive: true, isAvailable: true },
+  ],
+});
+```
 
-### Order Processing
-- Always validate item availability before creating an order
-- Calculate pricing accurately including tax and fees
-- Include customer contact information for order updates
-- Use status updates to track order progress
+### 2. Use variantId in Orders
 
-### Pricing Calculations
+```typescript
+// Order items require variantId
+const order = await client.menuOrders.create({
+  customerId: customer.id,
+  type: MenuOrderType.DINE_IN,
+  orderDate: Date.now(),
+  items: [
+    {
+      menuItemId: item.id,
+      variantId: item.variants[0].id,  // Required
+      itemName: item.name,
+      quantity: 1,
+      unitPrice: item.price,
+      totalPrice: item.price,
+    },
+  ],
+  pricing: { subtotal: item.price, total: item.price },
+});
+```
+
+### 3. Status Progression
+
+```typescript
+// Follow the standard order lifecycle
+// pending → confirmed → preparing → ready → completed
+```
+
+### 4. Pricing Accuracy
+
 ```typescript
 const items = [
-  { price: 12.99, quantity: 2 }, // 25.98
-  { price: 8.99, quantity: 1 },  // 8.99
+  { price: 12.99, quantity: 2 },
+  { price: 8.99, quantity: 1 },
 ];
 
 const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-const tax = subtotal * 0.0875; // 8.75% tax rate
-const tip = subtotal * 0.20;   // 20% tip
-const total = subtotal + tax + tip;
 
 const pricing = {
   subtotal: Number(subtotal.toFixed(2)),
-  tax: Number(tax.toFixed(2)),
-  tip: Number(tip.toFixed(2)),
-  shippingAmount: 0,
-  discount: 0,
-  total: Number(total.toFixed(2)),
-  currency: 'USD',
+  total: Number(subtotal.toFixed(2)),
 };
 ```
 
-### Status Management
-Follow this typical order lifecycle:
-1. Order created → 'pending'
-2. Restaurant confirms → 'confirmed'
-3. Kitchen starts → 'preparing'
-4. Food ready → 'ready'
-5. For delivery → 'out_for_delivery'
-6. Complete → 'completed'
+---
 
 ## Troubleshooting
 
-### Problem: Missing required customer ID
+### Missing variants
 
-**Error:**
-```
-ValidationError: customerId is required
-```
+**Problem**: "Menu item must have at least one variant"
 
-**Solution:**
-Ensure you provide a valid customer ID:
+**Solution**: Include the `variants` array when creating items:
 ```typescript
-const order = await client.menuOrders.create({
-  customerId: 'cust_123', // Required
+const item = await client.menus.createItem({
   // ... other fields
+  variants: [
+    { name: 'Default', price: 9.99, isDefault: true, isActive: true, isAvailable: true },
+  ],
 });
 ```
 
-### Problem: Invalid pricing calculation
+### Missing variantId in order
 
-**Error:**
-```
-ValidationError: pricing.total does not match sum of components
-```
+**Problem**: "variantId is required for order items"
 
-**Solution:**
-Verify your pricing calculation:
+**Solution**: Include variantId for each order item:
 ```typescript
-const pricing = {
-  subtotal: 25.98,
-  tax: 2.60,
-  tip: 5.00,
-  shippingAmount: 0,
-  discount: 0,
-  total: 33.58, // Must equal subtotal + tax + tip + shippingAmount - discount
-  currency: 'USD',
-};
-```
-
-### Problem: Item not found when creating order
-
-**Error:**
-```
-NotFoundError: Menu item not found
-```
-
-**Solution:**
-Verify the menu item exists and is active:
-```typescript
-const item = await client.menus.getItem('item_123');
-if (!item.isActive || !item.isAvailable) {
-  throw new Error('Item is not available for ordering');
-}
-```
-
-### Problem: Invalid order type
-
-**Error:**
-```
-ValidationError: Invalid order type
-```
-
-**Solution:**
-Use the MenuOrderType enum values:
-```typescript
-import { MenuOrderType } from 'wiil-js';
-
 const order = await client.menuOrders.create({
-  type: MenuOrderType.DINE_IN, // or TAKEOUT, DELIVERY
-  // ... other fields
+  items: [
+    {
+      menuItemId: item.id,
+      variantId: item.variants[0].id,  // Required
+      // ... other fields
+    },
+  ],
+  // ...
 });
 ```
+
+### Invalid order status update
+
+**Problem**: Status update fails
+
+**Solution**: Include all required fields:
+```typescript
+await client.menuOrders.updateStatus(orderId, {
+  id: orderId,
+  status: OrderStatus.CONFIRMED,
+  estimatedReadyTime: null,
+  actualReadyTime: null,
+});
+```
+
+---
+
+[Back to Examples](../README.md)

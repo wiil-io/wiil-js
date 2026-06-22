@@ -12,18 +12,20 @@ Business Services and Appointments enable you to manage service offerings and cu
 
 **Key Capabilities**:
 - Define business services with pricing and duration
+- Organize services into categories
+- Manage service providers (staff who perform services)
+- Query available appointment slots
 - Schedule customer appointments
 - Manage appointment lifecycle (confirm, cancel, reschedule)
 - Track appointment status and history
-- Generate QR codes for easy booking
 
 ---
 
 ## Prerequisites
 
-1. ✅ Active WIIL Platform account
-2. ✅ API key with business management permissions
-3. ✅ Node.js project with wiil-js SDK installed
+1. Active WIIL Platform account
+2. API key with business management permissions
+3. Node.js project with wiil-js SDK installed
 
 ---
 
@@ -37,50 +39,94 @@ import { WiilClient } from 'wiil-js';
 const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
 
 const service = await client.businessServices.create({
+  organizationId: 'org_123',
   name: 'Professional Haircut',
   description: 'Premium haircut service with styling',
   duration: 45,
-  bufferTime: 15,
-  price: 50.00,
+  bufferBefore: 0,
+  bufferAfter: 15,
+  basePrice: 50.00,
   isBookable: true,
-  isActive: true
+  isActive: true,
+  requiredResources: [],
+  lateCancelFeePercent: 50,
+  noShowFeePercent: 100,
 });
 
 console.log(`Service Created: ${service.name}`);
 console.log(`Service ID: ${service.id}`);
-console.log(`Price: $${service.price}`);
+console.log(`Price: $${service.basePrice}`);
 console.log(`Duration: ${service.duration} minutes`);
 ```
 
-### Step 2: Book an Appointment
+### Step 2: Create a Service Provider
 
 ```typescript
-import { AppointmentStatus } from 'wiil-js';
+const provider = await client.servicePersons.create({
+  name: 'Jane Smith',
+  description: 'Senior Hair Stylist',
+  isActive: true,
+  bookableOnline: true,
+  bookableByStaff: true,
+});
 
-const startTime = Date.now() + 24 * 60 * 60 * 1000; // Tomorrow
-const duration = 45; // minutes
+console.log(`Provider Created: ${provider.name}`);
+```
+
+### Step 3: Query Available Slots
+
+```typescript
+import { ServiceCandidateSlot } from 'wiil-core-js';
+
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+const localDate = tomorrow.toISOString().split('T')[0];
+
+const slotResponse = await client.serviceAppointments.getAvailableSlots({
+  serviceId: service.id,
+  localDate: localDate,
+  providerId: provider.id,
+  maxResults: 20,
+});
+
+console.log(`Found ${slotResponse.slots.length} available slots`);
+slotResponse.slots.forEach((slot, idx) => {
+  console.log(`  Slot ${idx + 1}: ${slot.startTimeOfDay}`);
+});
+```
+
+### Step 4: Book an Appointment
+
+```typescript
+import { CreateServiceAppointmentSchema } from 'wiil-core-js';
+
+const slot = slotResponse.slots[0];
+// API expects UTC seconds - use slot times directly
+const duration = Math.round((slot.endTimeUtcSec - slot.startTimeUtcSec) / 60);
 
 const appointment = await client.serviceAppointments.create({
   businessServiceId: service.id,
   customerId: 'cust_123',
-  startTime: startTime,
-  endTime: startTime + (duration * 60 * 1000),
+  startTime: slot.startTimeUtcSec,
+  endTime: slot.endTimeUtcSec,
   duration: duration,
   totalPrice: 50.00,
-  depositPaid: 0
+  depositPaid: 0,
 });
 
 console.log(`Appointment Created: ${appointment.id}`);
 console.log(`Customer: ${appointment.customerId}`);
-console.log(`Scheduled: ${new Date(appointment.startTime).toLocaleString()}`);
+console.log(`Scheduled: ${new Date(appointment.startTime * 1000).toLocaleString()}`);
 ```
 
-### Step 3: Confirm the Appointment
+### Step 5: Confirm the Appointment
 
 ```typescript
+import { AppointmentStatus } from 'wiil-core-js';
+
 const confirmed = await client.serviceAppointments.updateStatus(
   appointment.id,
-  { status: AppointmentStatus.CONFIRMED }
+  AppointmentStatus.CONFIRMED
 );
 
 console.log(`Appointment Status: ${confirmed.status}`);
@@ -90,30 +136,22 @@ console.log(`Appointment Status: ${confirmed.status}`);
 
 ## Business Services
 
-### Service Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | ✅ Yes | Service name |
-| `description` | string | ✅ Yes | Service description |
-| `duration` | number | ❌ No | Service duration in minutes (default applies) |
-| `bufferTime` | number | ❌ No | Buffer time after service in minutes (default applies) |
-| `price` | number | ❌ No | Service price (optional, defaults to 0) |
-| `isBookable` | boolean | ❌ No | Can be booked online (default: true) |
-| `isActive` | boolean | ❌ No | Service is active (default: true) |
-
 ### Create a Service
 
 ```typescript
 const service = await client.businessServices.create({
+  organizationId: 'org_123',
   name: 'Massage Therapy',
   description: '60-minute therapeutic massage',
   duration: 60,
-  bufferTime: 10,
-  price: 80.00,
+  bufferBefore: 10,
+  bufferAfter: 5,
+  basePrice: 80.00,
   isBookable: true,
   isActive: true,
-  displayOrder: 2
+  requiredResources: [],
+  lateCancelFeePercent: 50,
+  noShowFeePercent: 100,
 });
 ```
 
@@ -124,7 +162,7 @@ const service = await client.businessServices.get('service_123');
 
 console.log(`Name: ${service.name}`);
 console.log(`Duration: ${service.duration} minutes`);
-console.log(`Price: $${service.price}`);
+console.log(`Price: $${service.basePrice}`);
 ```
 
 ### Update a Service
@@ -133,132 +171,410 @@ console.log(`Price: $${service.price}`);
 const updated = await client.businessServices.update({
   id: 'service_123',
   name: 'Premium Massage Therapy',
-  price: 90.00
+  basePrice: 90.00,
 });
+
+console.log(`Updated: ${updated.name} - $${updated.basePrice}`);
 ```
 
 ### List All Services
 
 ```typescript
-const services = await client.businessServices.list({
+const result = await client.businessServices.list({
   page: 1,
-  pageSize: 20
+  pageSize: 20,
 });
 
-console.log(`Total Services: ${services.meta.totalCount}`);
-services.data.forEach(service => {
-  console.log(`- ${service.name}: $${service.price} (${service.duration} min)`);
+console.log(`Total Services: ${result.meta.totalCount}`);
+result.data.forEach(service => {
+  console.log(`- ${service.name}: $${service.basePrice} (${service.duration} min)`);
 });
 ```
 
 ### Delete a Service
 
 ```typescript
-const deleted = await client.businessServices.delete('service_123');
-if (deleted) {
-  console.log('Service deleted successfully');
-}
+await client.businessServices.delete('service_123');
+console.log('Service deleted successfully');
 ```
 
 ### Batch Create Services
 
-Create up to 50 business services in a single request:
+```typescript
+const result = await client.businessServices.createBatch([
+  {
+    organizationId: 'org_123',
+    name: 'Quick Consultation',
+    description: '30-minute consultation',
+    duration: 30,
+    bufferBefore: 5,
+    bufferAfter: 5,
+    basePrice: 49.99,
+    isBookable: true,
+    isActive: true,
+    requiredResources: [],
+    lateCancelFeePercent: 50,
+    noShowFeePercent: 100,
+  },
+  {
+    organizationId: 'org_123',
+    name: 'Standard Session',
+    description: '60-minute session',
+    duration: 60,
+    bufferBefore: 10,
+    bufferAfter: 5,
+    basePrice: 89.99,
+    isBookable: true,
+    isActive: true,
+    requiredResources: [],
+    lateCancelFeePercent: 50,
+    noShowFeePercent: 100,
+  },
+  {
+    organizationId: 'org_123',
+    name: 'Extended Session',
+    description: '90-minute session',
+    duration: 90,
+    bufferBefore: 15,
+    bufferAfter: 10,
+    basePrice: 129.99,
+    isBookable: true,
+    isActive: true,
+    requiredResources: [],
+    lateCancelFeePercent: 50,
+    noShowFeePercent: 100,
+  },
+]);
+
+console.log(`Created ${result.data.length} services`);
+result.data.forEach(svc => {
+  console.log(`- ${svc.name}: $${svc.basePrice} (${svc.duration} min)`);
+});
+```
+
+---
+
+## Service Categories
+
+Organize your services into categories for better management and customer navigation.
+
+### Create a Category
 
 ```typescript
-const services = await client.businessServices.createBatch([
+const category = await client.serviceCategories.create({
+  organizationId: 'org_123',
+  name: 'Hair Services',
+  description: 'All hair-related services',
+  displayOrder: 1,
+  isActive: true,
+});
+
+console.log(`Category Created: ${category.name}`);
+```
+
+### Get a Category
+
+```typescript
+const category = await client.serviceCategories.get('category_123');
+
+console.log(`Name: ${category.name}`);
+console.log(`Display Order: ${category.displayOrder}`);
+```
+
+### Update a Category
+
+```typescript
+const updated = await client.serviceCategories.update({
+  id: 'category_123',
+  name: 'Premium Hair Services',
+  displayOrder: 2,
+});
+
+console.log(`Updated: ${updated.name}`);
+```
+
+### List All Categories
+
+```typescript
+const result = await client.serviceCategories.list();
+
+console.log(`Total Categories: ${result.data.length}`);
+result.data.forEach(cat => {
+  console.log(`- ${cat.name} (order: ${cat.displayOrder})`);
+});
+```
+
+### Delete a Category
+
+```typescript
+await client.serviceCategories.delete('category_123');
+console.log('Category deleted successfully');
+```
+
+### Batch Create Categories
+
+```typescript
+const result = await client.serviceCategories.createBatch([
   {
-    name: 'Haircut & Style',
-    description: 'Professional haircut with styling',
-    duration: 45,
-    bufferTime: 15,
-    price: 50.00,
-    isBookable: true,
+    organizationId: 'org_123',
+    name: 'Spa Treatments',
+    description: 'Relaxing spa services',
+    displayOrder: 10,
     isActive: true,
   },
   {
-    name: 'Hair Coloring',
-    description: 'Full hair coloring service',
-    duration: 120,
-    bufferTime: 20,
-    price: 150.00,
-    isBookable: true,
-    isActive: true,
-  },
-  {
-    name: 'Manicure',
-    description: 'Classic manicure with polish',
-    duration: 30,
-    bufferTime: 10,
-    price: 35.00,
-    isBookable: true,
-    isActive: true,
-  },
-  {
-    name: 'Pedicure',
-    description: 'Relaxing pedicure with massage',
-    duration: 45,
-    bufferTime: 15,
-    price: 55.00,
-    isBookable: true,
+    organizationId: 'org_123',
+    name: 'Consultations',
+    description: 'Professional consultations',
+    displayOrder: 11,
     isActive: true,
   },
 ]);
 
-console.log(`Created ${services.data.length} services`);
-services.data.forEach(svc => {
-  console.log(`- ${svc.name}: $${svc.price} (${svc.duration} min)`);
+console.log(`Created ${result.data.length} categories`);
+```
+
+---
+
+## Service Persons
+
+Service persons are staff members who can perform services and be assigned to appointments.
+
+### Create a Service Person
+
+```typescript
+const person = await client.servicePersons.create({
+  name: 'Jane Smith',
+  description: 'Senior hair stylist with 10 years experience',
+  locationId: 'loc_123',
+  commissionPercent: 35,
+  bookableOnline: true,
+  bookableByStaff: true,
+  isActive: true,
+});
+
+console.log(`Person Created: ${person.name}`);
+```
+
+### Get a Service Person
+
+```typescript
+const person = await client.servicePersons.get('person_123');
+
+console.log(`Name: ${person.name}`);
+console.log(`Bookable Online: ${person.bookableOnline}`);
+```
+
+### Get Persons by Location
+
+```typescript
+const result = await client.servicePersons.getByLocation('loc_123');
+
+console.log(`Staff at location: ${result.data.length}`);
+result.data.forEach(person => {
+  console.log(`- ${person.name}`);
 });
 ```
 
-### Batch Limits
-
-| Resource          | Maximum per Batch |
-|-------------------|-------------------|
-| Business Services | 50                |
-
-**Note:** Batch operations validate each item individually. If validation fails for any item, the entire batch request fails with an error indicating the index of the failing item.
+### Update a Service Person
 
 ```typescript
-try {
-  const services = await client.businessServices.createBatch(serviceList);
-} catch (error) {
-  // Error message includes the index: "Validation failed for item at index 2"
-  console.error('Batch creation failed:', error.message);
-}
+const updated = await client.servicePersons.update({
+  id: 'person_123',
+  commissionPercent: 45,
+  bookableOnline: false,
+});
+
+console.log(`Updated commission: ${updated.commissionPercent}%`);
+```
+
+### List All Service Persons
+
+```typescript
+const result = await client.servicePersons.list();
+
+console.log(`Total Staff: ${result.data.length}`);
+result.data.forEach(person => {
+  console.log(`- ${person.name} (${person.isActive ? 'active' : 'inactive'})`);
+});
+```
+
+### Delete a Service Person
+
+```typescript
+await client.servicePersons.delete('person_123');
+console.log('Service person deleted successfully');
+```
+
+### Batch Create Service Persons
+
+```typescript
+const result = await client.servicePersons.createBatch([
+  {
+    name: 'John Doe',
+    description: 'Massage therapist',
+    locationId: 'loc_123',
+    commissionPercent: 30,
+    bookableOnline: true,
+    bookableByStaff: true,
+    isActive: true,
+  },
+  {
+    name: 'Mary Jane',
+    description: 'Esthetician',
+    locationId: 'loc_123',
+    commissionPercent: 35,
+    bookableOnline: true,
+    bookableByStaff: true,
+    isActive: true,
+  },
+]);
+
+console.log(`Created ${result.data.length} service persons`);
+```
+
+---
+
+## Service Providers
+
+Service providers link services to service persons, allowing you to define which staff can perform which services, with optional price and duration overrides.
+
+### Create a Service Provider
+
+```typescript
+const serviceProvider = await client.serviceProviders.create({
+  serviceId: 'service_123',
+  providerId: 'person_123',
+  priceOverride: 75.00,
+  durationOverride: 45,
+  active: true,
+});
+
+console.log(`Linked service ${serviceProvider.serviceId} to provider ${serviceProvider.providerId}`);
+```
+
+### Get a Service Provider
+
+```typescript
+const serviceProvider = await client.serviceProviders.get('sp_123');
+
+console.log(`Service ID: ${serviceProvider.serviceId}`);
+console.log(`Provider ID: ${serviceProvider.providerId}`);
+console.log(`Price Override: $${serviceProvider.priceOverride}`);
+```
+
+### Get Providers by Service
+
+```typescript
+const result = await client.serviceProviders.getByService('service_123');
+
+console.log(`Providers for this service: ${result.data.length}`);
+result.data.forEach(sp => {
+  console.log(`- Provider ${sp.providerId} (${sp.active ? 'active' : 'inactive'})`);
+});
+```
+
+### Get Services by Provider
+
+```typescript
+const result = await client.serviceProviders.getByProvider('person_123');
+
+console.log(`Services offered by provider: ${result.data.length}`);
+result.data.forEach(sp => {
+  console.log(`- Service ${sp.serviceId}`);
+});
+```
+
+### Update a Service Provider
+
+```typescript
+const updated = await client.serviceProviders.update({
+  id: 'sp_123',
+  priceOverride: 90.00,
+  active: false,
+});
+
+console.log(`Updated price: $${updated.priceOverride}`);
+```
+
+### List All Service Providers
+
+```typescript
+const result = await client.serviceProviders.list();
+
+console.log(`Total Service-Provider Links: ${result.data.length}`);
+```
+
+### Delete a Service Provider
+
+```typescript
+await client.serviceProviders.delete('sp_123');
+console.log('Service provider link deleted successfully');
+```
+
+### Batch Create Service Providers
+
+```typescript
+const result = await client.serviceProviders.createBatch([
+  {
+    serviceId: 'service_haircut',
+    providerId: 'person_123',
+    active: true,
+  },
+  {
+    serviceId: 'service_coloring',
+    providerId: 'person_123',
+    active: true,
+  },
+]);
+
+console.log(`Created ${result.data.length} service provider links`);
 ```
 
 ---
 
 ## Service Appointments
 
-### Appointment Schema
+### Query Available Slots
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `businessServiceId` | string | ✅ Yes | Service being booked |
-| `customerId` | string | ✅ Yes | Customer ID |
-| `startTime` | number | ✅ Yes | Start time (Unix timestamp) |
-| `endTime` | number | ❌ No | End time (Unix timestamp) |
-| `duration` | number | ❌ No | Duration in minutes (default applies) |
-| `totalPrice` | number | ❌ No | Total price (default: 0) |
-| `depositPaid` | number | ❌ No | Deposit amount paid (default: 0) |
-| `assignedUserAccountId` | string | ❌ No | Assigned staff member |
-| `calendarId` | string | ❌ No | Calendar ID for sync |
-| `calendarEventId` | string | ❌ No | External calendar event ID |
-| `calendarProvider` | string | ❌ No | Calendar provider (google, outlook, calendly) |
+Before creating an appointment, query available time slots:
+
+```typescript
+import { ServiceCandidateSlot } from 'wiil-core-js';
+
+const slotResponse = await client.serviceAppointments.getAvailableSlots({
+  serviceId: 'service_123',
+  localDate: '2026-06-22',
+  providerId: 'person_123',
+  maxResults: 20,
+});
+
+console.log(`Available slots: ${slotResponse.slots.length}`);
+slotResponse.slots.forEach((slot, idx) => {
+  console.log(`  ${idx + 1}. ${slot.startTimeOfDay} - startUtc: ${slot.startTimeUtcSec}`);
+});
+```
 
 ### Create an Appointment
 
 ```typescript
+import { CreateServiceAppointmentSchema } from 'wiil-core-js';
+
+const slot = slotResponse.slots[0];
+// API expects UTC seconds
+const duration = Math.round((slot.endTimeUtcSec - slot.startTimeUtcSec) / 60);
+
 const appointment = await client.serviceAppointments.create({
   businessServiceId: 'service_123',
   customerId: 'cust_456',
-  startTime: Date.now() + 3600000, // 1 hour from now
-  endTime: Date.now() + 7200000,   // 2 hours from now
-  duration: 60,
+  startTime: slot.startTimeUtcSec,
+  endTime: slot.endTimeUtcSec,
+  duration: duration,
   totalPrice: 80.00,
-  depositPaid: 20.00
+  depositPaid: 20.00,
 });
+
+console.log(`Appointment ID: ${appointment.id}`);
 ```
 
 ### Get an Appointment
@@ -268,44 +584,77 @@ const appointment = await client.serviceAppointments.get('appointment_123');
 
 console.log(`Customer ID: ${appointment.customerId}`);
 console.log(`Service ID: ${appointment.businessServiceId}`);
-console.log(`Time: ${new Date(appointment.startTime).toLocaleString()}`);
+console.log(`Time: ${new Date(appointment.startTime * 1000).toLocaleString()}`);
 console.log(`Status: ${appointment.status}`);
-```
-
-### List Customer Appointments
-
-```typescript
-const appointments = await client.serviceAppointments.getByCustomer('cust_123', {
-  page: 1,
-  pageSize: 20
-});
-
-console.log(`Customer has ${appointments.meta.totalCount} appointments`);
-appointments.data.forEach(apt => {
-  console.log(`- ${new Date(apt.startTime).toLocaleDateString()}: ${apt.status}`);
-});
-```
-
-### List Service Appointments
-
-```typescript
-const appointments = await client.serviceAppointments.getByService('service_123', {
-  page: 1,
-  pageSize: 20
-});
-
-console.log(`Service has ${appointments.meta.totalCount} bookings`);
 ```
 
 ### List All Appointments
 
 ```typescript
-const appointments = await client.serviceAppointments.list({
+const result = await client.serviceAppointments.list();
+
+console.log(`Total Appointments: ${result.data.length}`);
+result.data.forEach(apt => {
+  console.log(`- ${apt.id}: ${new Date(apt.startTime * 1000).toLocaleDateString()} (${apt.status})`);
+});
+```
+
+### Get Appointments by Customer
+
+```typescript
+const result = await client.serviceAppointments.getByCustomer('cust_123', {
   page: 1,
-  pageSize: 50
+  pageSize: 20,
 });
 
-console.log(`Total Appointments: ${appointments.meta.totalCount}`);
+console.log(`Customer has ${result.data.length} appointments`);
+result.data.forEach(apt => {
+  console.log(`- ${new Date(apt.startTime * 1000).toLocaleDateString()}: ${apt.status}`);
+});
+```
+
+### Get Appointments by Service
+
+```typescript
+const result = await client.serviceAppointments.getByService('service_123', {
+  page: 1,
+  pageSize: 20,
+});
+
+console.log(`Service has ${result.data.length} bookings`);
+```
+
+### Get Appointments by Provider
+
+```typescript
+const result = await client.serviceAppointments.getByProvider('person_123', {
+  page: 1,
+  pageSize: 20,
+});
+
+console.log(`Provider has ${result.data.length} appointments`);
+```
+
+### Get Appointments by Date Range
+
+```typescript
+// API expects UTC seconds
+const startDate = Math.floor(Date.now() / 1000);
+const endDate = startDate + (7 * 24 * 60 * 60); // Next 7 days
+
+const result = await client.serviceAppointments.getByDateRange(startDate, endDate, {
+  page: 1,
+  pageSize: 50,
+});
+
+console.log(`${result.data.length} appointments in the next week`);
+```
+
+### Delete an Appointment
+
+```typescript
+await client.serviceAppointments.delete('appointment_123');
+console.log('Appointment deleted successfully');
 ```
 
 ---
@@ -315,73 +664,69 @@ console.log(`Total Appointments: ${appointments.meta.totalCount}`);
 ### Appointment Statuses
 
 ```typescript
-enum AppointmentStatus {
-  PENDING = 'pending',           // Awaiting confirmation
-  CONFIRMED = 'confirmed',       // Confirmed by business
-  COMPLETED = 'completed',       // Service completed
-  CANCELLED = 'cancelled',       // Cancelled by customer or business
-  NO_SHOW = 'no_show'           // Customer didn't show up
-}
+import { AppointmentStatus } from 'wiil-core-js';
+
+// Available statuses:
+// AppointmentStatus.PENDING     - 'pending'     - Awaiting confirmation
+// AppointmentStatus.CONFIRMED   - 'confirmed'   - Confirmed by business
+// AppointmentStatus.COMPLETED   - 'completed'   - Service completed
+// AppointmentStatus.CANCELLED   - 'cancelled'   - Cancelled
+// AppointmentStatus.NO_SHOW     - 'no_show'     - Customer didn't show up
 ```
 
 ### Update Appointment Status
 
 ```typescript
-import { AppointmentStatus } from 'wiil-js';
+import { AppointmentStatus } from 'wiil-core-js';
 
 // Confirm appointment
 const confirmed = await client.serviceAppointments.updateStatus(
   'appointment_123',
-  { status: AppointmentStatus.CONFIRMED }
+  AppointmentStatus.CONFIRMED
 );
+console.log(`Status: ${confirmed.status}`);
 
 // Mark as completed
 const completed = await client.serviceAppointments.updateStatus(
   'appointment_123',
-  { status: AppointmentStatus.COMPLETED }
+  AppointmentStatus.COMPLETED
 );
 
 // Mark as no-show
 const noShow = await client.serviceAppointments.updateStatus(
   'appointment_123',
-  { status: AppointmentStatus.NO_SHOW }
+  AppointmentStatus.NO_SHOW
 );
 ```
 
 ### Cancel an Appointment
 
 ```typescript
-// Cancel with reason
 const cancelled = await client.serviceAppointments.cancel(
   'appointment_123',
-  { reason: 'Customer requested cancellation' }
+  { cancelReason: 'Customer requested cancellation' }
 );
 
 console.log(`Status: ${cancelled.status}`);
 console.log(`Reason: ${cancelled.cancelReason}`);
-
-// Cancel without reason
-const cancelled2 = await client.serviceAppointments.cancel(
-  'appointment_456',
-  {}
-);
 ```
 
 ### Reschedule an Appointment
 
 ```typescript
-const newStartTime = Date.now() + 48 * 60 * 60 * 1000; // 2 days from now
-const newEndTime = newStartTime + 60 * 60 * 1000;      // +1 hour
+// API expects UTC seconds
+const newStartTime = Math.floor(Date.now() / 1000) + (48 * 60 * 60); // 2 days from now
+const newEndTime = newStartTime + (60 * 60);                          // +1 hour
 
 const rescheduled = await client.serviceAppointments.reschedule(
   'appointment_123',
   {
-    startTime: newStartTime.toString(),
-    endTime: newEndTime.toString()
+    startTime: newStartTime,
+    endTime: newEndTime,
   }
 );
 
-console.log(`Rescheduled to: ${new Date(rescheduled.startTime).toLocaleString()}`);
+console.log(`Rescheduled to: ${new Date(rescheduled.startTime * 1000).toLocaleString()}`);
 ```
 
 ### Reschedule with Different Service
@@ -390,22 +735,13 @@ console.log(`Rescheduled to: ${new Date(rescheduled.startTime).toLocaleString()}
 const rescheduled = await client.serviceAppointments.reschedule(
   'appointment_123',
   {
-    startTime: newStartTime.toString(),
-    endTime: newEndTime.toString(),
-    serviceId: 'service_456' // Change to different service
+    startTime: newStartTime,
+    endTime: newEndTime,
+    businessServiceId: 'service_456',
   }
 );
 
 console.log(`New Service: ${rescheduled.businessServiceId}`);
-```
-
-### Delete an Appointment
-
-```typescript
-const deleted = await client.serviceAppointments.delete('appointment_123');
-if (deleted) {
-  console.log('Appointment deleted successfully');
-}
 ```
 
 ---
@@ -413,101 +749,136 @@ if (deleted) {
 ## Complete Example: Salon Booking System
 
 ```typescript
-import { WiilClient, AppointmentStatus } from 'wiil-js';
+import { WiilClient } from 'wiil-js';
+import { AppointmentStatus, PreferredContactMethod } from 'wiil-core-js';
 
 async function setupSalonBooking() {
   const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
 
-  // 1. Create services
-  console.log('Creating salon services...');
+  // 1. Create a customer
+  console.log('Creating customer...');
+  const customer = await client.customers.create({
+    phone_number: '+15551234567',
+    firstname: 'Jane',
+    lastname: 'Doe',
+    preferred_language: 'en',
+    preferred_contact_method: PreferredContactMethod.EMAIL,
+    isValidatedNames: false,
+  });
+  console.log(`Customer Created: ${customer.id}`);
 
+  // 2. Create service category
+  console.log('\nCreating service category...');
+  const category = await client.serviceCategories.create({
+    organizationId: 'org_salon',
+    name: 'Hair Services',
+    description: 'All hair-related services',
+    displayOrder: 1,
+    isActive: true,
+  });
+  console.log(`Category Created: ${category.name}`);
+
+  // 3. Create services
+  console.log('\nCreating services...');
   const haircut = await client.businessServices.create({
+    organizationId: 'org_salon',
     name: 'Haircut & Style',
     description: 'Professional haircut with styling',
-    duration: 45,
-    bufferTime: 15,
-    price: 50.00,
+    duration: 60,
+    bufferBefore: 0,
+    bufferAfter: 0,
+    basePrice: 50.00,
     isBookable: true,
-    isActive: true
+    isActive: true,
+    requiredResources: [],
+    lateCancelFeePercent: 50,
+    noShowFeePercent: 100,
+  });
+  console.log(`Service Created: ${haircut.name}`);
+
+  // 4. Create service provider (stylist)
+  console.log('\nCreating service provider...');
+  const stylist = await client.servicePersons.create({
+    name: 'Sarah Johnson',
+    description: 'Senior stylist',
+    isActive: true,
+    bookableOnline: true,
+    bookableByStaff: true,
+  });
+  console.log(`Stylist Created: ${stylist.name}`);
+
+  // 5. Link service to provider
+  console.log('\nLinking service to provider...');
+  await client.serviceProviders.create({
+    serviceId: haircut.id,
+    providerId: stylist.id,
+    active: true,
+  });
+  console.log('Service linked to provider');
+
+  // 6. Query available slots
+  console.log('\nQuerying available slots...');
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const localDate = tomorrow.toISOString().split('T')[0];
+
+  const slotResponse = await client.serviceAppointments.getAvailableSlots({
+    serviceId: haircut.id,
+    localDate: localDate,
+    providerId: stylist.id,
+    maxResults: 10,
   });
 
-  const coloring = await client.businessServices.create({
-    name: 'Hair Coloring',
-    description: 'Full hair coloring service',
-    duration: 120,
-    bufferTime: 20,
-    price: 150.00,
-    isBookable: true,
-    isActive: true
+  if (slotResponse.slots.length === 0) {
+    console.log('No available slots found');
+    return;
+  }
+
+  console.log(`Found ${slotResponse.slots.length} slots`);
+  slotResponse.slots.forEach((slot, idx) => {
+    console.log(`  ${idx + 1}. ${slot.startTimeOfDay}`);
   });
 
-  const massage = await client.businessServices.create({
-    name: 'Scalp Massage',
-    description: 'Relaxing scalp massage',
-    duration: 30,
-    bufferTime: 10,
-    price: 35.00,
-    isBookable: true,
-    isActive: true
-  });
+  // 7. Book an appointment using first available slot
+  console.log('\nBooking appointment...');
+  const slot = slotResponse.slots[0];
+  // API expects UTC seconds
+  const duration = Math.round((slot.endTimeUtcSec - slot.startTimeUtcSec) / 60);
 
-  console.log(`Created ${3} services`);
-
-  // 2. Book appointments
-  console.log('\nBooking appointments...');
-
-  const appointment1 = await client.serviceAppointments.create({
+  const appointment = await client.serviceAppointments.create({
     businessServiceId: haircut.id,
-    customerId: 'cust_001',
-    startTime: Date.now() + 24 * 60 * 60 * 1000, // Tomorrow
-    duration: 45,
+    customerId: customer.id,
+    startTime: slot.startTimeUtcSec,
+    endTime: slot.endTimeUtcSec,
+    duration: duration,
     totalPrice: 50.00,
-    depositPaid: 0
+    depositPaid: 0,
   });
+  console.log(`Appointment Created: ${appointment.id}`);
 
-  const appointment2 = await client.serviceAppointments.create({
-    businessServiceId: coloring.id,
-    customerId: 'cust_002',
-    startTime: Date.now() + 48 * 60 * 60 * 1000, // In 2 days
-    duration: 120,
-    totalPrice: 150.00,
-    depositPaid: 50.00, // Deposit required
-    assignedUserAccountId: 'stylist_001'
-  });
-
-  console.log(`Created ${2} appointments`);
-
-  // 3. Confirm first appointment
+  // 8. Confirm the appointment
+  console.log('\nConfirming appointment...');
   const confirmed = await client.serviceAppointments.updateStatus(
-    appointment1.id,
-    { status: AppointmentStatus.CONFIRMED }
+    appointment.id,
+    AppointmentStatus.CONFIRMED
   );
+  console.log(`Appointment Status: ${confirmed.status}`);
 
-  console.log(`\nAppointment ${confirmed.id} confirmed`);
-
-  // 4. List all upcoming appointments
-  const upcoming = await client.serviceAppointments.list({
-    page: 1,
-    pageSize: 50
+  // 9. List all appointments
+  console.log('\nListing appointments...');
+  const appointments = await client.serviceAppointments.list();
+  console.log(`Total Appointments: ${appointments.data.length}`);
+  appointments.data.forEach(apt => {
+    const date = new Date(apt.startTime * 1000).toLocaleString();
+    console.log(`- ${apt.id}: ${date} (${apt.status})`);
   });
-
-  console.log(`\nUpcoming Appointments (${upcoming.meta.totalCount}):`);
-  upcoming.data.forEach(apt => {
-    const date = new Date(apt.startTime).toLocaleString();
-    console.log(`- Customer ${apt.customerId}: ${date} (${apt.status})`);
-  });
-
-  // 5. Get customer appointment history
-  const customerApts = await client.serviceAppointments.getByCustomer('cust_001');
-  console.log(`\nCustomer has ${customerApts.meta.totalCount} appointment(s)`);
-
-  // 6. Get service bookings
-  const serviceBookings = await client.serviceAppointments.getByService(haircut.id);
-  console.log(`\nHaircut service has ${serviceBookings.meta.totalCount} booking(s)`);
 
   return {
-    services: [haircut, coloring, massage],
-    appointments: [appointment1, appointment2]
+    customer,
+    category,
+    service: haircut,
+    stylist,
+    appointment: confirmed,
   };
 }
 
@@ -516,96 +887,65 @@ setupSalonBooking().catch(console.error);
 
 ---
 
-## Calendar Integration
-
-### Appointment with Calendar Sync
-
-```typescript
-import { CalendarProvider } from 'wiil-js';
-
-const appointment = await client.serviceAppointments.create({
-  businessServiceId: 'service_123',
-  customerId: 'cust_456',
-  customerName: 'Jane Doe',
-  customerEmail: 'jane@example.com',
-  startTime: Date.now() + 3600000,
-  duration: 60,
-  totalPrice: 80.00,
-  depositPaid: 0,
-  status: AppointmentStatus.CONFIRMED,
-  calendarId: 'google-calendar-123',
-  calendarEventId: 'event-456',
-  calendarProvider: CalendarProvider.GOOGLE
-});
-
-console.log(`Synced to ${appointment.calendarProvider} calendar`);
-```
-
----
-
 ## Best Practices
 
-### 1. Service Configuration
+### 1. Always Query Available Slots
 
 ```typescript
-// ✅ Good: Clear service definitions
+// Always use getAvailableSlots before creating appointments
+const slotResponse = await client.serviceAppointments.getAvailableSlots({
+  serviceId: service.id,
+  localDate: '2026-06-22',
+  providerId: provider.id,
+  maxResults: 20,
+});
+
+// Use slot times directly - API expects UTC seconds
+const slot = slotResponse.slots[0];
+const appointment = await client.serviceAppointments.create({
+  businessServiceId: service.id,
+  customerId: customer.id,
+  startTime: slot.startTimeUtcSec,
+  endTime: slot.endTimeUtcSec,
+  duration: Math.round((slot.endTimeUtcSec - slot.startTimeUtcSec) / 60),
+  totalPrice: service.basePrice,
+  depositPaid: 0,
+});
+```
+
+### 2. Service Configuration
+
+```typescript
+// Include all required fields with appropriate values
 const service = await client.businessServices.create({
+  organizationId: 'org_123',
   name: 'Deep Tissue Massage',
   description: '90-minute deep tissue therapeutic massage',
   duration: 90,
-  bufferTime: 15,  // Time for cleanup/prep
-  price: 120.00,
+  bufferBefore: 15,
+  bufferAfter: 10,
+  basePrice: 120.00,
   isBookable: true,
-  isActive: true
-});
-
-// ❌ Avoid: Vague or incomplete definitions
-const badService = await client.businessServices.create({
-  name: 'Massage',
-  duration: 60,
-  price: 0  // Free services should still have price: 0
+  isActive: true,
+  requiredResources: [],
+  lateCancelFeePercent: 50,
+  noShowFeePercent: 100,
 });
 ```
 
-### 2. Appointment Scheduling
+### 3. Status Progression
 
 ```typescript
-// ✅ Good: Validate time slots
-const serviceDuration = 60; // minutes
-const bufferTime = 15;
-const totalDuration = serviceDuration + bufferTime;
+import { AppointmentStatus } from 'wiil-core-js';
 
-const startTime = Date.now() + 24 * 60 * 60 * 1000;
-const endTime = startTime + (totalDuration * 60 * 1000);
+// Follow the standard lifecycle: pending → confirmed → completed
+const apt = await client.serviceAppointments.create({ ... });
+// Status defaults to 'pending'
 
-// ❌ Avoid: Overlapping appointments without buffer
-```
+await client.serviceAppointments.updateStatus(apt.id, AppointmentStatus.CONFIRMED);
 
-### 3. Status Management
-
-```typescript
-// ✅ Good: Follow status progression
-// pending → confirmed → completed
-
-const apt = await client.serviceAppointments.create({
-  businessServiceId: 'service_123',
-  customerId: 'cust_456',
-  startTime: Date.now() + 3600000,
-  duration: 60,
-  totalPrice: 50.00
-});
-
-// Status defaults to 'pending', now confirm it
-const confirmed = await client.serviceAppointments.updateStatus(
-  apt.id,
-  { status: AppointmentStatus.CONFIRMED }
-);
-
-// After service is done
-const completed = await client.serviceAppointments.updateStatus(
-  apt.id,
-  { status: AppointmentStatus.COMPLETED }
-);
+// After service is complete
+await client.serviceAppointments.updateStatus(apt.id, AppointmentStatus.COMPLETED);
 ```
 
 ### 4. Error Handling
@@ -615,15 +955,17 @@ try {
   const appointment = await client.serviceAppointments.create({
     businessServiceId: 'service_123',
     customerId: 'cust_456',
-    startTime: Date.now(),
+    startTime: slot.startTimeUtcSec, // API expects UTC seconds
+    endTime: slot.endTimeUtcSec,
     duration: 60,
-    totalPrice: 50.00
+    totalPrice: 50.00,
+    depositPaid: 0,
   });
 } catch (error) {
   if (error.status === 404) {
-    console.error('Service not found');
+    console.error('Service or customer not found');
   } else if (error.status === 409) {
-    console.error('Time slot conflict');
+    console.error('Time slot conflict - slot already booked');
   } else {
     console.error('Failed to create appointment:', error.message);
   }
@@ -634,16 +976,29 @@ try {
 
 ## Troubleshooting
 
+### No available slots returned
+
+**Problem**: `getAvailableSlots` returns empty array
+
+**Solution**: Verify the service and provider are active and linked:
+```typescript
+const service = await client.businessServices.get('service_123');
+console.log(`Service active: ${service.isActive}, bookable: ${service.isBookable}`);
+
+const providers = await client.serviceProviders.getByService('service_123');
+console.log(`Linked providers: ${providers.data.length}`);
+```
+
 ### Service not bookable
+
 **Problem**: Customers can't book a service
 
-**Solution**:
+**Solution**: Ensure service is active and bookable:
 ```typescript
-// Ensure service is active and bookable
-const service = await client.businessServices.update({
+await client.businessServices.update({
   id: 'service_123',
   isActive: true,
-  isBookable: true
+  isBookable: true,
 });
 ```
 
@@ -651,15 +1006,16 @@ const service = await client.businessServices.update({
 
 **Problem**: Appointment creation fails
 
-**Solution**: Always include required customerId
+**Solution**: Always include required customerId:
 ```typescript
-// ✅ Include required customer ID
 const appointment = await client.serviceAppointments.create({
   businessServiceId: 'service_123',
-  customerId: 'cust_456',  // ← Required field
-  startTime: Date.now() + 3600000,
+  customerId: 'cust_456',  // Required
+  startTime: slot.startTimeUtcSec,  // API expects UTC seconds
+  endTime: slot.endTimeUtcSec,
   duration: 60,
-  totalPrice: 50.00
+  totalPrice: 50.00,
+  depositPaid: 0,
 });
 ```
 
@@ -668,10 +1024,9 @@ const appointment = await client.serviceAppointments.create({
 ## Next Steps
 
 - **AI-Powered Booking**: Integrate with WIIL AI agents for conversational booking
-- **Calendar Sync**: Connect with Google Calendar or Outlook
 - **Notifications**: Set up appointment reminders
 - **Payment Integration**: Add deposit and payment processing
 
 ---
 
-[← Back to Examples](../README.md)
+[Back to Examples](../README.md)

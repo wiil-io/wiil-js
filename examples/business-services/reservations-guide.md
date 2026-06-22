@@ -1,904 +1,918 @@
 # Reservation Management Guide
 
-This guide covers managing reservation resources (tables, rooms, rentals) and customer reservations using the WIIL Platform JS SDK.
+**Manage table, room, and rental reservations using the WIIL Platform JS SDK**
 
-## Quick Start
+**Setup Time**: ~15 minutes
 
-```typescript
-import { WiilClient, ResourceType, AppointmentStatus, ResourceReservationDurationUnit } from 'wiil-js';
+---
 
-const client = new WiilClient({
-  apiKey: 'your-api-key',
-});
+## Overview
 
-// Create a table resource
-const table = await client.reservationResources.create({
-  resourceType: ResourceType.TABLE,
-  name: 'Table 5',
-  description: 'Window-side table for 4 guests',
-  capacity: 4,
-  isAvailable: true,
-  location: 'Main dining area',
-  amenities: ['Window view', 'Booth seating'],
-  reservationDuration: 2,
-  reservationDurationUnit: ResourceReservationDurationUnit.HOURS,
-  syncEnabled: false,
-});
+The WIIL Platform provides three distinct reservation systems, each with specialized features:
 
-// Create a reservation for the table
-const reservation = await client.reservations.create({
-  reservationType: ResourceType.TABLE,
-  resourceId: table.id,
-  customerId: 'cust_123',
-  startTime: Date.now() + 3600000, // 1 hour from now
-  endTime: Date.now() + 7200000,   // 2 hours from now
-  duration: 2,
-  personsNumber: 4,
-  totalPrice: 0,
-  depositPaid: 0,
-  notes: 'Window table preferred',
-  isResourceReservation: true,
-});
-```
+| Type | Use Case | Duration Unit | Key Fields |
+|------|----------|---------------|------------|
+| **Table** | Restaurants, dining | Minutes | `time`, `duration`, `personsNumber`, `floorPlanId` |
+| **Room** | Hotels, accommodations | Nights | `checkIn`, `checkOut`, `nights`, `ratePerNight`, `guestId` |
+| **Rental** | Equipment, vehicles, spaces | Hours/Minutes | `startAt`, `endAt`, `tierId`, `payment` |
 
-## Reservation Resources
+Each type has its own SDK resource:
+- `client.tableReservations`
+- `client.roomReservations`
+- `client.rentalReservations`
 
-Reservation resources represent bookable items such as restaurant tables, hotel rooms, conference rooms, or rental equipment.
+---
 
-### Resource Types
+## Prerequisites
+
+1. Active WIIL Platform account
+2. API key with business management permissions
+3. Node.js project with wiil-js SDK installed
+
+---
+
+## Table Reservations
+
+Table reservations require a floor plan with sections and tables.
+
+### Create a Floor Plan
 
 ```typescript
-enum ResourceType {
-  TABLE = 'table',        // Restaurant/dining tables
-  ROOM = 'room',          // Hotel rooms/accommodations
-  RENTALS = 'rentals',    // Rental items/spaces
-  RESOURCE = 'resource'   // Generic resources
-}
-```
+import { WiilClient } from 'wiil-js';
+import { CanvasUnit, TableShape } from 'wiil-core-js';
 
-### Duration Units
+const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
 
-```typescript
-enum ResourceReservationDurationUnit {
-  MINUTES = 'minutes',
-  HOURS = 'hours',
-  NIGHTS = 'nights'
-}
-```
-
-### Resource Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| resourceType | string | Yes | Type: 'table', 'room', 'rentals', 'resource' |
-| name | string | Yes | Resource name |
-| description | string | No | Resource description |
-| capacity | number | No | Maximum capacity (people) |
-| isAvailable | boolean | No | Available for reservation (default: true) |
-| location | string | No | Physical location |
-| amenities | string[] | No | Available amenities (default: []) |
-| reservationDuration | number | No | Default reservation duration |
-| reservationDurationUnit | string | No | Unit: 'minutes', 'hours', 'nights' |
-| calendarId | string | No | Calendar ID for sync |
-| syncEnabled | boolean | No | Enable calendar sync (default: false) |
-| roomResource | object | No | Room-specific fields (for ROOM type) |
-| rentalResource | object | No | Rental-specific fields (for RENTALS type) |
-
-### Create Table Resource
-
-```typescript
-const table = await client.reservationResources.create({
-  resourceType: ResourceType.TABLE,
-  name: 'Table 10',
-  description: 'Private dining table',
-  capacity: 6,
-  isAvailable: true,
-  location: 'Private room',
-  amenities: ['Privacy screen', 'Premium seating'],
-  reservationDuration: 2,
-  reservationDurationUnit: ResourceReservationDurationUnit.HOURS,
-  syncEnabled: false,
-});
-
-console.log('Table created:', table.id);
-```
-
-### Create Room Resource
-
-```typescript
-const room = await client.reservationResources.create({
-  resourceType: ResourceType.ROOM,
-  name: 'Room 101',
-  description: 'Deluxe ocean view suite',
-  capacity: 2,
-  isAvailable: true,
-  location: 'Building A, Floor 1',
-  amenities: ['WiFi', 'Mini-bar', 'Ocean view', 'King bed'],
-  reservationDuration: 1,
-  reservationDurationUnit: ResourceReservationDurationUnit.NIGHTS,
-  syncEnabled: false,
-  roomResource: {
-    roomNumber: '101',
-    roomType: 'Deluxe King',
-    pricePerNight: 299.99,
-    view: 'Ocean View',
-    bedType: 'King',
-    isSmoking: false,
-    accessibilityFeatures: 'Roll-in shower, Grab bars',
-  },
-});
-
-console.log('Room created:', room.id);
-console.log('Price per night:', room.roomResource.pricePerNight);
-```
-
-### Create Rental Resource
-
-```typescript
-const conferenceRoom = await client.reservationResources.create({
-  resourceType: ResourceType.RENTALS,
-  name: 'Conference Room A',
-  description: 'Large conference room with projector',
-  capacity: 12,
-  isAvailable: true,
-  location: 'Floor 2',
-  amenities: ['Projector', 'Whiteboard', 'Video-conference'],
-  reservationDuration: 1,
-  reservationDurationUnit: ResourceReservationDurationUnit.HOURS,
-  syncEnabled: false,
-  rentalResource: {
-    itemType: 'Conference Room',
-    pricePerHour: 50.00,
-  },
-});
-
-console.log('Conference room created:', conferenceRoom.id);
-console.log('Hourly rate:', conferenceRoom.rentalResource.pricePerHour);
-```
-
-### Create Resource with Calendar Sync
-
-```typescript
-const room = await client.reservationResources.create({
-  resourceType: ResourceType.ROOM,
-  name: 'Room 202',
-  capacity: 2,
-  isAvailable: true,
-  amenities: [],
-  reservationDuration: 1,
-  reservationDurationUnit: ResourceReservationDurationUnit.NIGHTS,
-  calendarId: 'google-calendar-123',
-  syncEnabled: true,
-});
-
-console.log('Calendar sync enabled:', room.syncEnabled);
-console.log('Last sync:', room.lastSyncAt);
-```
-
-### Get Resource
-
-```typescript
-const resource = await client.reservationResources.get('resource_123');
-
-console.log('Resource:', resource.name);
-console.log('Type:', resource.resourceType);
-console.log('Capacity:', resource.capacity);
-console.log('Available:', resource.isAvailable);
-```
-
-### Get Resources by Type
-
-```typescript
-const tables = await client.reservationResources.getByType(ResourceType.TABLE, {
-  page: 1,
-  pageSize: 20,
-});
-
-console.log('Tables:', tables.data.length);
-tables.data.forEach(table => {
-  console.log('-', table.name, `(capacity: ${table.capacity})`);
-});
-```
-
-### Update Resource
-
-```typescript
-const updated = await client.reservationResources.update({
-  id: 'resource_123',
-  name: 'Table 5 (VIP)',
-  capacity: 6,
-  description: 'Expanded VIP table',
-  isAvailable: true,
-});
-
-console.log('Updated:', updated.name);
-```
-
-### Update Resource Availability
-
-```typescript
-const updated = await client.reservationResources.update({
-  id: 'resource_456',
-  isAvailable: false,
-});
-
-console.log('Now unavailable');
-```
-
-### Update Room Pricing
-
-```typescript
-const updated = await client.reservationResources.update({
-  id: 'resource_room',
-  roomResource: {
-    roomNumber: '101',
-    roomType: 'Deluxe King',
-    pricePerNight: 349.99,
-    view: 'Ocean View',
-    bedType: 'King',
-    isSmoking: false,
-  },
-});
-
-console.log('New price:', updated.roomResource.pricePerNight);
-```
-
-### Delete Resource
-
-```typescript
-const deleted = await client.reservationResources.delete('resource_123');
-
-console.log('Deleted:', deleted);
-```
-
-### List Resources
-
-```typescript
-const result = await client.reservationResources.list({
-  page: 1,
-  pageSize: 20,
-});
-
-console.log('Resources:', result.data.length);
-console.log('Total:', result.meta.totalCount);
-```
-
-## Batch Operations
-
-Batch operations allow you to create multiple resources in a single API request, improving performance for bulk data imports.
-
-### Batch Create Resources
-
-Create up to 50 reservation resources in a single request:
-
-```typescript
-const resources = await client.reservationResources.createBatch([
-  {
-    resourceType: ResourceType.TABLE,
-    name: 'Table 1',
-    description: 'Corner booth for 2',
-    capacity: 2,
-    isAvailable: true,
-    location: 'Corner area',
-    amenities: ['Quiet', 'Intimate'],
-    reservationDuration: 2,
-    reservationDurationUnit: ResourceReservationDurationUnit.HOURS,
-    syncEnabled: false,
-  },
-  {
-    resourceType: ResourceType.TABLE,
-    name: 'Table 2',
-    description: 'Family table for 4',
-    capacity: 4,
-    isAvailable: true,
-    location: 'Main dining',
-    amenities: ['High chairs available'],
-    reservationDuration: 2,
-    reservationDurationUnit: ResourceReservationDurationUnit.HOURS,
-    syncEnabled: false,
-  },
-  {
-    resourceType: ResourceType.TABLE,
-    name: 'Table 3',
-    description: 'Large party table',
-    capacity: 8,
-    isAvailable: true,
-    location: 'Private room',
-    amenities: ['Privacy screen', 'Wine service'],
-    reservationDuration: 3,
-    reservationDurationUnit: ResourceReservationDurationUnit.HOURS,
-    syncEnabled: false,
-  },
-]);
-
-console.log(`Created ${resources.data.length} resources`);
-resources.data.forEach(res => {
-  console.log(`- ${res.name} (capacity: ${res.capacity})`);
-});
-```
-
-### Batch Create Room Resources
-
-```typescript
-const rooms = await client.reservationResources.createBatch([
-  {
-    resourceType: ResourceType.ROOM,
-    name: 'Room 101',
-    description: 'Standard King',
-    capacity: 2,
-    isAvailable: true,
-    reservationDuration: 1,
-    reservationDurationUnit: ResourceReservationDurationUnit.NIGHTS,
-    roomResource: {
-      roomNumber: '101',
-      roomType: 'Standard King',
-      pricePerNight: 199.99,
-      bedType: 'King',
-      isSmoking: false,
+const floorPlan = await client.floorPlans.createDefinition({
+  name: 'Main Dining Room',
+  description: 'Primary dining area with 10 tables',
+  capacity: 40,
+  canvasDimensions: { width: 800, height: 600, unit: CanvasUnit.PX },
+  isActive: true,
+  sections: [
+    {
+      name: 'Window Section',
+      capacity: 16,
+      color: '#4A90D9',
+      isActive: true,
+      sortOrder: 1,
+      tables: [
+        {
+          number: 'W1',
+          x: 100,
+          y: 100,
+          width: 80,
+          height: 80,
+          shape: TableShape.ROUND,
+          minParty: 2,
+          maxParty: 4,
+          combinableWith: [],
+        },
+        {
+          number: 'W2',
+          x: 250,
+          y: 100,
+          width: 120,
+          height: 80,
+          shape: TableShape.RECT,
+          minParty: 4,
+          maxParty: 6,
+          combinableWith: [],
+        },
+        {
+          number: 'W3',
+          x: 400,
+          y: 100,
+          width: 100,
+          height: 100,
+          shape: TableShape.ROUND,
+          minParty: 4,
+          maxParty: 6,
+          combinableWith: [],
+        },
+      ],
     },
-  },
-  {
-    resourceType: ResourceType.ROOM,
-    name: 'Room 102',
-    description: 'Deluxe Suite',
-    capacity: 4,
-    isAvailable: true,
-    reservationDuration: 1,
-    reservationDurationUnit: ResourceReservationDurationUnit.NIGHTS,
-    roomResource: {
-      roomNumber: '102',
-      roomType: 'Deluxe Suite',
-      pricePerNight: 349.99,
-      bedType: 'King + Sofa',
-      isSmoking: false,
+    {
+      name: 'Main Floor',
+      capacity: 24,
+      color: '#7B68EE',
+      isActive: true,
+      sortOrder: 2,
+      tables: [
+        {
+          number: 'M1',
+          x: 100,
+          y: 300,
+          width: 150,
+          height: 80,
+          shape: TableShape.RECT,
+          minParty: 6,
+          maxParty: 8,
+          combinableWith: [],
+        },
+      ],
     },
-  },
-]);
+  ],
+});
 
-console.log(`Created ${rooms.data.length} rooms`);
+console.log(`Floor Plan Created: ${floorPlan.id}`);
 ```
 
-### Batch Limits
-
-| Resource              | Maximum per Batch |
-|-----------------------|-------------------|
-| Reservation Resources | 50                |
-
-**Note:** Batch operations validate each item individually. If validation fails for any item, the entire batch request fails with an error indicating the index of the failing item.
+### Query Available Table Slots
 
 ```typescript
-try {
-  const resources = await client.reservationResources.createBatch(resourceList);
-} catch (error) {
-  // Error message includes the index: "Validation failed for item at index 2"
-  console.error('Batch creation failed:', error.message);
-}
+import { ResourceType, ReservationCandidateSlot } from 'wiil-core-js';
+
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+const localDate = tomorrow.toISOString().split('T')[0];
+
+const slotResponse = await client.tableReservations.getAvailableSlots({
+  resourceType: ResourceType.TABLE,
+  localDate: localDate,
+  partySize: 4,
+  floorPlanId: floorPlan.id,
+  maxResults: 10,
+});
+
+console.log(`Found ${slotResponse.slots.length} available slots`);
+slotResponse.slots.forEach((slot: ReservationCandidateSlot, idx) => {
+  console.log(`  ${idx + 1}. ${slot.startTimeOfDay} (available: ${slot.isAvailable})`);
+});
 ```
-
-## Reservations
-
-Reservations represent customer bookings for specific resources.
-
-### Reservation Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| reservationType | string | Yes | Type: 'table', 'room', 'rentals', 'resource' |
-| resourceId | string | No | Resource ID (nullable) |
-| customerId | string | Yes | Customer ID |
-| startTime | number | Yes | Start time (Unix timestamp) |
-| endTime | number | No | End time (Unix timestamp) |
-| duration | number | No | Duration based on resource type |
-| personsNumber | number | No | Number of people |
-| totalPrice | number | No | Total price |
-| depositPaid | number | No | Deposit paid (default: 0) |
-| notes | string | No | Special requests or notes |
-| isResourceReservation | boolean | No | Specific resource (default: true) |
-
-Note: Status defaults to 'pending' and should not be included in create requests.
 
 ### Create Table Reservation
 
 ```typescript
-const reservation = await client.reservations.create({
-  reservationType: ResourceType.TABLE,
-  resourceId: 'resource_table5',
+import { CreateTableReservationSchema } from 'wiil-core-js';
+
+const slot = slotResponse.slots.find(s => s.isAvailable);
+if (!slot) throw new Error('No available slots');
+
+// Use slot time directly - API expects UTC seconds
+const reservation = await client.tableReservations.create({
+  resourceId: floorPlan.id,
   customerId: 'cust_123',
-  startTime: Date.now() + 3600000,
-  endTime: Date.now() + 7200000,
-  duration: 2,
+  floorPlanId: floorPlan.id,
+  time: slot.startTimeUtcSec,
+  duration: 120,
   personsNumber: 4,
-  totalPrice: 0,
-  depositPaid: 0,
-  notes: 'Window table preferred',
-  isResourceReservation: true,
+  isVip: false,
+  notes: 'Anniversary dinner - window table preferred',
 });
 
-console.log('Reservation created:', reservation.id);
-console.log('Status:', reservation.status);
+console.log(`Reservation Created: ${reservation.id}`);
+console.log(`Time: ${new Date(reservation.time * 1000).toLocaleString()}`);
+console.log(`Party Size: ${reservation.personsNumber}`);
 ```
 
-### Create Room Reservation with Deposit
+### Get Table Reservation
 
 ```typescript
-const reservation = await client.reservations.create({
-  reservationType: ResourceType.ROOM,
-  resourceId: 'resource_room101',
-  customerId: 'cust_456',
-  startTime: Date.now(),
-  endTime: Date.now() + 3 * 24 * 60 * 60 * 1000, // 3 nights
-  duration: 3,
-  personsNumber: 2,
-  totalPrice: 899.97,
-  depositPaid: 299.99,
-  notes: 'Early check-in requested',
-  isResourceReservation: true,
+const reservation = await client.tableReservations.get('reservation_123');
+
+console.log(`Reservation: ${reservation.id}`);
+console.log(`Customer: ${reservation.customerId}`);
+console.log(`Time: ${new Date(reservation.time * 1000).toLocaleString()}`);
+console.log(`Status: ${reservation.status}`);
+```
+
+### List Table Reservations
+
+```typescript
+const result = await client.tableReservations.list();
+
+console.log(`Total Reservations: ${result.data.length}`);
+result.data.forEach(res => {
+  console.log(`- ${res.id}: ${new Date(res.time * 1000).toLocaleDateString()} for ${res.personsNumber} people`);
+});
+```
+
+### Update Table Reservation
+
+```typescript
+import { UpdateTableReservationSchema } from 'wiil-core-js';
+
+const updated = await client.tableReservations.update(reservation.id, {
+  id: reservation.id,
+  personsNumber: 6,
+  notes: 'Updated: Party size increased to 6',
 });
 
-console.log('Reservation created:', reservation.id);
-console.log('Total price:', reservation.totalPrice);
-console.log('Deposit paid:', reservation.depositPaid);
+console.log(`Updated party size: ${updated.personsNumber}`);
+```
+
+### Cancel Table Reservation
+
+```typescript
+const cancelled = await client.tableReservations.cancel(
+  reservation.id,
+  'Customer requested cancellation'
+);
+
+console.log(`Status: ${cancelled.status}`);
+```
+
+### Delete Table Reservation
+
+```typescript
+await client.tableReservations.delete('reservation_123');
+console.log('Reservation deleted');
+```
+
+---
+
+## Room Reservations
+
+Room reservations are for hotels and accommodations, with check-in/check-out dates and nightly rates.
+
+### Create Room Resource
+
+```typescript
+import { ResourceType, ResourceInstanceStatus } from 'wiil-core-js';
+
+const roomResource = await client.reservationResources.create({
+  name: 'Deluxe Ocean Suite',
+  resourceType: ResourceType.ROOM,
+  capacity: 4,
+  isAvailable: true,
+  amenities: ['WiFi', 'Air Conditioning', 'Mini Bar', 'Ocean View'],
+  checklistTemplate: [],
+  applicableTierIds: [],
+  instances: [
+    { name: 'Room 101', code: 'R101', status: ResourceInstanceStatus.AVAILABLE, isAvailable: true },
+    { name: 'Room 102', code: 'R102', status: ResourceInstanceStatus.AVAILABLE, isAvailable: true },
+  ],
+});
+
+console.log(`Room Resource Created: ${roomResource.id}`);
+```
+
+### Create Room Reservation
+
+```typescript
+import { 
+  CreateRoomReservationSchema, 
+  ReservationStatus, 
+  PaymentStatus 
+} from 'wiil-core-js';
+
+// API expects UTC seconds
+const nowSec = Math.floor(Date.now() / 1000);
+const checkIn = nowSec + (24 * 60 * 60); // Tomorrow
+const checkOut = checkIn + (3 * 24 * 60 * 60); // 3 nights later
+
+const roomReservation = await client.roomReservations.create({
+  resourceId: roomResource.id,
+  guestId: 'cust_456',
+  personsNumber: 2,
+  checkIn: checkIn,
+  checkOut: checkOut,
+  nights: 3,
+  status: ReservationStatus.PENDING,
+  ratePerNight: [
+    { date: new Date(checkIn * 1000).toISOString().split('T')[0], amount: 299.00 },
+    { date: new Date((checkIn + 24*60*60) * 1000).toISOString().split('T')[0], amount: 299.00 },
+    { date: new Date((checkIn + 48*60*60) * 1000).toISOString().split('T')[0], amount: 299.00 },
+  ],
+  totalWithTax: 980.67,
+  deposit: 299.00,
+  paymentStatus: PaymentStatus.PENDING,
+  notes: 'Late check-in requested around 10 PM',
+});
+
+console.log(`Room Reservation Created: ${roomReservation.id}`);
+console.log(`Check-in: ${new Date(roomReservation.checkIn * 1000).toLocaleDateString()}`);
+console.log(`Check-out: ${new Date(roomReservation.checkOut * 1000).toLocaleDateString()}`);
+console.log(`Total: $${roomReservation.totalWithTax}`);
+```
+
+### Get Room Reservation
+
+```typescript
+const roomRes = await client.roomReservations.get('reservation_123');
+
+console.log(`Guest: ${roomRes.guestId}`);
+console.log(`Nights: ${roomRes.nights}`);
+console.log(`Total: $${roomRes.totalWithTax}`);
+console.log(`Deposit: $${roomRes.deposit}`);
+```
+
+### Get Room Reservations by Guest
+
+```typescript
+const guestReservations = await client.roomReservations.getByGuest('cust_456');
+
+console.log(`Guest has ${guestReservations.data.length} reservations`);
+guestReservations.data.forEach(res => {
+  console.log(`- ${new Date(res.checkIn * 1000).toLocaleDateString()} to ${new Date(res.checkOut * 1000).toLocaleDateString()}`);
+});
+```
+
+### Get Room Reservations by Resource
+
+```typescript
+const resourceReservations = await client.roomReservations.getByResource(roomResource.id);
+
+console.log(`Room has ${resourceReservations.data.length} reservations`);
+```
+
+### List Room Reservations
+
+```typescript
+const result = await client.roomReservations.list();
+
+console.log(`Total Room Reservations: ${result.data.length}`);
+```
+
+### Update Room Reservation
+
+```typescript
+import { UpdateRoomReservationSchema } from 'wiil-core-js';
+
+const updated = await client.roomReservations.update(roomReservation.id, {
+  id: roomReservation.id,
+  personsNumber: 3,
+  notes: 'Extra bed requested for third guest',
+  deposit: 350.00,
+});
+
+console.log(`Updated deposit: $${updated.deposit}`);
+```
+
+### Cancel Room Reservation
+
+```typescript
+import { ReservationStatus } from 'wiil-core-js';
+
+const cancelled = await client.roomReservations.cancel(
+  roomReservation.id,
+  'Change of travel plans'
+);
+
+console.log(`Status: ${cancelled.status}`);
+```
+
+### Delete Room Reservation
+
+```typescript
+await client.roomReservations.delete('reservation_123');
+console.log('Room reservation deleted');
+```
+
+---
+
+## Rental Reservations
+
+Rental reservations are for equipment, vehicles, or spaces with hourly/daily rates.
+
+### Create Rental Resource
+
+```typescript
+import { ResourceType, ResourceInstanceStatus } from 'wiil-core-js';
+
+const rentalResource = await client.reservationResources.create({
+  name: 'Mountain Bike - Premium',
+  resourceType: ResourceType.RENTAL,
+  capacity: 1,
+  isAvailable: true,
+  amenities: ['Helmet included', 'Lock included'],
+  checklistTemplate: [],
+  applicableTierIds: [],
+  instances: [
+    { name: 'Bike #001', code: 'MTB-001', status: ResourceInstanceStatus.AVAILABLE, isAvailable: true },
+    { name: 'Bike #002', code: 'MTB-002', status: ResourceInstanceStatus.AVAILABLE, isAvailable: true },
+  ],
+});
+
+console.log(`Rental Resource Created: ${rentalResource.id}`);
+```
+
+### Query Available Rental Slots
+
+```typescript
+import { ResourceType, RentalCandidateSlot } from 'wiil-core-js';
+
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+const localDate = tomorrow.toISOString().split('T')[0];
+
+const slotResponse = await client.rentalReservations.getAvailableSlots({
+  resourceType: ResourceType.RENTAL,
+  localDate: localDate,
+  resourceId: rentalResource.id,
+  durationMinutes: 240, // 4 hours
+  maxResults: 10,
+});
+
+console.log(`Found ${slotResponse.slots.length} available slots`);
+slotResponse.slots.forEach((slot: RentalCandidateSlot, idx) => {
+  console.log(`  ${idx + 1}. Pickup: ${slot.pickupTimeOfDay}, Return: ${slot.returnTimeOfDay}`);
+});
 ```
 
 ### Create Rental Reservation
 
 ```typescript
-const reservation = await client.reservations.create({
-  reservationType: ResourceType.RENTALS,
-  resourceId: 'resource_confroom',
+import { 
+  CreateRentalReservationSchema, 
+  RentalReservationStatus, 
+  DepositStatus 
+} from 'wiil-core-js';
+
+const slot = slotResponse.slots.find(s => s.isAvailable);
+if (!slot) throw new Error('No available rental slots');
+
+// Use slot times directly - API expects UTC seconds
+const rentalReservation = await client.rentalReservations.create({
+  resourceId: rentalResource.id,
   customerId: 'cust_789',
-  startTime: Date.now(),
-  endTime: Date.now() + 4 * 60 * 60 * 1000, // 4 hours
-  duration: 4,
-  personsNumber: 10,
-  totalPrice: 200.00,
-  depositPaid: 0,
-  isResourceReservation: true,
+  startAt: slot.startTimeUtcSec,
+  endAt: slot.endTimeUtcSec,
+  tierId: 'tier_standard',
+  status: RentalReservationStatus.UPCOMING,
+  payment: {
+    rentalCharge: 75.00,
+    securityDeposit: 200.00,
+    depositStatus: DepositStatus.PENDING,
+  },
+  checklistCompletions: [],
+  notes: 'First-time renter, provide extra instructions',
 });
 
-console.log('Conference room reserved:', reservation.id);
+console.log(`Rental Reservation Created: ${rentalReservation.id}`);
+console.log(`Pickup: ${new Date(rentalReservation.startAt * 1000).toLocaleString()}`);
+console.log(`Return: ${new Date(rentalReservation.endAt * 1000).toLocaleString()}`);
+console.log(`Rental Charge: $${rentalReservation.payment.rentalCharge}`);
 ```
 
-### Create General Availability Reservation
-
-Without a specific resource (capacity-based):
+### Get Rental Reservation
 
 ```typescript
-const reservation = await client.reservations.create({
-  reservationType: ResourceType.TABLE,
-  customerId: 'cust_999',
-  startTime: Date.now(),
-  duration: 1,
-  personsNumber: 2,
-  totalPrice: 0,
-  depositPaid: 0,
-  isResourceReservation: false, // No specific resource
-});
+const rental = await client.rentalReservations.get('reservation_123');
 
-console.log('General reservation created:', reservation.id);
-console.log('Resource ID:', reservation.resourceId); // undefined
+console.log(`Customer: ${rental.customerId}`);
+console.log(`Pickup: ${new Date(rental.startAt * 1000).toLocaleString()}`);
+console.log(`Rental Charge: $${rental.payment.rentalCharge}`);
+console.log(`Security Deposit: $${rental.payment.securityDeposit}`);
 ```
 
-### Get Reservation
+### Get Rental Reservations by Customer
 
 ```typescript
-const reservation = await client.reservations.get('reservation_123');
+const customerRentals = await client.rentalReservations.getByCustomer('cust_789');
 
-console.log('Reservation:', reservation.id);
-console.log('Status:', reservation.status);
-console.log('Persons:', reservation.personsNumber);
-console.log('Notes:', reservation.notes);
+console.log(`Customer has ${customerRentals.data.length} rental reservations`);
 ```
 
-### Get Reservations by Customer
+### Get Rental Reservations by Resource
 
 ```typescript
-const result = await client.reservations.getByCustomer('cust_123', {
-  page: 1,
-  pageSize: 20,
-});
+const resourceRentals = await client.rentalReservations.getByResource(rentalResource.id);
 
-console.log('Customer reservations:', result.data.length);
-result.data.forEach(res => {
-  console.log('-', new Date(res.startTime), res.reservationType, res.status);
-});
+console.log(`Resource has ${resourceRentals.data.length} reservations`);
 ```
 
-### Get Reservations by Resource
+### List Rental Reservations
 
 ```typescript
-const result = await client.reservations.getByResource('resource_table5', {
-  page: 1,
-  pageSize: 20,
-});
+const result = await client.rentalReservations.list();
 
-console.log('Resource reservations:', result.data.length);
-result.data.forEach(res => {
-  console.log('-', new Date(res.startTime), res.personsNumber, 'people');
-});
+console.log(`Total Rental Reservations: ${result.data.length}`);
 ```
 
-### Update Reservation
+### Update Rental Reservation
 
 ```typescript
-const updated = await client.reservations.update({
-  id: 'reservation_123',
-  personsNumber: 6,
-  notes: 'Updated party size',
+import { UpdateRentalReservationSchema, DepositStatus } from 'wiil-core-js';
+
+const updated = await client.rentalReservations.update(rentalReservation.id, {
+  id: rentalReservation.id,
+  notes: 'Customer requested early pickup',
+  payment: {
+    rentalCharge: 85.00,
+    securityDeposit: 200.00,
+    depositStatus: DepositStatus.PAID,
+  },
 });
 
-console.log('Updated:', updated.personsNumber, 'people');
+console.log(`Updated rental charge: $${updated.payment.rentalCharge}`);
+console.log(`Deposit status: ${updated.payment.depositStatus}`);
 ```
 
-### Update Reservation Status
+### Cancel Rental Reservation
 
 ```typescript
-const updated = await client.reservations.updateStatus('reservation_123', {
-  status: AppointmentStatus.COMPLETED,
+import { RentalReservationStatus } from 'wiil-core-js';
+
+const cancelled = await client.rentalReservations.cancel(
+  rentalReservation.id,
+  'Weather conditions not suitable'
+);
+
+console.log(`Status: ${cancelled.status}`);
+```
+
+### Delete Rental Reservation
+
+```typescript
+await client.rentalReservations.delete('reservation_123');
+console.log('Rental reservation deleted');
+```
+
+---
+
+## Resource Management
+
+### Resource Categories
+
+Organize resources into categories:
+
+```typescript
+import { ResourceType } from 'wiil-core-js';
+
+// Create category
+const category = await client.resourceCategories.create({
+  name: 'Conference Rooms',
+  description: 'Meeting and conference spaces',
+  resourceType: ResourceType.ROOM,
+  isActive: true,
+  displayOrder: 1,
 });
 
-console.log('Status updated:', updated.status);
-```
+// Get category
+const cat = await client.resourceCategories.get(category.id);
 
-### Cancel Reservation
+// Get categories by type
+const roomCategories = await client.resourceCategories.getByResourceType(ResourceType.ROOM);
 
-```typescript
-const cancelled = await client.reservations.cancel('reservation_123', {
-  reason: 'Customer requested cancellation',
+// Get active categories
+const activeCategories = await client.resourceCategories.getActive();
+
+// List all categories
+const allCategories = await client.resourceCategories.list();
+
+// Update category
+const updated = await client.resourceCategories.update(category.id, {
+  id: category.id,
+  description: 'Premium meeting spaces',
+  displayOrder: 2,
 });
 
-console.log('Cancelled:', cancelled.status);
-console.log('Reason:', cancelled.cancelReason);
+// Batch create categories
+const batchResult = await client.resourceCategories.createBatch([
+  { name: 'Executive Suites', resourceType: ResourceType.ROOM, isActive: true, displayOrder: 10 },
+  { name: 'Equipment Rentals', resourceType: ResourceType.RENTAL, isActive: true, displayOrder: 11 },
+]);
+
+// Delete category
+await client.resourceCategories.delete(category.id);
 ```
 
-### Reschedule Reservation
+### Resource Instances
+
+Manage individual bookable units within a resource:
 
 ```typescript
-const newStartTime = Date.now() + 24 * 60 * 60 * 1000; // Tomorrow
-const newEndTime = newStartTime + 2 * 60 * 60 * 1000;  // 2 hours later
+import { ResourceInstanceStatus } from 'wiil-core-js';
 
-const rescheduled = await client.reservations.reschedule('reservation_123', {
-  startTime: newStartTime.toString(),
-  endTime: newEndTime.toString(),
+// Create instance
+const instance = await client.resourceInstances.create({
+  resourceId: roomResource.id,
+  name: 'Room 201',
+  code: 'R201',
+  status: ResourceInstanceStatus.AVAILABLE,
+  isAvailable: true,
+  attributes: [
+    { key: 'floor', value: '2' },
+    { key: 'view', value: 'garden' },
+  ],
 });
 
-console.log('Rescheduled to:', new Date(rescheduled.startTime));
-```
+// Get instance
+const inst = await client.resourceInstances.get(instance.id);
 
-### Reschedule with Different Resource
+// Get instances by resource
+const resourceInstances = await client.resourceInstances.getByResource(roomResource.id);
 
-```typescript
-const newStartTime = Date.now() + 24 * 60 * 60 * 1000;
-const newEndTime = newStartTime + 2 * 60 * 60 * 1000;
+// Get instances by status
+const availableInstances = await client.resourceInstances.getByStatus(ResourceInstanceStatus.AVAILABLE);
 
-const rescheduled = await client.reservations.reschedule('reservation_123', {
-  startTime: newStartTime.toString(),
-  endTime: newEndTime.toString(),
-  resourceId: 'resource_table10', // Different table
+// List all instances
+const allInstances = await client.resourceInstances.list();
+
+// Update instance
+const updatedInst = await client.resourceInstances.update(instance.id, {
+  id: instance.id,
+  code: 'R201-PREMIUM',
+  attributes: [
+    { key: 'floor', value: '2' },
+    { key: 'view', value: 'ocean' },
+    { key: 'upgrade', value: 'premium' },
+  ],
 });
 
-console.log('Moved to:', rescheduled.resourceId);
+// Delete instance
+await client.resourceInstances.delete(instance.id);
 ```
 
-### Delete Reservation
-
-```typescript
-const deleted = await client.reservations.delete('reservation_123');
-
-console.log('Deleted:', deleted);
-```
-
-### List Reservations
-
-```typescript
-const result = await client.reservations.list({
-  page: 1,
-  pageSize: 20,
-});
-
-console.log('Reservations:', result.data.length);
-console.log('Total:', result.meta.totalCount);
-```
+---
 
 ## Reservation Settings
 
-Configure default reservation behaviors for each resource type.
-
-### Setting Types
+Configure per-location reservation settings:
 
 ```typescript
-enum ReservationSettingType {
-  CAPACITY = 'capacity',              // Capacity-based (no specific resource)
-  RESOURCE_SPECIFIC = 'resource_specific'  // Specific resource required
-}
-```
-
-### Settings Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| reservationType | string | Yes | Type: 'table', 'room', 'rentals', 'resource' |
-| settingType | string | Yes | 'capacity' or 'resource_specific' |
-| defaultReservationDuration | number | No | Default duration |
-| defaultReservationDurationUnit | string | No | Unit: 'minutes', 'hours', 'nights' |
-| isActive | boolean | No | Setting is active (default: true) |
-
-### Get Settings
-
-```typescript
-const settings = await client.reservations.getSettings();
-
-console.log('Settings:', settings.length);
-settings.forEach(setting => {
-  console.log('-', setting.reservationType, setting.defaultReservationDuration, setting.defaultReservationDurationUnit);
-});
-```
-
-### Update Settings
-
-```typescript
-const updated = await client.reservations.updateSettings({
-  id: 'settings_123',
-  defaultReservationDuration: 3,
-  isActive: false,
+// Create settings
+const settings = await client.reservationSettings.create({
+  locationId: 'loc_123',
+  supportTableReservations: true,
+  supportRoomReservations: true,
+  supportRentalReservations: false,
+  table: {
+    defaultDurationMinutes: 90,
+    turnoverMinutes: 15,
+    slotIntervalMinutes: 30,
+    advanceBookingDays: 30,
+    maxPartySize: 12,
+  },
 });
 
-console.log('Settings updated:', updated.defaultReservationDuration);
+// Get settings
+const s = await client.reservationSettings.get(settings.id);
+
+// Get settings by location
+const locationSettings = await client.reservationSettings.getByLocation('loc_123');
+
+// List all settings
+const allSettings = await client.reservationSettings.list();
+
+// Update settings
+const updated = await client.reservationSettings.update({
+  id: settings.id,
+  table: {
+    advanceBookingDays: 60,
+    maxPartySize: 20,
+  },
+});
+
+// Delete settings
+await client.reservationSettings.delete(settings.id);
 ```
 
-### Delete Settings
+---
+
+## Status Enums
+
+### Room Reservation Status
 
 ```typescript
-const deleted = await client.reservations.deleteSettings('settings_123');
+import { ReservationStatus } from 'wiil-core-js';
 
-console.log('Deleted:', deleted);
+// ReservationStatus.PENDING     - Awaiting confirmation
+// ReservationStatus.CONFIRMED   - Confirmed
+// ReservationStatus.CHECKED_IN  - Guest has arrived
+// ReservationStatus.CHECKED_OUT - Guest has departed
+// ReservationStatus.CANCELLED   - Reservation cancelled
+// ReservationStatus.NO_SHOW     - Guest did not arrive
 ```
 
-## Reservation Status Values
+### Rental Reservation Status
 
 ```typescript
-enum AppointmentStatus {
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  CANCELLED = 'cancelled',
-  COMPLETED = 'completed',
-  NO_SHOW = 'no_show'
-}
+import { RentalReservationStatus } from 'wiil-core-js';
+
+// RentalReservationStatus.UPCOMING   - Scheduled for future
+// RentalReservationStatus.ACTIVE     - Currently in use
+// RentalReservationStatus.COMPLETED  - Returned
+// RentalReservationStatus.CANCELLED  - Cancelled
 ```
+
+### Resource Instance Status
+
+```typescript
+import { ResourceInstanceStatus } from 'wiil-core-js';
+
+// ResourceInstanceStatus.AVAILABLE   - Ready for booking
+// ResourceInstanceStatus.OCCUPIED    - Currently in use
+// ResourceInstanceStatus.MAINTENANCE - Under maintenance
+// ResourceInstanceStatus.RESERVED    - Reserved but not started
+```
+
+---
 
 ## Complete Example: Restaurant Reservation System
 
 ```typescript
-import { WiilClient, ResourceType, AppointmentStatus, ResourceReservationDurationUnit } from 'wiil-js';
+import { WiilClient } from 'wiil-js';
+import { 
+  CanvasUnit, 
+  TableShape, 
+  ResourceType,
+  PreferredContactMethod,
+} from 'wiil-core-js';
 
 async function setupRestaurantReservations() {
-  const client = new WiilClient({
-    apiKey: process.env.WIIL_API_KEY!,
-  });
+  const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
 
-  // 1. Create table resources
-  const table2 = await client.reservationResources.create({
+  // 1. Create a customer
+  console.log('Creating customer...');
+  const customer = await client.customers.create({
+    phone_number: '+15551234567',
+    firstname: 'John',
+    lastname: 'Smith',
+    preferred_language: 'en',
+    preferred_contact_method: PreferredContactMethod.SMS,
+    isValidatedNames: false,
+  });
+  console.log(`Customer: ${customer.id}`);
+
+  // 2. Create floor plan with tables
+  console.log('\nCreating floor plan...');
+  const floorPlan = await client.floorPlans.createDefinition({
+    name: 'Main Dining',
+    description: 'Primary dining area',
+    capacity: 24,
+    canvasDimensions: { width: 800, height: 600, unit: CanvasUnit.PX },
+    isActive: true,
+    sections: [
+      {
+        name: 'Window Section',
+        capacity: 12,
+        color: '#4A90D9',
+        isActive: true,
+        sortOrder: 1,
+        tables: [
+          { number: 'W1', x: 100, y: 100, width: 80, height: 80, shape: TableShape.ROUND, minParty: 2, maxParty: 4, combinableWith: [] },
+          { number: 'W2', x: 200, y: 100, width: 100, height: 80, shape: TableShape.RECT, minParty: 4, maxParty: 6, combinableWith: [] },
+        ],
+      },
+      {
+        name: 'Main Floor',
+        capacity: 12,
+        color: '#7B68EE',
+        isActive: true,
+        sortOrder: 2,
+        tables: [
+          { number: 'M1', x: 100, y: 300, width: 120, height: 80, shape: TableShape.RECT, minParty: 4, maxParty: 6, combinableWith: [] },
+          { number: 'M2', x: 250, y: 300, width: 100, height: 100, shape: TableShape.ROUND, minParty: 4, maxParty: 6, combinableWith: [] },
+        ],
+      },
+    ],
+  });
+  console.log(`Floor Plan: ${floorPlan.id}`);
+
+  // 3. Query available slots for tomorrow evening
+  console.log('\nQuerying available slots...');
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const localDate = tomorrow.toISOString().split('T')[0];
+
+  const slotResponse = await client.tableReservations.getAvailableSlots({
     resourceType: ResourceType.TABLE,
-    name: 'Table 2',
-    description: 'Cozy corner table',
-    capacity: 2,
-    isAvailable: true,
-    location: 'Corner area',
-    amenities: ['Quiet', 'Intimate'],
-    reservationDuration: 2,
-    reservationDurationUnit: ResourceReservationDurationUnit.HOURS,
-    syncEnabled: false,
+    localDate: localDate,
+    partySize: 4,
+    floorPlanId: floorPlan.id,
+    maxResults: 10,
   });
 
-  const table4 = await client.reservationResources.create({
-    resourceType: ResourceType.TABLE,
-    name: 'Table 4',
-    description: 'Family table',
-    capacity: 4,
-    isAvailable: true,
-    location: 'Main dining area',
-    amenities: ['High chairs available'],
-    reservationDuration: 2,
-    reservationDurationUnit: ResourceReservationDurationUnit.HOURS,
-    syncEnabled: false,
+  if (slotResponse.slots.length === 0) {
+    console.log('No available slots');
+    return;
+  }
+
+  console.log(`Found ${slotResponse.slots.length} slots`);
+  slotResponse.slots.forEach((slot, idx) => {
+    console.log(`  ${idx + 1}. ${slot.startTimeOfDay}`);
   });
 
-  const table6 = await client.reservationResources.create({
-    resourceType: ResourceType.TABLE,
-    name: 'Table 6',
-    description: 'Large party table',
-    capacity: 6,
-    isAvailable: true,
-    location: 'Private room',
-    amenities: ['Privacy screen', 'Wine pairing available'],
-    reservationDuration: 2,
-    reservationDurationUnit: ResourceReservationDurationUnit.HOURS,
-    syncEnabled: false,
-  });
+  // 4. Create reservation using first available slot
+  console.log('\nCreating reservation...');
+  const slot = slotResponse.slots.find(s => s.isAvailable) || slotResponse.slots[0];
 
-  console.log('Created 3 tables');
-
-  // 2. Create reservation for tonight
-  const tonight7pm = new Date();
-  tonight7pm.setHours(19, 0, 0, 0);
-  const tonight9pm = new Date();
-  tonight9pm.setHours(21, 0, 0, 0);
-
-  const reservation = await client.reservations.create({
-    reservationType: ResourceType.TABLE,
-    resourceId: table4.id,
-    customerId: 'cust_smith',
-    startTime: tonight7pm.getTime(),
-    endTime: tonight9pm.getTime(),
-    duration: 2,
+  const reservation = await client.tableReservations.create({
+    resourceId: floorPlan.id,
+    customerId: customer.id,
+    floorPlanId: floorPlan.id,
+    time: slot.startTimeUtcSec, // API expects UTC seconds
+    duration: 120,
     personsNumber: 4,
-    totalPrice: 0,
-    depositPaid: 0,
-    notes: 'Anniversary dinner - please decorate table',
-    isResourceReservation: true,
+    isVip: true,
+    notes: 'Anniversary dinner - please prepare special dessert',
+  });
+  console.log(`Reservation: ${reservation.id}`);
+  console.log(`Time: ${new Date(reservation.time).toLocaleString()}`);
+
+  // 5. List all reservations
+  console.log('\nAll reservations:');
+  const allReservations = await client.tableReservations.list();
+  allReservations.data.forEach(res => {
+    console.log(`- ${res.id}: ${new Date(res.time * 1000).toLocaleDateString()} for ${res.personsNumber}`);
   });
 
-  console.log('Reservation created:', reservation.id);
-  console.log('Table:', table4.name);
-  console.log('Time:', new Date(reservation.startTime).toLocaleString());
-
-  // 4. Confirm the reservation
-  await client.reservations.updateStatus(reservation.id, {
-    status: AppointmentStatus.CONFIRMED,
-  });
-
-  console.log('Reservation confirmed');
-
-  // 4. Customer needs to reschedule
-  const tomorrow7pm = new Date(tonight7pm);
-  tomorrow7pm.setDate(tomorrow7pm.getDate() + 1);
-  const tomorrow9pm = new Date(tonight9pm);
-  tomorrow9pm.setDate(tomorrow9pm.getDate() + 1);
-
-  const rescheduled = await client.reservations.reschedule(reservation.id, {
-    startTime: tomorrow7pm.getTime().toString(),
-    endTime: tomorrow9pm.getTime().toString(),
-  });
-
-  console.log('Rescheduled to:', new Date(rescheduled.startTime).toLocaleString());
-
-  // 5. Check all reservations for a resource
-  const table4Reservations = await client.reservations.getByResource(table4.id);
-
-  console.log(`Table 4 has ${table4Reservations.data.length} reservations`);
-  table4Reservations.data.forEach(res => {
-    console.log('-', new Date(res.startTime).toLocaleString(), res.personsNumber, 'people', res.status);
-  });
-
-  // 6. Complete the reservation
-  await client.reservations.updateStatus(rescheduled.id, {
-    status: AppointmentStatus.COMPLETED,
-  });
-
-  console.log('Reservation completed');
-
-  // 7. Get customer reservation history
-  const customerHistory = await client.reservations.getByCustomer('cust_smith');
-
-  console.log(`Customer has ${customerHistory.data.length} reservations`);
+  return { customer, floorPlan, reservation };
 }
+
+setupRestaurantReservations().catch(console.error);
 ```
+
+---
 
 ## Best Practices
 
-### Resource Management
-- Set appropriate capacities for each resource
-- Use descriptive names and locations
-- Keep amenities lists up to date
-- Set realistic reservation durations
-- Use calendar sync for external booking systems
+### 1. Always Query Available Slots
 
-### Reservation Handling
-- Always validate resource availability before creating reservations
-- Include customer notes for special requests
-- Use deposits for high-value bookings (rooms, special events)
-- Confirm reservations promptly
-- Send reminders before reservation time
+```typescript
+// Table reservations
+const tableSlots = await client.tableReservations.getAvailableSlots({
+  resourceType: ResourceType.TABLE,
+  localDate: '2026-06-22',
+  partySize: 4,
+  floorPlanId: floorPlan.id,
+  maxResults: 10,
+});
 
-### Resource Type Guidelines
+// Rental reservations
+const rentalSlots = await client.rentalReservations.getAvailableSlots({
+  resourceType: ResourceType.RENTAL,
+  localDate: '2026-06-22',
+  resourceId: resource.id,
+  durationMinutes: 240,
+  maxResults: 10,
+});
+```
 
-**Tables (Restaurants):**
-- Duration: hours
-- Track capacity (number of seats)
-- Include location for customer preference
-- List amenities (window view, booth, etc.)
+### 2. Use Correct Field Names Per Type
 
-**Rooms (Hotels):**
-- Duration: nights
-- Use roomResource for detailed info
-- Track pricing per night
-- Include bed type and view information
-- Note accessibility features
+```typescript
+// Table: time, duration, personsNumber, floorPlanId, customerId
+// Room: checkIn, checkOut, nights, guestId, ratePerNight
+// Rental: startAt, endAt, tierId, customerId, payment
+```
 
-**Rentals (Equipment/Spaces):**
-- Duration: hours or minutes
-- Use rentalResource for hourly rates
-- List available equipment/amenities
-- Include capacity for spaces
+### 3. Handle Deposits Appropriately
 
-### Status Management
-Follow this typical lifecycle:
-1. Reservation created → 'pending'
-2. Confirmed by business → 'confirmed'
-3. Customer arrives → (reservation active)
-4. Service complete → 'completed'
-5. Or cancelled → 'cancelled'
-6. Or no-show → 'no_show'
+```typescript
+// Room deposit
+const roomRes = await client.roomReservations.create({
+  // ...
+  deposit: 299.00,
+  paymentStatus: PaymentStatus.PENDING,
+});
+
+// Rental security deposit
+const rentalRes = await client.rentalReservations.create({
+  // ...
+  payment: {
+    rentalCharge: 75.00,
+    securityDeposit: 200.00,
+    depositStatus: DepositStatus.PENDING,
+  },
+});
+```
+
+---
 
 ## Troubleshooting
 
-### Problem: Resource not available
+### No available slots returned
 
-**Error:**
-```
-ValidationError: Resource is not available for reservation
-```
+**Problem**: `getAvailableSlots` returns empty array
 
-**Solution:**
-Check resource availability and update if needed:
+**Solution**: Verify floor plan/resource exists and is active:
 ```typescript
-const resource = await client.reservationResources.get('resource_123');
-if (!resource.isAvailable) {
-  await client.reservationResources.update({
-    id: 'resource_123',
-    isAvailable: true,
-  });
-}
+const floorPlan = await client.floorPlans.get('fp_123');
+console.log(`Active: ${floorPlan.isActive}`);
+console.log(`Sections: ${floorPlan.sections?.length}`);
 ```
 
-### Problem: Missing customer ID
+### Resource type mismatch
 
-**Error:**
-```
-ValidationError: customerId is required
-```
+**Problem**: Creating reservation fails with type error
 
-**Solution:**
-Always provide a valid customer ID:
+**Solution**: Use correct client for each type:
 ```typescript
-const reservation = await client.reservations.create({
-  reservationType: ResourceType.TABLE,
-  customerId: 'cust_123', // Required
-  // ... other fields
-});
+// Tables
+await client.tableReservations.create({ ... });
+
+// Rooms
+await client.roomReservations.create({ ... });
+
+// Rentals
+await client.rentalReservations.create({ ... });
 ```
 
-### Problem: Invalid reservation type
+### Missing required fields
 
-**Error:**
-```
-ValidationError: Invalid reservation type
-```
+**Problem**: Validation error on create
 
-**Solution:**
-Use ResourceType enum values:
+**Solution**: Include all required fields per type:
 ```typescript
-import { ResourceType } from 'wiil-js';
-
-const reservation = await client.reservations.create({
-  reservationType: ResourceType.TABLE, // or ROOM, RENTALS, RESOURCE
-  // ... other fields
-});
+// Table requires: resourceId, customerId, floorPlanId, time, duration, personsNumber
+// Room requires: resourceId, guestId, checkIn, checkOut, nights, ratePerNight, totalWithTax
+// Rental requires: resourceId, customerId, startAt, endAt, tierId, payment
 ```
 
-### Problem: Resource type mismatch
+---
 
-**Error:**
-Resource and reservation types don't match
-
-**Solution:**
-Ensure reservation type matches resource type:
-```typescript
-const resource = await client.reservationResources.get('resource_123');
-
-const reservation = await client.reservations.create({
-  reservationType: resource.resourceType, // Match the resource type
-  resourceId: resource.id,
-  // ... other fields
-});
-```
+[Back to Examples](../README.md)

@@ -9,6 +9,7 @@ This directory contains comprehensive examples and guides for building AI-powere
   - [Dynamic Agent Setup (Recommended)](#dynamic-agent-setup-recommended)
   - [Fundamental Configuration Setup (Traditional)](#fundamental-configuration-setup-traditional)
 - [Core Guides](#core-guides)
+- [Outbound Communications](#outbound-communications)
 - [Business Service Guides](#business-service-guides)
 - [Configuration Flow](#configuration-flow)
 - [Best Practices](#best-practices)
@@ -120,6 +121,46 @@ Guides for setting up different communication channels:
 - **[Voice Channels](./channels/voice-channels.md)** - Phone call integration
 - **[SMS Channels](./channels/sms-channels.md)** - Text messaging integration
 - **[Troubleshooting](./channels/troubleshooting.md)** - Common channel issues
+
+---
+
+## Outbound Communications
+
+Send automated calls, emails, and SMS without infrastructure setup. No SMTP servers, no SMS gateway contracts, no telephony stacks — the platform handles all provider complexity.
+
+### Outbound Communications Guide (Comprehensive)
+
+**File**: [outbound-communications-guide.md](./outbound-communications-guide.md)
+
+Full documentation for production notification systems:
+
+- Templates — Create once, use everywhere. Marketing updates copy without deploys.
+- Email — Transactional and marketing emails with template support
+- SMS — Text messages with delivery tracking
+- Voice Calls — AI-powered outbound calls with scheduling
+- Architecture — What the platform abstracts away
+- Status tracking, best practices, troubleshooting
+
+```typescript
+// One SDK, three channels
+await client.outboundEmails.create({ to: [...], templateId, templateVariables });
+await client.outboundSms.create({ to, templateId, templateVariables });
+await client.outboundCalls.create({ to, agentConfigurationId });
+```
+
+[📖 Read the Full Guide](./outbound-communications-guide.md)
+
+### Messaging Guide (Quick Start)
+
+**File**: [messaging-guide.md](./messaging-guide.md)
+
+Quick-start guide to send your first notification in minutes:
+
+- Send SMS, email, and calls with minimal setup
+- Template basics
+- Complete appointment notification example
+
+[📖 Read the Quick Start](./messaging-guide.md)
 
 ---
 
@@ -354,29 +395,28 @@ const service = await client.services.create({
   name: 'Hair Styling',
   description: 'Professional hair styling service',
   duration: 60,
-  price: 75.00
+  basePrice: 75.00,
 });
 
-// Menu items for restaurants
-const menuItem = await client.menus.createItem({
+// Menu items (requires variants)
+const menuItem = await client.menuItems.create({
   name: 'Cheeseburger',
-  price: 12.99,
-  categoryId: 'category_main'
+  categoryId: 'category_main',
+  variants: [{ name: 'Regular', price: 12.99, isDefault: true, isActive: true, isAvailable: true }],
 });
 
-// Products for retail
+// Products (requires variants)
 const product = await client.products.create({
   name: 'Wireless Mouse',
-  price: 29.99,
-  trackInventory: true,
-  stockQuantity: 150
+  categoryId: 'category_electronics',
+  isAlcoholic: false,
+  variants: [{ axisValues: {}, price: 29.99, isDefault: true, isActive: true }],
 });
 
-// Reservation resources
-const table = await client.reservationResources.create({
-  resourceType: 'table',
-  name: 'Table 5',
-  capacity: 4
+// Table reservations
+const table = await client.floorPlans.create({
+  name: 'Main Dining',
+  tables: [{ name: 'Table 5', capacity: 4 }],
 });
 ```
 

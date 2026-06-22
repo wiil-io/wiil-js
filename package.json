@@ -23,7 +23,6 @@
     "watch": "tsc --watch",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
-    "docs": "typedoc",
     "tag:bash": "bash ./scripts/tag-script.sh",
     "git:commit": "bash ./scripts/commit-script.sh",
     "prepare": "npm run build"
@@ -32,7 +31,6 @@
     "@types/node": "^22.13.14",
     "@vitest/coverage-v8": "^4.0.18",
     "nock": "^14.0.0",
-    "typedoc": "^0.27.5",
     "typescript": "^5.8.2",
     "vitest": "^4.0.18"
   },

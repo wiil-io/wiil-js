@@ -1,173 +1,309 @@
 # Messaging Guide
 
-This guide covers sending outbound messages using the WIIL Platform JS SDK. The messaging service supports AI-powered phone calls, SMS text messages, and emails.
+Quick-start guide for outbound messaging — calls, SMS, and email in minutes.
+
+---
+
+## Why This Exists
+
+You need to notify customers. The traditional path:
+
+- Configure SMTP servers or email providers
+- Sign contracts with SMS gateways
+- Integrate telephony stacks
+- Build retry logic, queue management, delivery tracking
+- Handle failures, bounces, compliance
+
+**Skip all of that.** The WIIL Messaging APIs give you production-ready notifications with a single SDK call. No provider setup. No infrastructure. Just send.
+
+---
 
 ## Quick Start
 
 ```typescript
-import { WiilService } from 'wiil-js';
+import { WiilClient } from 'wiil-js';
 
-const service = new WiilService({
-  apiKey: 'your-api-key',
-});
+const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
 
 // Send an SMS
-const sms = await service.messaging.sendSms({
+await client.outboundSms.create({
   to: '+12125551234',
+  from: '+12125559999',
   body: 'Your appointment is confirmed for tomorrow at 3 PM.',
 });
 
-console.log('SMS sent:', sms.id);
-```
-
-## Request a Call
-
-Initiate an AI-powered outbound phone call:
-
-```typescript
-const call = await service.messaging.requestCall({
-  to: '+12125551234',
-  from: '+12125559999',
-  agentConfigurationId: 'agent_456',
-  scheduleType: 'IMMEDIATE',
+// Send an Email
+await client.outboundEmails.create({
+  to: [{ email: 'customer@example.com', name: 'John Smith' }],
+  subject: 'Order Confirmed',
+  bodyHtml: '<h1>Thank you!</h1><p>Your order is confirmed.</p>',
+  bodyText: 'Thank you! Your order is confirmed.',
 });
 
-console.log('Call requested:', call.id);
-console.log('Status:', call.status);
-```
-
-### Scheduled Call with Calling Hours
-
-```typescript
-const scheduledCall = await service.messaging.requestCall({
+// Request a Call
+await client.outboundCalls.create({
   to: '+12125551234',
   from: '+12125559999',
-  agentConfigurationId: 'agent_456',
-  scheduleType: 'SCHEDULED',
-  scheduledAt: Date.now() + 3600000, // 1 hour from now
-  callingHours: {
-    startTime: '09:00',
-    endTime: '17:00',
-    daysOfWeek: [1, 2, 3, 4, 5], // Monday-Friday
-  },
-  maxRetries: 3,
-  retryDelayMinutes: 30,
+  agentConfigurationId: 'confirmation_agent',
+  scheduleType: 'immediate',
 });
 ```
+
+Three channels. One pattern. Done.
+
+---
 
 ## Send SMS
 
-Send a text message with optional template variables:
+Direct message:
 
 ```typescript
-const sms = await service.messaging.sendSms({
+await client.outboundSms.create({
   to: '+12125551234',
-  body: 'Hi {{firstName}}, your code is {{code}}.',
-  variables: {
-    firstName: 'John',
-    code: '123456',
-  },
+  from: '+12125559999',
+  body: 'Your verification code is 847291. Valid for 10 minutes.',
+  maxRetries: 2,
 });
-
-console.log('SMS sent:', sms.id);
 ```
 
-### Scheduled SMS
+With template:
 
 ```typescript
-const scheduledSms = await service.messaging.sendSms({
+await client.outboundSms.create({
   to: '+12125551234',
-  body: 'Reminder: Your appointment is in 1 hour.',
-  scheduledAt: Date.now() + 3600000,
+  from: '+12125559999',
+  templateId: 'verification_code',
+  templateVariables: { code: '847291' },
 });
 ```
+
+---
 
 ## Send Email
 
-Send an email with HTML content:
+Direct content:
 
 ```typescript
-const email = await service.messaging.sendEmail({
+await client.outboundEmails.create({
   to: [{ email: 'customer@example.com', name: 'John Smith' }],
-  subject: 'Order Confirmation - #{{orderId}}',
-  bodyHtml: '<h1>Thank you, {{name}}!</h1><p>Your order has been confirmed.</p>',
-  variables: {
-    orderId: '12345',
-    name: 'John',
+  subject: 'Your Order Has Shipped',
+  bodyHtml: '<h1>Good news!</h1><p>Your order is on its way.</p>',
+  bodyText: 'Good news! Your order is on its way.',
+  replyTo: 'support@example.com',
+});
+```
+
+With template:
+
+```typescript
+await client.outboundEmails.create({
+  to: [{ email: 'customer@example.com', name: 'John Smith' }],
+  templateId: 'order_shipped',
+  templateVariables: {
+    customerName: 'John',
+    orderNumber: 'ORD-12345',
+    trackingUrl: 'https://track.example.com/12345',
   },
 });
-
-console.log('Email sent:', email.id);
 ```
 
-### Email with CC and Attachments
+Multiple recipients:
 
 ```typescript
-import * as fs from 'fs';
-
-const pdfContent = fs.readFileSync('invoice.pdf').toString('base64');
-
-const email = await service.messaging.sendEmail({
-  to: [{ email: 'customer@example.com', name: 'Customer' }],
-  cc: [{ email: 'sales@company.com' }],
-  replyTo: 'support@company.com',
-  subject: 'Your Invoice',
-  bodyHtml: '<p>Please find your invoice attached.</p>',
-  bodyText: 'Please find your invoice attached.',
-  attachments: [
-    {
-      filename: 'invoice.pdf',
-      content: pdfContent,
-      contentType: 'application/pdf',
-    },
+await client.outboundEmails.create({
+  to: [
+    { email: 'alice@example.com', name: 'Alice' },
+    { email: 'bob@example.com', name: 'Bob' },
   ],
+  cc: [{ email: 'manager@example.com' }],
+  bcc: [{ email: 'archive@example.com' }],
+  templateId: 'team_update',
+  templateVariables: { ... },
 });
 ```
 
-## Schedule Types
+---
 
-| Type | Description |
-|------|-------------|
-| `IMMEDIATE` | Execute as soon as possible within calling hours |
-| `SCHEDULED` | Execute at specific `scheduledAt` timestamp |
-| `RECURRING` | Execute on `callingHours` schedule pattern |
+## Request a Call
+
+Immediate call:
+
+```typescript
+await client.outboundCalls.create({
+  to: '+12125551234',
+  from: '+12125559999',
+  agentConfigurationId: 'support_agent',
+  scheduleType: 'immediate',
+  maxDuration: 300, // 5 minutes
+  maxRetries: 2,
+});
+```
+
+Scheduled call:
+
+```typescript
+await client.outboundCalls.create({
+  to: '+12125551234',
+  from: '+12125559999',
+  agentConfigurationId: 'reminder_agent',
+  scheduleType: 'scheduled',
+  scheduledAt: Math.floor(Date.now() / 1000) + (60 * 60), // 1 hour from now (UTC seconds)
+  maxDuration: 300,
+  maxRetries: 3,
+});
+```
+
+---
+
+## Templates
+
+Create once, use everywhere. Marketing updates copy without code deploys.
+
+```typescript
+import { OutboundTemplateChannel } from 'wiil-core-js';
+
+// Create email template
+const emailTemplate = await client.outboundTemplates.createEmailTemplate({
+  name: 'Order Confirmation',
+  code: 'order_confirmation',
+  channel: OutboundTemplateChannel.EMAIL,
+  subjectTemplate: 'Order #{{orderNumber}} Confirmed',
+  bodyHtmlTemplate: '<h1>Thank you, {{customerName}}!</h1><p>Order confirmed.</p>',
+  bodyTextTemplate: 'Thank you, {{customerName}}! Order confirmed.',
+  variables: [
+    { key: 'customerName', required: true },
+    { key: 'orderNumber', required: true },
+  ],
+});
+
+// Create SMS template
+const smsTemplate = await client.outboundTemplates.createSmsTemplate({
+  name: 'Verification Code',
+  code: 'verification',
+  channel: 'SMS',
+  bodyTemplate: 'Your code is {{code}}. Valid for 10 minutes.',
+  variables: [{ key: 'code', required: true }],
+});
+
+// Activate templates
+await client.outboundTemplates.activate(emailTemplate.id);
+await client.outboundTemplates.activate(smsTemplate.id);
+
+// Preview before sending
+const preview = await client.outboundTemplates.render(emailTemplate.id, {
+  customerName: 'Test User',
+  orderNumber: 'TEST-001',
+});
+console.log(preview.subject, preview.bodyHtml);
+```
+
+---
 
 ## Complete Example
 
+Multi-channel appointment notifications:
+
 ```typescript
-import { WiilService } from 'wiil-js';
+import { WiilClient } from 'wiil-js';
 
-const service = new WiilService({
-  apiKey: process.env.WIIL_API_KEY!,
-});
+const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
 
-async function sendNotifications(customerId: string, appointmentTime: string) {
-  // Send confirmation SMS
-  const sms = await service.messaging.sendSms({
-    to: '+12125551234',
-    body: `Your appointment is confirmed for ${appointmentTime}.`,
+async function sendAppointmentNotifications(appointment: {
+  customerEmail: string;
+  customerName: string;
+  customerPhone: string;
+  dateTime: string;
+  serviceName: string;
+}) {
+  const appointmentTime = new Date(appointment.dateTime).getTime();
+  
+  // 1. Immediate confirmation email
+  await client.outboundEmails.create({
+    to: [{ email: appointment.customerEmail, name: appointment.customerName }],
+    templateId: 'appointment_confirmed',
+    templateVariables: {
+      customerName: appointment.customerName,
+      serviceName: appointment.serviceName,
+      dateTime: appointment.dateTime,
+    },
   });
-  console.log('SMS sent:', sms.id);
+  console.log('Confirmation email sent');
 
-  // Send confirmation email
-  const email = await service.messaging.sendEmail({
-    to: [{ email: 'customer@example.com' }],
-    subject: 'Appointment Confirmed',
-    bodyHtml: `<p>Your appointment is confirmed for <strong>${appointmentTime}</strong>.</p>`,
-  });
-  console.log('Email sent:', email.id);
-
-  // Schedule reminder call 1 hour before
-  const reminderTime = new Date(appointmentTime).getTime() - 3600000;
-  const call = await service.messaging.requestCall({
-    to: '+12125551234',
+  // 2. 24-hour reminder SMS
+  await client.outboundSms.create({
+    to: appointment.customerPhone,
     from: '+12125559999',
-    agentConfigurationId: 'reminder_agent',
-    scheduleType: 'SCHEDULED',
-    scheduledAt: reminderTime,
+    templateId: 'appointment_reminder_24h',
+    templateVariables: {
+      serviceName: appointment.serviceName,
+      dateTime: appointment.dateTime,
+    },
   });
-  console.log('Reminder call scheduled:', call.id);
+  console.log('Reminder SMS queued');
+
+  // 3. 2-hour confirmation call
+  await client.outboundCalls.create({
+    to: appointment.customerPhone,
+    from: '+12125559999',
+    agentConfigurationId: 'appointment_confirmation_agent',
+    scheduleType: 'scheduled',
+    scheduledAt: appointmentTime - (2 * 60 * 60 * 1000),
+    maxDuration: 180,
+    maxRetries: 2,
+  });
+  console.log('Confirmation call scheduled');
 }
 
-sendNotifications('cust_123', '2024-12-20T15:00:00Z').catch(console.error);
+sendAppointmentNotifications({
+  customerEmail: 'jane@example.com',
+  customerName: 'Jane Smith',
+  customerPhone: '+12125551234',
+  dateTime: '2026-06-25T15:00:00Z',
+  serviceName: 'Haircut & Style',
+}).catch(console.error);
 ```
+
+---
+
+## What the Platform Handles
+
+| You Call                         | Platform Handles                                    |
+| -------------------------------- | --------------------------------------------------- |
+| `client.outboundSms.create()`    | Gateway selection, delivery, retry, status tracking |
+| `client.outboundEmails.create()` | SMTP routing, bounce handling, deliverability       |
+| `client.outboundCalls.create()`  | Telephony stack, AI agent, call recording           |
+
+No provider contracts. No infrastructure setup. No reliability engineering.
+
+---
+
+## Phone Number Format
+
+Always use E.164 format:
+
+```typescript
+// Correct
+to: '+12125551234'
+
+// Incorrect
+to: '(212) 555-1234'
+to: '212-555-1234'
+```
+
+---
+
+## Next Steps
+
+For comprehensive documentation including:
+
+- All template operations
+- Status tracking and queries
+- Status enums and types
+- Architecture overview
+- Best practices
+
+See the [Outbound Communications Guide](./outbound-communications-guide.md).
+
+---
+
+[Back to Examples](./README.md)

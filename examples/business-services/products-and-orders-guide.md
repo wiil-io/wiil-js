@@ -1,84 +1,91 @@
 # Product Management Guide
 
-This guide covers managing product catalogs and retail orders using the WIIL Platform JS SDK.
+**Manage product catalogs and retail orders using the WIIL Platform JS SDK**
+
+**Setup Time**: ~15 minutes
+
+---
+
+## Overview
+
+The Product Management system provides comprehensive tools for managing product catalogs, variants, and customer orders.
+
+**Key Resources:**
+- `client.products` - Categories and products
+- `client.productVariants` - Product variations (size, color)
+- `client.productVariantAxes` - Define variation axes
+- `client.productOrders` - Customer orders
+
+---
+
+## Prerequisites
+
+1. Active WIIL Platform account
+2. API key with business management permissions
+3. Node.js project with wiil-js SDK installed
+
+---
 
 ## Quick Start
 
 ```typescript
-import { WiilClient, OrderStatus, PaymentStatus } from 'wiil-js';
+import { WiilClient } from 'wiil-js';
 
-const client = new WiilClient({
-  apiKey: 'your-api-key',
-});
+const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
 
-// Create a product category
+// 1. Create a product category
 const category = await client.products.createCategory({
   name: 'Electronics',
   description: 'Electronic devices and accessories',
+  isDefault: false,
 });
 
-// Create a product
+// 2. Create a product with required variants
 const product = await client.products.create({
+  categoryId: category.id,
   name: 'Wireless Mouse',
   description: 'Ergonomic wireless mouse with 6 buttons',
   price: 29.99,
   sku: 'WM-2024-BLK',
-  barcode: '123456789012',
-  categoryId: category.id,
-  brand: 'TechBrand',
   trackInventory: true,
-  stockQuantity: 150,
-  lowStockThreshold: 20,
-  weight: 0.25,
-  dimensions: {
-    length: 4.5,
-    width: 2.8,
-    height: 1.6,
-    unit: 'inches',
-  },
   isActive: true,
+  isAlcoholic: false,
+  variants: [
+    {
+      axisValues: {},
+      price: 29.99,
+      isDefault: true,
+      isActive: true,
+    },
+  ],
 });
 
-// Create an order
+// 3. Create an order (requires variantId)
 const order = await client.productOrders.create({
+  customerId: 'cust_123',
+  orderDate: Date.now(),
   items: [
     {
       productId: product.id,
+      variantId: product.variants[0].id,
       itemName: product.name,
-      sku: product.sku,
       quantity: 2,
-      unitPrice: product.price,
-      totalPrice: product.price * 2,
+      unitPrice: 29.99,
+      totalPrice: 59.98,
     },
   ],
-  customerId: 'cust_123',
   pricing: {
     subtotal: 59.98,
-    tax: 4.80,
-    shippingAmount: 9.99,
-    total: 74.77,
+    total: 59.98,
   },
-  orderDate: Date.now(),
-  shippingAddress: {
-    street: '123 Main St',
-    city: 'New York',
-    state: 'NY',
-    postalCode: '10001',
-    country: 'US',
-  },
-  source: 'web',
 });
+
+console.log(`Order Created: ${order.id}`);
 ```
 
+---
+
 ## Product Categories
-
-### Category Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| name | string | Yes | Category name |
-| description | string | No | Category description |
-| displayOrder | number | No | Display order for sorting |
 
 ### Create Category
 
@@ -86,10 +93,10 @@ const order = await client.productOrders.create({
 const category = await client.products.createCategory({
   name: 'Electronics',
   description: 'Electronic devices and accessories',
-  displayOrder: 1,
+  isDefault: false,
 });
 
-console.log('Category created:', category.id);
+console.log(`Category Created: ${category.id}`);
 ```
 
 ### Get Category
@@ -97,19 +104,18 @@ console.log('Category created:', category.id);
 ```typescript
 const category = await client.products.getCategory('category_123');
 
-console.log('Category:', category.name);
+console.log(`Category: ${category.name}`);
 ```
 
 ### List Categories
 
 ```typescript
-const result = await client.products.listCategories({
-  page: 1,
-  pageSize: 20,
-});
+const result = await client.products.listCategories();
 
-console.log('Categories:', result.data.length);
-console.log('Total:', result.meta.totalCount);
+console.log(`Categories: ${result.data.length}`);
+result.data.forEach(cat => {
+  console.log(`- ${cat.name}`);
+});
 ```
 
 ### Update Category
@@ -117,66 +123,98 @@ console.log('Total:', result.meta.totalCount);
 ```typescript
 const updated = await client.products.updateCategory({
   id: 'category_123',
-  name: 'Premium Electronics',
-  description: 'High-end electronic devices',
+  description: 'Updated description for electronics',
 });
 
-console.log('Category updated:', updated.name);
+console.log(`Updated: ${updated.description}`);
 ```
 
 ### Delete Category
 
 ```typescript
-const deleted = await client.products.deleteCategory('category_123');
-
-console.log('Deleted:', deleted);
+await client.products.deleteCategory('category_123');
+console.log('Category deleted');
 ```
+
+### Batch Create Categories
+
+```typescript
+const result = await client.products.createCategoryBatch([
+  { name: 'Electronics', description: 'Electronic devices', isDefault: false },
+  { name: 'Accessories', description: 'Computer peripherals', isDefault: false },
+  { name: 'Software', description: 'Digital products', isDefault: false },
+]);
+
+console.log(`Created ${result.data.length} categories`);
+```
+
+---
 
 ## Products
 
-### Product Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| name | string | Yes | Product name |
-| description | string | No | Product description |
-| price | number | Yes | Product price |
-| categoryId | string | No | Category ID |
-| sku | string | No | Stock Keeping Unit identifier |
-| barcode | string | No | Product barcode |
-| brand | string | No | Brand name |
-| trackInventory | boolean | No | Track inventory (default: false) |
-| stockQuantity | number | No | Current stock quantity |
-| lowStockThreshold | number | No | Low stock alert threshold |
-| weight | number | No | Product weight |
-| dimensions | object | No | Dimensions (length, width, height, unit) |
-| isActive | boolean | No | Available for sale (default: true) |
+Products **require at least one variant** for pricing.
 
 ### Create Product
 
 ```typescript
 const product = await client.products.create({
+  categoryId: 'category_123',
   name: 'Wireless Headphones',
   description: 'Premium noise-canceling wireless headphones',
   price: 199.99,
   sku: 'WH-2024-BLK',
-  barcode: '987654321098',
-  categoryId: 'category_electronics',
-  brand: 'AudioBrand',
   trackInventory: true,
-  stockQuantity: 75,
-  lowStockThreshold: 15,
-  weight: 0.5,
-  dimensions: {
-    length: 8.0,
-    width: 7.0,
-    height: 3.5,
-    unit: 'inches',
-  },
   isActive: true,
+  isAlcoholic: false,
+  variants: [
+    {
+      axisValues: {},
+      price: 199.99,
+      isDefault: true,
+      isActive: true,
+    },
+  ],
 });
 
-console.log('Product created:', product.id);
+console.log(`Product Created: ${product.id}`);
+console.log(`Variant ID: ${product.variants[0].id}`);
+```
+
+### Create Product with Multiple Variants
+
+```typescript
+const tshirt = await client.products.create({
+  categoryId: 'category_apparel',
+  name: 'Classic T-Shirt',
+  description: 'Comfortable cotton t-shirt',
+  price: 24.99,
+  sku: 'TS-CLASSIC',
+  trackInventory: true,
+  isActive: true,
+  isAlcoholic: false,
+  variants: [
+    {
+      axisValues: { Size: 'Small', Color: 'Black' },
+      price: 24.99,
+      isDefault: true,
+      isActive: true,
+    },
+    {
+      axisValues: { Size: 'Medium', Color: 'Black' },
+      price: 24.99,
+      isDefault: false,
+      isActive: true,
+    },
+    {
+      axisValues: { Size: 'Large', Color: 'Black' },
+      price: 26.99,
+      isDefault: false,
+      isActive: true,
+    },
+  ],
+});
+
+console.log(`Created product with ${tshirt.variants.length} variants`);
 ```
 
 ### Get Product
@@ -184,63 +222,17 @@ console.log('Product created:', product.id);
 ```typescript
 const product = await client.products.get('product_123');
 
-console.log('Product:', product.name);
-console.log('Price:', product.price);
-console.log('Stock:', product.stockQuantity);
-```
-
-### Get Product by SKU
-
-```typescript
-const product = await client.products.getBySku('WH-2024-BLK');
-
-console.log('Found product:', product.name);
-```
-
-### Get Product by Barcode
-
-```typescript
-const product = await client.products.getByBarcode('987654321098');
-
-console.log('Found product:', product.name);
+console.log(`Product: ${product.name}`);
+console.log(`Price: $${product.price}`);
+console.log(`Variants: ${product.variants?.length}`);
 ```
 
 ### List Products
 
 ```typescript
-const result = await client.products.list({
-  page: 1,
-  pageSize: 50,
-  includeDeleted: false,
-});
+const result = await client.products.list();
 
-console.log('Products:', result.data.length);
-console.log('Total:', result.meta.totalCount);
-```
-
-### Get Products by Category
-
-```typescript
-const result = await client.products.getByCategory('category_electronics', {
-  page: 1,
-  pageSize: 20,
-});
-
-console.log('Products in category:', result.data.length);
-```
-
-### Search Products
-
-```typescript
-const result = await client.products.search('wireless', {
-  page: 1,
-  pageSize: 20,
-});
-
-console.log('Search results:', result.data.length);
-result.data.forEach(product => {
-  console.log('-', product.name);
-});
+console.log(`Products: ${result.data.length}`);
 ```
 
 ### Update Product
@@ -249,248 +241,300 @@ result.data.forEach(product => {
 const updated = await client.products.update({
   id: 'product_123',
   price: 179.99,
-  stockQuantity: 100,
-  isActive: true,
 });
 
-console.log('Product updated:', updated.name);
-console.log('New price:', updated.price);
+console.log(`Updated price: $${updated.price}`);
 ```
 
 ### Delete Product
 
 ```typescript
-const deleted = await client.products.delete('product_123');
-
-console.log('Deleted:', deleted);
-```
-
-## Batch Operations
-
-Batch operations allow you to create multiple resources in a single API request, improving performance for bulk data imports.
-
-### Batch Create Categories
-
-Create up to 50 product categories in a single request:
-
-```typescript
-const categories = await client.products.createCategoryBatch([
-  { name: 'Electronics', description: 'Electronic devices', displayOrder: 1 },
-  { name: 'Accessories', description: 'Computer peripherals', displayOrder: 2 },
-  { name: 'Software', description: 'Digital products', displayOrder: 3 },
-]);
-
-console.log(`Created ${categories.data.length} categories`);
-categories.data.forEach(cat => {
-  console.log(`- ${cat.name}: ${cat.id}`);
-});
+await client.products.delete('product_123');
+console.log('Product deleted');
 ```
 
 ### Batch Create Products
 
-Create up to 100 products in a single request:
-
 ```typescript
-const products = await client.products.createBatch([
+const result = await client.products.createBatch([
   {
+    categoryId: 'cat_accessories',
     name: 'Wireless Mouse',
     description: 'Ergonomic wireless mouse',
     price: 29.99,
     sku: 'WM-001',
-    categoryId: 'cat_accessories',
     trackInventory: true,
-    stockQuantity: 150,
-    lowStockThreshold: 20,
     isActive: true,
+    isAlcoholic: false,
+    variants: [{ axisValues: {}, price: 29.99, isDefault: true, isActive: true }],
   },
   {
+    categoryId: 'cat_accessories',
     name: 'Mechanical Keyboard',
     description: 'RGB backlit mechanical keyboard',
     price: 89.99,
     sku: 'KB-001',
-    categoryId: 'cat_accessories',
     trackInventory: true,
-    stockQuantity: 75,
-    lowStockThreshold: 15,
+    isActive: true,
+    isAlcoholic: false,
+    variants: [{ axisValues: {}, price: 89.99, isDefault: true, isActive: true }],
+  },
+]);
+
+console.log(`Created ${result.data.length} products`);
+```
+
+---
+
+## Product Variants
+
+Manage product variations separately.
+
+### Create Variant
+
+```typescript
+const variant = await client.productVariants.create({
+  productId: 'product_123',
+  axisValues: { Size: 'Extra Large', Color: 'Blue' },
+  sku: 'TS-XL-BL',
+  price: 29.99,
+  isDefault: false,
+  isActive: true,
+});
+
+console.log(`Variant Created: ${variant.id}`);
+```
+
+### Get Variant
+
+```typescript
+const variant = await client.productVariants.get('variant_123');
+
+console.log(`Variant: ${variant.sku} - $${variant.price}`);
+console.log(`Axis Values: ${JSON.stringify(variant.axisValues)}`);
+```
+
+### Get Variant by SKU
+
+```typescript
+const variant = await client.productVariants.getBySku('TS-XL-BL');
+
+if (variant) {
+  console.log(`Found: ${variant.sku} - $${variant.price}`);
+}
+```
+
+### Get Default Variant
+
+```typescript
+const defaultVariant = await client.productVariants.getDefault('product_123');
+
+if (defaultVariant) {
+  console.log(`Default: ${defaultVariant.sku} - $${defaultVariant.price}`);
+}
+```
+
+### Update Variant
+
+```typescript
+const updated = await client.productVariants.update('variant_123', {
+  id: 'variant_123',
+  price: 32.99,
+  isActive: true,
+});
+
+console.log(`Updated price: $${updated.price}`);
+```
+
+### Delete Variant
+
+```typescript
+await client.productVariants.delete('variant_123');
+console.log('Variant deleted');
+```
+
+### Batch Create Variants
+
+```typescript
+const result = await client.productVariants.createBatch([
+  {
+    productId: 'product_123',
+    axisValues: { Size: 'Medium', Color: 'Red' },
+    sku: 'TS-MD-RD',
+    price: 24.99,
+    isDefault: false,
     isActive: true,
   },
   {
-    name: 'USB-C Hub',
-    description: '7-in-1 USB-C adapter',
-    price: 49.99,
-    sku: 'HUB-001',
-    categoryId: 'cat_accessories',
-    trackInventory: true,
-    stockQuantity: 200,
-    lowStockThreshold: 30,
+    productId: 'product_123',
+    axisValues: { Size: 'Large', Color: 'Green' },
+    sku: 'TS-LG-GN',
+    price: 26.99,
+    isDefault: false,
     isActive: true,
   },
 ]);
 
-console.log(`Created ${products.data.length} products`);
-products.data.forEach(prod => {
-  console.log(`- ${prod.name} (${prod.sku}): $${prod.price}`);
-});
+console.log(`Created ${result.data.length} variants`);
 ```
 
-### Batch Limits
+---
 
-| Resource   | Maximum per Batch |
-|------------|-------------------|
-| Categories | 50                |
-| Products   | 100               |
+## Variant Axes
 
-**Note:** Batch operations validate each item individually. If validation fails for any item, the entire batch request fails with an error indicating the index of the failing item.
+Define the axes for product variations (Size, Color, Material, etc.).
+
+### Create Axis
 
 ```typescript
-try {
-  const products = await client.products.createBatch(productList);
-} catch (error) {
-  // Error message includes the index: "Validation failed for item at index 2"
-  console.error('Batch creation failed:', error.message);
+import { VariantAxisType } from 'wiil-core-js';
+
+const sizeAxis = await client.productVariantAxes.create({
+  name: 'Size',
+  type: VariantAxisType.TEXT,
+  values: [
+    { id: 'sm', label: 'Small', sortOrder: 0 },
+    { id: 'md', label: 'Medium', sortOrder: 1 },
+    { id: 'lg', label: 'Large', sortOrder: 2 },
+    { id: 'xl', label: 'Extra Large', sortOrder: 3 },
+  ],
+  isActive: true,
+});
+
+console.log(`Axis Created: ${sizeAxis.id}`);
+```
+
+### Create Color Axis with Swatches
+
+```typescript
+import { VariantAxisType } from 'wiil-core-js';
+
+const colorAxis = await client.productVariantAxes.create({
+  name: 'Color',
+  type: VariantAxisType.SWATCH,
+  values: [
+    { id: 'black', label: 'Black', swatchColor: '#000000', sortOrder: 0 },
+    { id: 'white', label: 'White', swatchColor: '#FFFFFF', sortOrder: 1 },
+    { id: 'red', label: 'Red', swatchColor: '#FF0000', sortOrder: 2 },
+    { id: 'blue', label: 'Blue', swatchColor: '#0000FF', sortOrder: 3 },
+  ],
+  isActive: true,
+});
+
+console.log(`Color Axis Created: ${colorAxis.id}`);
+```
+
+### Get Axis
+
+```typescript
+const axis = await client.productVariantAxes.get('axis_123');
+
+console.log(`Axis: ${axis.name}`);
+console.log(`Type: ${axis.type}`);
+console.log(`Values: ${axis.values.length}`);
+```
+
+### Get Axis by Name
+
+```typescript
+const axis = await client.productVariantAxes.getByName('Size');
+
+if (axis) {
+  console.log(`Found: ${axis.name} with ${axis.values.length} values`);
 }
 ```
 
+### List Axes
+
+```typescript
+const result = await client.productVariantAxes.list();
+
+console.log(`Axes: ${result.data.length}`);
+result.data.forEach(axis => {
+  console.log(`- ${axis.name} (${axis.type}): ${axis.values.length} values`);
+});
+```
+
+### Update Axis
+
+```typescript
+const updated = await client.productVariantAxes.update('axis_123', {
+  id: 'axis_123',
+  values: [
+    { id: 'xs', label: 'Extra Small', sortOrder: 0 },
+    { id: 'sm', label: 'Small', sortOrder: 1 },
+    { id: 'md', label: 'Medium', sortOrder: 2 },
+    { id: 'lg', label: 'Large', sortOrder: 3 },
+    { id: 'xl', label: 'Extra Large', sortOrder: 4 },
+  ],
+});
+
+console.log(`Updated: ${updated.values.length} values`);
+```
+
+### Delete Axis
+
+```typescript
+await client.productVariantAxes.delete('axis_123');
+console.log('Axis deleted');
+```
+
+### Batch Create Axes
+
+```typescript
+import { VariantAxisType } from 'wiil-core-js';
+
+const result = await client.productVariantAxes.createBatch([
+  {
+    name: 'Material',
+    type: VariantAxisType.TEXT,
+    values: [
+      { id: 'cotton', label: 'Cotton', sortOrder: 0 },
+      { id: 'polyester', label: 'Polyester', sortOrder: 1 },
+    ],
+    isActive: true,
+  },
+  {
+    name: 'Style',
+    type: VariantAxisType.TEXT,
+    values: [
+      { id: 'slim', label: 'Slim Fit', sortOrder: 0 },
+      { id: 'regular', label: 'Regular Fit', sortOrder: 1 },
+    ],
+    isActive: true,
+  },
+]);
+
+console.log(`Created ${result.data.length} axes`);
+```
+
+---
+
 ## Product Orders
-
-### Order Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| items | array | Yes | Order items (see Item Schema below) |
-| customerId | string | Yes | Customer ID |
-| pricing | object | Yes | Pricing breakdown (subtotal, tax, tip, shippingAmount, discount, total, currency) |
-| orderDate | number | Yes | Order date (Unix timestamp) |
-| paymentStatus | string | No | Payment status (default: 'pending') |
-| paymentMethod | string | No | Payment method |
-| paymentReference | string | No | Payment reference number |
-| billingAddress | object | No | Billing address |
-| shippingAddress | object | No | Shipping address |
-| shippingMethod | string | No | Shipping method (Standard, Express, etc.) |
-| trackingNumber | string | No | Shipment tracking number |
-| shippingCarrier | string | No | Shipping carrier (UPS, FedEx, USPS, etc.) |
-| requestedDeliveryDate | number | No | Requested delivery date |
-| externalOrderId | string | No | External order ID |
-| source | string | No | Order source (default: 'direct') |
-| notes | string | No | Additional notes |
-
-### Order Item Schema
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| productId | string | Yes | Product ID |
-| itemName | string | Yes | Product name |
-| sku | string | No | Product SKU |
-| quantity | number | Yes | Quantity ordered |
-| unitPrice | number | Yes | Price per unit |
-| totalPrice | number | Yes | Total price for this item |
-| selectedVariant | string | No | Selected variant (size, color, etc.) |
-| warrantyInfo | string | No | Warranty information |
-| notes | string | No | Additional notes |
-
-Note: Status defaults to 'pending' and should not be included in create requests.
 
 ### Create Order
 
 ```typescript
 const order = await client.productOrders.create({
-  items: [
-    {
-      productId: 'prod_123',
-      itemName: 'Wireless Headphones',
-      sku: 'WH-2024-BLK',
-      quantity: 2,
-      unitPrice: 79.99,
-      totalPrice: 159.98,
-      selectedVariant: 'Black',
-      warrantyInfo: '1-year manufacturer warranty',
-    },
-    {
-      productId: 'prod_456',
-      itemName: 'Phone Case',
-      sku: 'PC-2024-CLR',
-      quantity: 1,
-      unitPrice: 19.99,
-      totalPrice: 19.99,
-    },
-  ],
-  customerId: 'cust_789',
-  pricing: {
-    subtotal: 179.97,
-    tax: 14.40,
-    shippingAmount: 9.99,
-    total: 204.36,
-    currency: 'USD',
-  },
-  paymentMethod: 'credit_card',
-  billingAddress: {
-    street: '123 Billing Ave',
-    city: 'New York',
-    state: 'NY',
-    postalCode: '10001',
-    country: 'US',
-  },
-  orderDate: Date.now(),
-  requestedDeliveryDate: Date.now() + 7 * 24 * 60 * 60 * 1000,
-  shippingAddress: {
-    street: '456 Delivery St',
-    city: 'Brooklyn',
-    state: 'NY',
-    postalCode: '11201',
-    country: 'US',
-    deliveryInstructions: 'Leave at front door',
-  },
-  shippingMethod: 'Standard',
-  source: 'web',
-});
-
-console.log('Order created:', order.id);
-console.log('Order number:', order.orderNumber);
-```
-
-### Create Order with Tracking
-
-```typescript
-const order = await client.productOrders.create({
-  items: [
-    {
-      productId: 'prod_999',
-      itemName: 'Laptop Computer',
-      sku: 'LT-2024-15',
-      quantity: 1,
-      unitPrice: 1299.99,
-      totalPrice: 1299.99,
-      selectedVariant: '15-inch/16GB RAM',
-      warrantyInfo: '3-year extended warranty',
-    },
-  ],
   customerId: 'cust_456',
-  pricing: {
-    subtotal: 1299.99,
-    tax: 104.00,
-    discount: 100.00,
-    total: 1303.99,
-  },
-  paymentStatus: PaymentStatus.PAID,
-  paymentMethod: 'paypal',
-  paymentReference: 'PP-2024-XYZ789',
   orderDate: Date.now(),
-  shippingAddress: {
-    street: '789 Tech Blvd',
-    city: 'San Francisco',
-    state: 'CA',
-    postalCode: '94102',
-    country: 'US',
+  items: [
+    {
+      productId: 'product_123',
+      variantId: 'variant_456',
+      itemName: 'Wireless Headphones',
+      quantity: 1,
+      unitPrice: 199.99,
+      totalPrice: 199.99,
+    },
+  ],
+  pricing: {
+    subtotal: 199.99,
+    total: 199.99,
   },
-  shippingMethod: 'Express',
-  trackingNumber: '1Z999AA1234567890',
-  shippingCarrier: 'UPS',
-  externalOrderId: 'SHOP-2024-999',
-  source: 'marketplace',
 });
 
-console.log('Order created:', order.id);
-console.log('Tracking:', order.trackingNumber);
+console.log(`Order Created: ${order.id}`);
 ```
 
 ### Get Order
@@ -498,23 +542,19 @@ console.log('Tracking:', order.trackingNumber);
 ```typescript
 const order = await client.productOrders.get('order_123');
 
-console.log('Order:', order.orderNumber);
-console.log('Status:', order.status);
-console.log('Items:', order.items.length);
-console.log('Tracking:', order.trackingNumber);
+console.log(`Order: ${order.id}`);
+console.log(`Status: ${order.status}`);
+console.log(`Total: $${order.pricing.total}`);
 ```
 
-### Get Orders by Customer
+### List Orders
 
 ```typescript
-const result = await client.productOrders.getByCustomer('cust_456', {
-  page: 1,
-  pageSize: 20,
-});
+const result = await client.productOrders.list();
 
-console.log('Customer orders:', result.data.length);
+console.log(`Orders: ${result.data.length}`);
 result.data.forEach(order => {
-  console.log('-', order.orderNumber, order.status);
+  console.log(`- ${order.id}: ${order.status} ($${order.pricing.total})`);
 });
 ```
 
@@ -523,435 +563,337 @@ result.data.forEach(order => {
 ```typescript
 const updated = await client.productOrders.update({
   id: 'order_123',
-  status: OrderStatus.PREPARING,
-  shippingCarrier: 'FedEx',
-  trackingNumber: '1234567890',
-  notes: 'Rush order - process immediately',
+  pricing: {
+    subtotal: 180.00,
+    total: 180.00,
+  },
 });
 
-console.log('Order updated:', updated.status);
-console.log('Tracking:', updated.trackingNumber);
+console.log(`Updated total: $${updated.pricing.total}`);
 ```
 
 ### Update Order Status
 
 ```typescript
+import { OrderStatus } from 'wiil-core-js';
+
 const updated = await client.productOrders.updateStatus('order_123', {
-  status: OrderStatus.OUT_FOR_DELIVERY,
+  id: 'order_123',
+  status: OrderStatus.CONFIRMED,
 });
 
-console.log('Status updated:', updated.status);
-console.log('Shipped:', updated.shippedDate);
+console.log(`Status: ${updated.status}`);
 ```
 
 ### Cancel Order
 
 ```typescript
 const cancelled = await client.productOrders.cancel('order_123', {
-  reason: 'Customer requested cancellation',
+  cancelReason: 'Customer requested cancellation',
 });
 
-console.log('Order cancelled:', cancelled.status);
-console.log('Reason:', cancelled.cancelReason);
-console.log('Payment status:', cancelled.paymentStatus);
+console.log(`Status: ${cancelled.status}`);
 ```
 
 ### Delete Order
 
 ```typescript
-const deleted = await client.productOrders.delete('order_123');
-
-console.log('Deleted:', deleted);
+await client.productOrders.delete('order_123');
+console.log('Order deleted');
 ```
 
-### List Orders
+---
+
+## Status Enums
+
+### Order Status
 
 ```typescript
-const result = await client.productOrders.list({
-  page: 1,
-  pageSize: 20,
-});
+import { OrderStatus } from 'wiil-core-js';
 
-console.log('Orders:', result.data.length);
-console.log('Total:', result.meta.totalCount);
+// OrderStatus.PENDING        - 'pending'
+// OrderStatus.CONFIRMED      - 'confirmed'
+// OrderStatus.PREPARING      - 'preparing'
+// OrderStatus.READY          - 'ready'
+// OrderStatus.OUT_FOR_DELIVERY - 'out_for_delivery'
+// OrderStatus.COMPLETED      - 'completed'
+// OrderStatus.CANCELLED      - 'cancelled'
+// OrderStatus.RETURNED       - 'returned'
 ```
 
-## Order Status Values
-
-Order status follows this enum:
+### Variant Axis Type
 
 ```typescript
-enum OrderStatus {
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  PREPARING = 'preparing',
-  READY = 'ready',
-  OUT_FOR_DELIVERY = 'out_for_delivery',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
-  RETURNED = 'returned'
-}
+import { VariantAxisType } from 'wiil-core-js';
+
+// VariantAxisType.TEXT   - Text-based values (Size: Small, Medium, Large)
+// VariantAxisType.SWATCH - Color swatches with hex codes
 ```
 
-## Payment Status Values
+---
 
-Payment status follows this enum:
-
-```typescript
-enum PaymentStatus {
-  PENDING = 'pending',
-  PAID = 'paid',
-  PARTIAL = 'partial',
-  FAILED = 'failed',
-  REFUNDED = 'refunded'
-}
-```
-
-## Complete Example: Electronics Store Setup
+## Complete Example: Electronics Store
 
 ```typescript
-import { WiilClient, OrderStatus, PaymentStatus } from 'wiil-js';
+import { WiilClient } from 'wiil-js';
+import { OrderStatus, VariantAxisType, PreferredContactMethod } from 'wiil-core-js';
 
 async function setupElectronicsStore() {
-  const client = new WiilClient({
-    apiKey: process.env.WIIL_API_KEY!,
-  });
+  const client = new WiilClient({ apiKey: process.env.WIIL_API_KEY! });
 
-  // 1. Create product categories
+  // 1. Create customer
+  console.log('Creating customer...');
+  const customer = await client.customers.create({
+    phone_number: '+15551234567',
+    firstname: 'John',
+    lastname: 'Doe',
+    preferred_language: 'en',
+    preferred_contact_method: PreferredContactMethod.EMAIL,
+    isValidatedNames: false,
+  });
+  console.log(`Customer: ${customer.id}`);
+
+  // 2. Create categories
+  console.log('\nCreating categories...');
   const computers = await client.products.createCategory({
     name: 'Computers',
-    description: 'Laptops, desktops, and accessories',
-    displayOrder: 1,
+    description: 'Laptops and desktops',
+    isDefault: false,
   });
 
   const accessories = await client.products.createCategory({
     name: 'Accessories',
-    description: 'Computer peripherals and accessories',
-    displayOrder: 2,
+    description: 'Computer peripherals',
+    isDefault: false,
   });
+  console.log('Categories created');
 
-  // 2. Create products
-  const laptop = await client.products.create({
-    name: 'Pro Laptop 15"',
-    description: '15-inch laptop with 16GB RAM and 512GB SSD',
-    price: 1299.99,
-    sku: 'LT-PRO-15-2024',
-    barcode: '123456789012',
-    categoryId: computers.id,
-    brand: 'TechBrand',
-    trackInventory: true,
-    stockQuantity: 25,
-    lowStockThreshold: 5,
-    weight: 4.5,
-    dimensions: {
-      length: 14.0,
-      width: 9.5,
-      height: 0.7,
-      unit: 'inches',
-    },
+  // 3. Create variant axes
+  console.log('\nCreating variant axes...');
+  const colorAxis = await client.productVariantAxes.create({
+    name: 'Color',
+    type: VariantAxisType.SWATCH,
+    values: [
+      { id: 'black', label: 'Black', swatchColor: '#000000', sortOrder: 0 },
+      { id: 'silver', label: 'Silver', swatchColor: '#C0C0C0', sortOrder: 1 },
+    ],
     isActive: true,
+  });
+  console.log(`Color axis: ${colorAxis.id}`);
+
+  // 4. Create products with variants
+  console.log('\nCreating products...');
+  const laptop = await client.products.create({
+    categoryId: computers.id,
+    name: 'Pro Laptop 15"',
+    description: '15-inch laptop with 16GB RAM',
+    price: 1299.99,
+    sku: 'LT-PRO-15',
+    trackInventory: true,
+    isActive: true,
+    isAlcoholic: false,
+    variants: [
+      { axisValues: { Color: 'Black' }, price: 1299.99, isDefault: true, isActive: true },
+      { axisValues: { Color: 'Silver' }, price: 1349.99, isDefault: false, isActive: true },
+    ],
   });
 
   const mouse = await client.products.create({
+    categoryId: accessories.id,
     name: 'Wireless Mouse',
-    description: 'Ergonomic wireless mouse with precision tracking',
+    description: 'Ergonomic wireless mouse',
     price: 29.99,
-    sku: 'MS-WL-BLK-2024',
-    barcode: '987654321098',
-    categoryId: accessories.id,
-    brand: 'TechBrand',
+    sku: 'MS-WL',
     trackInventory: true,
-    stockQuantity: 150,
-    lowStockThreshold: 20,
-    weight: 0.25,
-    dimensions: {
-      length: 4.5,
-      width: 2.8,
-      height: 1.6,
-      unit: 'inches',
-    },
     isActive: true,
+    isAlcoholic: false,
+    variants: [
+      { axisValues: {}, price: 29.99, isDefault: true, isActive: true },
+    ],
   });
+  console.log('Products created');
 
-  const keyboard = await client.products.create({
-    name: 'Mechanical Keyboard',
-    description: 'RGB backlit mechanical keyboard with blue switches',
-    price: 89.99,
-    sku: 'KB-MEC-RGB-2024',
-    barcode: '456789012345',
-    categoryId: accessories.id,
-    brand: 'TechBrand',
-    trackInventory: true,
-    stockQuantity: 60,
-    lowStockThreshold: 10,
-    weight: 2.1,
-    dimensions: {
-      length: 17.5,
-      width: 5.2,
-      height: 1.3,
-      unit: 'inches',
-    },
-    isActive: true,
-  });
-
-  // 3. Process a customer order
+  // 5. Create order
+  console.log('\nCreating order...');
   const order = await client.productOrders.create({
+    customerId: customer.id,
+    orderDate: Date.now(),
     items: [
       {
         productId: laptop.id,
-        itemName: laptop.name,
-        sku: laptop.sku,
+        variantId: laptop.variants[0].id,
+        itemName: 'Pro Laptop 15" (Black)',
         quantity: 1,
-        unitPrice: laptop.price,
-        totalPrice: laptop.price,
-        selectedVariant: 'Silver',
-        warrantyInfo: '2-year extended warranty included',
+        unitPrice: 1299.99,
+        totalPrice: 1299.99,
       },
       {
         productId: mouse.id,
-        itemName: mouse.name,
-        sku: mouse.sku,
-        quantity: 1,
-        unitPrice: mouse.price,
-        totalPrice: mouse.price,
-        selectedVariant: 'Black',
-      },
-      {
-        productId: keyboard.id,
-        itemName: keyboard.name,
-        sku: keyboard.sku,
-        quantity: 1,
-        unitPrice: keyboard.price,
-        totalPrice: keyboard.price,
-        selectedVariant: 'RGB',
+        variantId: mouse.variants[0].id,
+        itemName: 'Wireless Mouse',
+        quantity: 2,
+        unitPrice: 29.99,
+        totalPrice: 59.98,
       },
     ],
-    customerId: 'cust_123',
     pricing: {
-      subtotal: 1419.97,
-      tax: 113.60,
-      shippingAmount: 15.00,
-      discount: 50.00,
-      total: 1498.57,
-      currency: 'USD',
+      subtotal: 1359.97,
+      total: 1359.97,
     },
-    paymentStatus: PaymentStatus.PAID,
-    paymentMethod: 'credit_card',
-    paymentReference: 'CC-2024-ABC123',
-    billingAddress: {
-      street: '100 Main Street',
-      street2: 'Suite 200',
-      city: 'San Francisco',
-      state: 'CA',
-      postalCode: '94105',
-      country: 'US',
-    },
-    orderDate: Date.now(),
-    requestedDeliveryDate: Date.now() + 3 * 24 * 60 * 60 * 1000,
-    shippingAddress: {
-      street: '200 Work Plaza',
-      city: 'San Francisco',
-      state: 'CA',
-      postalCode: '94105',
-      country: 'US',
-      deliveryInstructions: 'Reception desk on 2nd floor',
-    },
-    shippingMethod: 'Express',
-    source: 'web',
   });
+  console.log(`Order Created: ${order.id}`);
 
-  console.log('Order created:', order.orderNumber);
+  // 6. Update order status through lifecycle
+  console.log('\nProcessing order...');
 
-  // 4. Update order through fulfillment lifecycle
   await client.productOrders.updateStatus(order.id, {
+    id: order.id,
     status: OrderStatus.CONFIRMED,
   });
+  console.log('Order confirmed');
 
   await client.productOrders.updateStatus(order.id, {
+    id: order.id,
     status: OrderStatus.PREPARING,
   });
+  console.log('Order preparing');
 
-  await client.productOrders.update({
-    id: order.id,
-    status: OrderStatus.OUT_FOR_DELIVERY,
-    trackingNumber: '1Z999AA10123456789',
-    shippingCarrier: 'UPS',
-  });
-
-  // 5. Complete the order
   await client.productOrders.updateStatus(order.id, {
+    id: order.id,
     status: OrderStatus.COMPLETED,
   });
+  console.log('Order completed');
 
-  // 6. Check inventory levels
-  const lowStockProducts = await client.products.list();
-  const needsRestock = lowStockProducts.data.filter(
-    p => p.trackInventory && p.stockQuantity! <= p.lowStockThreshold!
-  );
-
-  console.log('Products needing restock:', needsRestock.length);
-  needsRestock.forEach(product => {
-    console.log('-', product.name, 'Stock:', product.stockQuantity);
-  });
+  return { customer, categories: [computers, accessories], products: [laptop, mouse], order };
 }
+
+setupElectronicsStore().catch(console.error);
 ```
+
+---
 
 ## Best Practices
 
-### Product Management
-- Use SKUs and barcodes for easier inventory tracking
-- Set low stock thresholds to get alerts before running out
-- Include accurate dimensions and weight for shipping calculations
-- Keep product descriptions clear and informative
-- Use categories to organize your catalog effectively
+### 1. Always Include Variants
 
-### Inventory Tracking
 ```typescript
-// Enable inventory tracking for physical products
+// Every product needs at least one variant
 const product = await client.products.create({
-  name: 'Physical Product',
-  price: 49.99,
+  categoryId: 'cat_123',
+  name: 'Widget',
+  price: 19.99,
+  sku: 'WGT-001',
   trackInventory: true,
-  stockQuantity: 100,
-  lowStockThreshold: 20,
-  // ... other fields
-});
-
-// Disable tracking for digital products or services
-const digital = await client.products.create({
-  name: 'Digital Download',
-  price: 9.99,
-  trackInventory: false,
-  // ... other fields
+  isActive: true,
+  isAlcoholic: false,
+  variants: [
+    { axisValues: {}, price: 19.99, isDefault: true, isActive: true },
+  ],
 });
 ```
 
-### Order Processing
-- Always validate product availability before creating orders
-- Include shipping and billing addresses for physical products
-- Use tracking numbers to help customers monitor deliveries
-- Set realistic delivery dates
-- Include payment references for reconciliation
+### 2. Use variantId in Orders
 
-### Pricing Calculations
 ```typescript
-const items = [
-  { price: 79.99, quantity: 2 },  // 159.98
-  { price: 19.99, quantity: 1 },  // 19.99
-];
-
-const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-const tax = subtotal * 0.0875;        // 8.75% tax
-const shippingAmount = 9.99;          // Flat rate shipping
-const discount = 10.00;               // Promotional discount
-const total = subtotal + tax + shippingAmount - discount;
-
-const pricing = {
-  subtotal: Number(subtotal.toFixed(2)),
-  tax: Number(tax.toFixed(2)),
-  shippingAmount: Number(shippingAmount.toFixed(2)),
-  discount: Number(discount.toFixed(2)),
-  total: Number(total.toFixed(2)),
-  currency: 'USD',
-};
+// Order items require variantId
+const order = await client.productOrders.create({
+  customerId: customer.id,
+  orderDate: Date.now(),
+  items: [
+    {
+      productId: product.id,
+      variantId: product.variants[0].id,  // Required
+      itemName: product.name,
+      quantity: 1,
+      unitPrice: product.price,
+      totalPrice: product.price,
+    },
+  ],
+  pricing: { subtotal: product.price, total: product.price },
+});
 ```
 
-### Status Management
-Follow this typical order lifecycle:
-1. Order created → 'pending'
-2. Payment confirmed → 'confirmed'
-3. Warehouse prepares → 'preparing'
-4. Items ready → 'ready'
-5. Shipped → 'out_for_delivery'
-6. Delivered → 'completed'
+### 3. Define Axes for Complex Products
+
+```typescript
+// Create axes first, then reference in product variants
+const sizeAxis = await client.productVariantAxes.create({
+  name: 'Size',
+  type: VariantAxisType.TEXT,
+  values: [
+    { id: 'sm', label: 'Small', sortOrder: 0 },
+    { id: 'md', label: 'Medium', sortOrder: 1 },
+    { id: 'lg', label: 'Large', sortOrder: 2 },
+  ],
+  isActive: true,
+});
+
+// Reference in product variants
+const product = await client.products.create({
+  // ...
+  variants: [
+    { axisValues: { Size: 'Small' }, price: 24.99, isDefault: true, isActive: true },
+    { axisValues: { Size: 'Medium' }, price: 24.99, isDefault: false, isActive: true },
+    { axisValues: { Size: 'Large' }, price: 26.99, isDefault: false, isActive: true },
+  ],
+});
+```
+
+### 4. Status Progression
+
+```typescript
+// Follow the standard order lifecycle
+// pending → confirmed → preparing → ready → out_for_delivery → completed
+```
+
+---
 
 ## Troubleshooting
 
-### Problem: Missing required customer ID
+### Missing variants
 
-**Error:**
-```
-ValidationError: customerId is required
-```
+**Problem**: "Product must have at least one variant"
 
-**Solution:**
-Ensure you provide a valid customer ID:
-```typescript
-const order = await client.productOrders.create({
-  customerId: 'cust_123', // Required
-  // ... other fields
-});
-```
-
-### Problem: Product not found by SKU
-
-**Error:**
-```
-NotFoundError: Product not found
-```
-
-**Solution:**
-Verify the SKU exists and is spelled correctly:
-```typescript
-try {
-  const product = await client.products.getBySku('WM-2024-BLK');
-} catch (error) {
-  console.error('Product not found. Check SKU:', error);
-}
-```
-
-### Problem: Inventory tracking not working
-
-**Error:**
-Product stock not updating after orders
-
-**Solution:**
-Ensure trackInventory is enabled:
-```typescript
-const product = await client.products.update({
-  id: 'product_123',
-  trackInventory: true,
-  stockQuantity: 100,
-});
-```
-
-### Problem: Invalid pricing calculation
-
-**Error:**
-```
-ValidationError: pricing.total does not match sum of components
-```
-
-**Solution:**
-Verify your pricing calculation:
-```typescript
-const pricing = {
-  subtotal: 179.97,
-  tax: 14.40,
-  shippingAmount: 9.99,
-  discount: 0,
-  total: 204.36, // Must equal subtotal + tax + shippingAmount - discount
-  currency: 'USD',
-};
-```
-
-### Problem: Dimensions not saving
-
-**Error:**
-Dimensions field appears empty
-
-**Solution:**
-Ensure you include the unit field:
+**Solution**: Include the `variants` array when creating products:
 ```typescript
 const product = await client.products.create({
-  name: 'Product',
-  price: 99.99,
-  dimensions: {
-    length: 10.5,
-    width: 8.2,
-    height: 3.1,
-    unit: 'inches', // Required: 'cm' or 'inches'
-  },
   // ... other fields
+  variants: [
+    { axisValues: {}, price: 29.99, isDefault: true, isActive: true },
+  ],
 });
 ```
+
+### Missing variantId in order
+
+**Problem**: "variantId is required for order items"
+
+**Solution**: Include variantId for each order item:
+```typescript
+const order = await client.productOrders.create({
+  items: [
+    {
+      productId: product.id,
+      variantId: product.variants[0].id,  // Required
+      // ... other fields
+    },
+  ],
+  // ...
+});
+```
+
+### Invalid order status update
+
+**Problem**: Status update fails
+
+**Solution**: Include the id field in status update:
+```typescript
+await client.productOrders.updateStatus(orderId, {
+  id: orderId,  // Required
+  status: OrderStatus.CONFIRMED,
+});
+```
+
+---
+
+[Back to Examples](../README.md)
