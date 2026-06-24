@@ -13,6 +13,7 @@ import {
   UpdatePropertyInquiryStatusSchema,
   PaginatedResultType,
   PaginationRequest,
+  ServiceSlotQueryResponse,
 } from 'wiil-core-js';
 import { HttpClient } from '../../../client/HttpClient';
 
@@ -32,6 +33,20 @@ export class PropertyInquiryResource {
       this.resource_path,
       data,
       CreatePropertyInquirySchema
+    );
+  }
+
+  /**
+   * Get available viewing slots for a property on a specific date.
+   * @param propertyId - The property ID to get viewing slots for
+   * @param localDate - Business local date in YYYY-MM-DD format
+   */
+  public async getViewingSlots(
+    propertyId: string,
+    localDate: string
+  ): Promise<ServiceSlotQueryResponse> {
+    return this.http.get<ServiceSlotQueryResponse>(
+      `${this.resource_path}/viewing-slots/${propertyId}?localDate=${localDate}`
     );
   }
 

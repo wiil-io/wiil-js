@@ -199,7 +199,7 @@ console.log('Updated:', updated.street, updated.unit);
 const verified = await client.propertyConfig.verifyAddress('addr_123');
 
 console.log('Verified:', verified.isVerified);
-console.log('Verified at:', verified.verifiedAt);
+console.log('Verified at:', verified.verifiedAt ? new Date(verified.verifiedAt * 1000) : null);
 ```
 
 ### Delete Address
@@ -816,6 +816,68 @@ console.log('Deleted:', deleted);
 
 ---
 
+## Viewing Slots
+
+Query available viewing slots for a property and schedule viewings using the slot's UTC timestamp.
+
+### Get Available Viewing Slots
+
+```typescript
+const slotsResponse = await client.propertyInquiries.getViewingSlots(
+  'prop_123',
+  '2026-06-25'
+);
+
+console.log('Timezone:', slotsResponse.timezone);
+console.log('Available slots for', slotsResponse.localDate);
+
+for (const slot of slotsResponse.slots) {
+  console.log(`  ${slot.startTimeOfDay} - Provider: ${slot.providerId}`);
+  console.log(`    UTC start: ${slot.startTimeUtcSec}`);
+}
+```
+
+### Schedule a Viewing from Available Slots
+
+```typescript
+import { PropertyInquiryType, PropertyInquiryStatus } from 'wiil-js';
+
+// Get available slots
+const slotsResponse = await client.propertyInquiries.getViewingSlots(
+  'prop_123',
+  '2026-06-25'
+);
+
+if (slotsResponse.slots.length > 0) {
+  const selectedSlot = slotsResponse.slots[0];
+  
+  // Create inquiry with slot's UTC timestamp (use directly, no conversion)
+  const inquiry = await client.propertyInquiries.create({
+    propertyId: 'prop_123',
+    customerId: 'cust_456',
+    inquiryType: PropertyInquiryType.GENERAL,
+    message: "I'd like to schedule a viewing",
+    scheduledViewingDate: selectedSlot.startTimeUtcSec,
+    assignedAgentId: selectedSlot.providerId,
+  });
+  
+  // Update status to scheduled
+  await client.propertyInquiries.updateStatus(inquiry.id, {
+    id: inquiry.id,
+    status: PropertyInquiryStatus.VIEWING_SCHEDULED,
+    scheduledViewingDate: selectedSlot.startTimeUtcSec,
+  });
+  
+  // For display only, convert to Date (multiply by 1000)
+  const viewingTime = new Date(selectedSlot.startTimeUtcSec * 1000);
+  console.log('Viewing scheduled for:', viewingTime.toISOString());
+}
+```
+
+**Timestamp Format:** All timestamps use UTC seconds. The `startTimeUtcSec` value from slots passes directly to API calls—no conversion needed. Only multiply by 1000 when converting to JavaScript `Date` for display.
+
+---
+
 ## Complete Example: Real Estate Agency Workflow
 
 ```typescript
@@ -947,19 +1009,30 @@ async function realEstateWorkflow() {
 
   console.log('Inquiry received from:', inquiry.customer.firstName, inquiry.customer.lastName);
 
-  // 6. Contact client and schedule viewing
+  // 6. Contact client and schedule viewing using available slots
   await client.propertyInquiries.updateStatus(inquiry.id, {
     id: inquiry.id,
     status: PropertyInquiryStatus.CONTACTED,
   });
 
+  // Get available viewing slots for the property
+  const viewingDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
+  const localDate = viewingDate.toISOString().split('T')[0]; // YYYY-MM-DD
+  const slotsResponse = await client.propertyInquiries.getViewingSlots(property.id, localDate);
+
+  if (slotsResponse.slots.length === 0) {
+    throw new Error('No viewing slots available');
+  }
+
+  // Select first available slot and use its UTC timestamp directly
+  const selectedSlot = slotsResponse.slots[0];
   const scheduledInquiry = await client.propertyInquiries.updateStatus(inquiry.id, {
     id: inquiry.id,
     status: PropertyInquiryStatus.VIEWING_SCHEDULED,
-    scheduledViewingDate: Math.floor(Date.now() / 1000) + (5 * 24 * 60 * 60),
+    scheduledViewingDate: selectedSlot.startTimeUtcSec,
   });
 
-  console.log('Viewing scheduled for:', new Date(scheduledInquiry.scheduledViewingDate!));
+  console.log('Viewing scheduled for:', new Date(selectedSlot.startTimeUtcSec * 1000));
 
   // 7. Complete viewing with positive feedback
   await client.propertyInquiries.updateStatus(inquiry.id, {
