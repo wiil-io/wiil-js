@@ -5,6 +5,7 @@
 
 import {
   AgentConfiguration,
+  AgentGraph,
   CreateAgentConfiguration,
   UpdateAgentConfiguration,
   PaginatedResultType,
@@ -114,6 +115,29 @@ export class AgentConfigurationsResource {
    */
   public async get(id: string): Promise<AgentConfiguration> {
     return this.http.get<AgentConfiguration>(`${this.resource_path}/${id}`);
+  }
+
+  /**
+   * Retrieves the full agent graph for an agent configuration.
+   *
+   * @param id - Agent configuration ID
+   * @returns Promise resolving to the full agent graph with all related entities
+   *
+   * @remarks
+   * Returns a fully hydrated view of the agent including its instruction
+   * configuration, knowledge sources, and deployment channels.
+   *
+   * @example
+   * ```typescript
+   * const graph = await client.agents.getGraph('agent_123');
+   * console.log('Agent:', graph.agent.name);
+   * console.log('Instruction:', graph.instruction?.name);
+   * console.log('Knowledge sources:', graph.knowledgeSources.length);
+   * console.log('Deployments:', graph.deployments.length);
+   * ```
+   */
+  public async getGraph(id: string): Promise<AgentGraph> {
+    return this.http.get<AgentGraph>(`${this.resource_path}/${id}/graph`);
   }
 
   /**

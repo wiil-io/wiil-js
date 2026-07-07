@@ -64,7 +64,7 @@
   ],
   "dependencies": {
     "axios": "^1.13.6",
-    "wiil-core-js": "^0.0.84",
+    "wiil-core-js": "^0.0.85",
     "zod": "4.1.12"
   }
 }
