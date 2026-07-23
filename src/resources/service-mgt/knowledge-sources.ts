@@ -5,6 +5,8 @@
 
 import {
   KnowledgeSource,
+  CreateTextKnowledgeSource,
+  CreateTextKnowledgeSourceSchema,
   PaginatedResultType,
   PaginationRequest,
 } from 'wiil-core-js';
@@ -107,5 +109,37 @@ export class KnowledgeSourcesResource {
     const path = `${this.resource_path}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
     return this.http.get<PaginatedResultType<KnowledgeSource>>(path);
+  }
+
+  /**
+   * Creates a knowledge source from raw text content.
+   *
+   * Text knowledge sources are ingested and stored as CORPUS-type knowledge sources.
+   * The content must be at least 1000 characters.
+   *
+   * @param data - Text knowledge source creation data
+   * @returns Promise resolving to the created knowledge source
+   *
+   * @throws {@link WiilAPIError} - When the API returns an error
+   * @throws {@link WiilNetworkError} - When network communication fails
+   * @throws {@link WiilValidationError} - When content is less than 1000 characters
+   *
+   * @example
+   * ```typescript
+   * const source = await client.knowledgeSources.createText({
+   *   name: 'Product FAQ',
+   *   content: 'Your text content here (minimum 1000 characters)...',
+   *   metadata: { category: 'support', version: '1.0' }
+   * });
+   * console.log('Created:', source.id);
+   * console.log('Processing status:', source.processingStatus);
+   * ```
+   */
+  public async createText(data: CreateTextKnowledgeSource): Promise<KnowledgeSource> {
+    return this.http.post<CreateTextKnowledgeSource, KnowledgeSource>(
+      `${this.resource_path}/text`,
+      data,
+      CreateTextKnowledgeSourceSchema
+    );
   }
 }
