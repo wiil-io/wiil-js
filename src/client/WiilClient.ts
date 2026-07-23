@@ -72,7 +72,6 @@ import {
   OutboundEmailsResource,
   OutboundSmsResource,
   OutboundTemplatesResource,
-  // TranslationServicesResource,
 } from '../resources/conversation';
 import { WiilConfigurationError } from '../errors/WiilError';
 
@@ -772,24 +771,6 @@ export class WiilClient {
    */
   public readonly outboundTemplates: OutboundTemplatesResource;
 
-  /**
-   * Translation Services resource for managing real-time translation sessions.
-   *
-   * @remarks
-   * Provides methods for initiating, managing, and tracking translation
-   * sessions for cross-language communication.
-   *
-   * @example
-   * ```typescript
-   * const config = await client.translationServices.initiate({
-   *   initiator_id: 'user_123',
-   *   initiator_language_code: 'en',
-   *   participant_language_code: 'es'
-   * });
-   * ```
-   */
-  // public readonly translationServices: TranslationServicesResource;
-
   private readonly http: HttpClient;
 
   /**
@@ -897,7 +878,6 @@ export class WiilClient {
     this.outboundEmails = new OutboundEmailsResource(this.http);
     this.outboundSms = new OutboundSmsResource(this.http);
     this.outboundTemplates = new OutboundTemplatesResource(this.http);
-    // this.translationServices = new TranslationServicesResource(this.http);
   }
 
   /**

@@ -4,7 +4,7 @@
  */
 
 import {
-  TranslationServiceLog,
+  TranslationSession,
   PaginatedResultType,
   PaginationRequest,
 } from 'wiil-core-js';
@@ -61,12 +61,12 @@ export class TranslationSessionsResource {
    * ```typescript
    * const session = await client.translationSessions.get('session_123');
    * console.log('Session:', session.id);
-   * console.log('Source Language:', session.sourceLanguage);
-   * console.log('Target Language:', session.targetLanguage);
+   * console.log('Status:', session.status);
+   * console.log('Direction:', session.direction);
    * ```
    */
-  public async get(id: string): Promise<TranslationServiceLog> {
-    return this.http.get<TranslationServiceLog>(`${this.resource_path}/${id}`);
+  public async get(id: string): Promise<TranslationSession> {
+    return this.http.get<TranslationSession>(`${this.resource_path}/${id}`);
   }
 
   /**
@@ -87,20 +87,18 @@ export class TranslationSessionsResource {
    * const page2 = await client.translationSessions.list({
    *   page: 2,
    *   pageSize: 50,
-   *   sortBy: 'createdAt',
-   *   sortDirection: 'desc'
    * });
    *
    * console.log(`Found ${page2.meta.totalCount} translation sessions`);
    * console.log(`Page ${page2.meta.page} of ${page2.meta.totalPages}`);
    * page2.data.forEach(session => {
-   *   console.log(`- Session ${session.id} (${session.sourceLanguage} -> ${session.targetLanguage})`);
+   *   console.log(`- Session ${session.id}: ${session.status} (${session.direction})`);
    * });
    * ```
    */
   public async list(
     params?: Partial<PaginationRequest>
-  ): Promise<PaginatedResultType<TranslationServiceLog>> {
+  ): Promise<PaginatedResultType<TranslationSession>> {
     const queryParams = new URLSearchParams();
 
     if (params?.page) queryParams.append('page', params.page.toString());
@@ -108,6 +106,6 @@ export class TranslationSessionsResource {
 
     const path = `${this.resource_path}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
-    return this.http.get<PaginatedResultType<TranslationServiceLog>>(path);
+    return this.http.get<PaginatedResultType<TranslationSession>>(path);
   }
 }
