@@ -5,7 +5,12 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import nock from 'nock';
 import { WiilClient } from '../../client/WiilClient';
-import { TranslationServiceLog, PaginatedResultType, ConversationStatus, TranslationDirection } from 'wiil-core-js';
+import {
+  TranslationSession,
+  TranslationSessionStatus,
+  PaginatedResultType,
+  TranslationDirection,
+} from 'wiil-core-js';
 import { WiilAPIError } from '../../errors/WiilError';
 
 const BASE_URL = 'https://api.wiil.io/v1';
@@ -27,36 +32,37 @@ describe('TranslationSessionsResource', () => {
 
   describe('get', () => {
     it('should retrieve a translation session by ID', async () => {
-      const mockResponse: TranslationServiceLog = {
+      const mockResponse: TranslationSession = {
         id: 'session_123',
-        organization_id: 'org_456',
-        project_id: 'proj_789',
-        partner_initiator_id: 'init_123',
-        partner_session_id: 'partner_sess_456',
-        sdrtn_id: 'sdrtn_789',
+        organizationId: 'org_456',
+        projectId: 'proj_789',
+        externalInitiatorId: 'init_123',
+        externalSessionId: 'external_sess_456',
+        sdrtnId: 'sdrtn_789',
         translationConfigId: 'config_123',
-        participants: ['participant_1', 'participant_2'],
         durationInSeconds: 1500,
-        status: ConversationStatus.ENDED,
+        status: TranslationSessionStatus.COMPLETED,
         direction: TranslationDirection.BIDIRECTIONAL,
-        transcribedConversationLog: [
+        startedAt: 1705312800,
+        endedAt: 1705314300,
+        summary: 'Customer support translation session',
+        stateHistory: [
           {
-            messageId: 'msg_1',
-            speakerParticipantId: 'participant_1',
-            targetParticipantId: 'participant_2',
-            originalText: 'Hello, how can I help you?',
-            translatedText: 'Hola, ¿cómo puedo ayudarte?',
-            originalLanguage: 'en-US',
-            targetLanguage: 'es-ES',
-            provisioningConfigId: 'config_123',
-            timestamp: Date.now(),
+            status: TranslationSessionStatus.PENDING,
+            timestamp: 1705312700,
+          },
+          {
+            status: TranslationSessionStatus.ACTIVE,
+            timestamp: 1705312800,
+          },
+          {
+            status: TranslationSessionStatus.COMPLETED,
+            timestamp: 1705314300,
+            reason: 'Session ended normally',
           },
         ],
-        logTranscriptionInParticipantRecords: false,
-        translationSummary: 'Customer support translation session',
-        created_day: '2025-01-15',
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
+        createdAt: 1705312700,
+        updatedAt: 1705314300,
       };
 
       nock(BASE_URL)
@@ -71,9 +77,10 @@ describe('TranslationSessionsResource', () => {
       const result = await client.translationSessions.get('session_123');
 
       expect(result.id).toBe('session_123');
-      expect(result.organization_id).toBe('org_456');
-      expect(result.status).toBe(ConversationStatus.ENDED);
+      expect(result.organizationId).toBe('org_456');
+      expect(result.status).toBe(TranslationSessionStatus.COMPLETED);
       expect(result.direction).toBe(TranslationDirection.BIDIRECTIONAL);
+      expect(result.durationInSeconds).toBe(1500);
     });
 
     it('should throw API error when translation session not found', async () => {
@@ -93,42 +100,39 @@ describe('TranslationSessionsResource', () => {
 
   describe('list', () => {
     it('should list translation sessions with pagination', async () => {
-      const mockSessions: TranslationServiceLog[] = [
+      const mockSessions: TranslationSession[] = [
         {
           id: 'session_1',
-          organization_id: 'org_456',
-          project_id: 'proj_789',
-          partner_initiator_id: 'init_123',
-          partner_session_id: 'partner_sess_1',
+          organizationId: 'org_456',
+          projectId: 'proj_789',
+          externalInitiatorId: 'init_123',
+          externalSessionId: 'external_sess_1',
           translationConfigId: 'config_123',
-          participants: ['participant_1', 'participant_2'],
           durationInSeconds: 800,
-          status: ConversationStatus.ENDED,
+          status: TranslationSessionStatus.COMPLETED,
           direction: TranslationDirection.BIDIRECTIONAL,
-          logTranscriptionInParticipantRecords: false,
-          created_day: '2025-01-15',
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
+          startedAt: 1705312800,
+          endedAt: 1705313600,
+          createdAt: 1705312700,
+          updatedAt: 1705313600,
         },
         {
           id: 'session_2',
-          organization_id: 'org_456',
-          project_id: 'proj_789',
-          partner_initiator_id: 'init_456',
-          partner_session_id: 'partner_sess_2',
+          organizationId: 'org_456',
+          projectId: 'proj_789',
+          externalInitiatorId: 'init_456',
+          externalSessionId: 'external_sess_2',
           translationConfigId: 'config_124',
-          participants: ['participant_3', 'participant_4'],
           durationInSeconds: 900,
-          status: ConversationStatus.ACTIVE,
+          status: TranslationSessionStatus.ACTIVE,
           direction: TranslationDirection.UNIDIRECTIONAL,
-          logTranscriptionInParticipantRecords: true,
-          created_day: '2025-01-15',
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
+          startedAt: 1705314000,
+          createdAt: 1705313900,
+          updatedAt: 1705314000,
         },
       ];
 
-      const mockResponse: PaginatedResultType<TranslationServiceLog> = {
+      const mockResponse: PaginatedResultType<TranslationSession> = {
         data: mockSessions,
         meta: {
           page: 1,
@@ -154,12 +158,12 @@ describe('TranslationSessionsResource', () => {
       expect(result.data).toHaveLength(2);
       expect(result.meta.totalCount).toBe(2);
       expect(result.meta.page).toBe(1);
-      expect(result.data[0].status).toBe(ConversationStatus.ENDED);
-      expect(result.data[1].status).toBe(ConversationStatus.ACTIVE);
+      expect(result.data[0].status).toBe(TranslationSessionStatus.COMPLETED);
+      expect(result.data[1].status).toBe(TranslationSessionStatus.ACTIVE);
     });
 
     it('should list translation sessions with custom pagination parameters', async () => {
-      const mockResponse: PaginatedResultType<TranslationServiceLog> = {
+      const mockResponse: PaginatedResultType<TranslationSession> = {
         data: [],
         meta: {
           page: 2,
