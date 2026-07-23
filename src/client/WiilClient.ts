@@ -59,7 +59,6 @@ import {
   PhoneConfigurationsResource,
   ProvisioningConfigurationsResource,
   ConversationConfigurationsResource,
-  TranslationSessionsResource,
   KnowledgeSourcesResource,
   SupportModelsResource,
   TelephonyProviderResource,
@@ -573,11 +572,6 @@ export class WiilClient {
   public readonly conversationConfigs: ConversationConfigurationsResource;
 
   /**
-   * Translation Sessions resource for managing translation sessions.
-   */
-  public readonly translationSessions: TranslationSessionsResource;
-
-  /**
    * Knowledge Sources resource for managing knowledge sources.
    */
   public readonly knowledgeSources: KnowledgeSourcesResource;
@@ -865,7 +859,6 @@ export class WiilClient {
     this.phoneConfigs = new PhoneConfigurationsResource(this.http);
     this.provisioningConfigs = new ProvisioningConfigurationsResource(this.http);
     this.conversationConfigs = new ConversationConfigurationsResource(this.http);
-    this.translationSessions = new TranslationSessionsResource(this.http);
     this.knowledgeSources = new KnowledgeSourcesResource(this.http);
     this.supportModels = new SupportModelsResource(this.http);
     this.telephonyProvider = new TelephonyProviderResource(this.http);
