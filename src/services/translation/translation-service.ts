@@ -5,10 +5,6 @@
 
 import {
   TranslationSession,
-  CreateTranslationSession,
-  CreateTranslationSessionSchema,
-  UpdateTranslationSession,
-  UpdateTranslationSessionSchema,
   TranslationParticipant,
   CreateTranslationParticipant,
   CreateTranslationParticipantSchema,
@@ -27,9 +23,9 @@ import { HttpClient } from '../../client/HttpClient';
  * Service class for managing translation sessions in the WIIL Platform.
  *
  * @remarks
- * Provides methods for initiating, creating, retrieving, updating, and listing
- * translation sessions and participants. Translation services enable real-time
- * language translation for cross-language communication.
+ * Provides methods for initiating, retrieving, and listing translation sessions
+ * and participants. Translation services enable real-time language translation
+ * for cross-language communication.
  *
  * @example
  * ```typescript
@@ -87,29 +83,6 @@ export class TranslationService {
   }
 
   /**
-   * Creates a new translation session.
-   *
-   * @param data - Translation session data
-   * @returns Promise resolving to the created translation session
-   *
-   * @example
-   * ```typescript
-   * const session = await service.translation.create({
-   *   externalInitiatorId: 'user_123',
-   *   direction: 'bidirectional'
-   * });
-   * console.log('Translation session created:', session.id);
-   * ```
-   */
-  public async create(data: CreateTranslationSession): Promise<TranslationSession> {
-    return this.http.post<CreateTranslationSession, TranslationSession>(
-      this.resource_path,
-      data,
-      CreateTranslationSessionSchema
-    );
-  }
-
-  /**
    * Retrieves a translation session by ID.
    *
    * @param id - Translation session ID
@@ -144,20 +117,6 @@ export class TranslationService {
     const path = `${this.resource_path}/by-organization/${organizationId}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
     return this.http.get<PaginatedResultType<TranslationSession>>(path);
-  }
-
-  /**
-   * Updates an existing translation session.
-   *
-   * @param data - Translation session update data (must include id)
-   * @returns Promise resolving to the updated translation session
-   */
-  public async update(data: UpdateTranslationSession): Promise<TranslationSession> {
-    return this.http.patch<UpdateTranslationSession, TranslationSession>(
-      this.resource_path,
-      data,
-      UpdateTranslationSessionSchema
-    );
   }
 
   /**

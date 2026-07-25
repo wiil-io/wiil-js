@@ -302,16 +302,6 @@ const access = await service.translation.initiate({
 // Returns: TranslationSessionAccess
 ```
 
-#### `create(data)` - Create a session directly
-
-```typescript
-const session = await service.translation.create({
-  externalInitiatorId: 'user_123',
-  direction: 'bidirectional',
-});
-// Returns: TranslationSession
-```
-
 #### `get(id)` - Get session by ID
 
 ```typescript
@@ -331,16 +321,6 @@ const result = await service.translation.list({ page: 1, pageSize: 50 });
 ```typescript
 const result = await service.translation.getByOrganization('org_123');
 // Returns: PaginatedResultType<TranslationSession>
-```
-
-#### `update(data)` - Update session fields
-
-```typescript
-const updated = await service.translation.update({
-  id: 'session_123',
-  summary: 'Customer support call',
-});
-// Returns: TranslationSession
 ```
 
 #### `updateStatus(id, status)` - Update session status
