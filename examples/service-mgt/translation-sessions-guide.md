@@ -32,10 +32,10 @@ console.log('Channel:', access.channelIdentifier);
 Translation sessions provide:
 
 - **Session Records**: Durable root for participant-to-participant translations
-- **Lifecycle Tracking**: Status progression (pending → active → completed)
+- **Lifecycle Tracking**: Status progression (pending -> active -> completed)
 - **Duration Metrics**: Start/end timestamps and total duration
 - **State History**: Ordered lifecycle transition records for audit
-- **Participant Management**: Add, update, and remove participants
+- **Participant Management**: Add and update participants
 
 ### Session Structure
 
@@ -139,22 +139,16 @@ if (session.durationInSeconds) {
 }
 ```
 
-### Query Sessions
+### Query Sessions by Organization
 
 ```typescript
 // By organization
 const orgSessions = await service.translation.getByOrganization('org_123');
 
-// By project
-const projectSessions = await service.translation.getByProject('proj_456');
-
-// By status
-const activeSessions = await service.translation.getByStatus('active');
-
-// By date range (UTC seconds)
-const now = Math.floor(Date.now() / 1000);
-const lastWeek = now - 7 * 24 * 60 * 60;
-const recentSessions = await service.translation.getByDateRange(lastWeek, now);
+console.log('Total sessions:', orgSessions.meta.totalCount);
+orgSessions.data.forEach(session => {
+  console.log(`- ${session.id}: ${session.status}`);
+});
 ```
 
 ### Manage Participants
@@ -178,9 +172,6 @@ const updated = await service.translation.updateParticipant(sessionId, {
   id: newParticipant.id,
   displayName: 'Senior Translator',
 });
-
-// Remove a participant
-await service.translation.removeParticipant(sessionId, newParticipant.id);
 ```
 
 ### Session Lifecycle
@@ -194,10 +185,6 @@ await service.translation.updateStatus(sessionId, 'active');
 // End session
 const ended = await service.translation.end(sessionId);
 console.log('Session ended at:', new Date(ended.endedAt! * 1000).toISOString());
-
-// Generate summary
-const withSummary = await service.translation.generateSummary(sessionId);
-console.log('Summary:', withSummary.summary);
 ```
 
 ## Complete Example
@@ -346,29 +333,6 @@ const result = await service.translation.getByOrganization('org_123');
 // Returns: PaginatedResultType<TranslationSession>
 ```
 
-#### `getByProject(projectId, params?)` - List by project
-
-```typescript
-const result = await service.translation.getByProject('proj_456');
-// Returns: PaginatedResultType<TranslationSession>
-```
-
-#### `getByStatus(status, params?)` - List by status
-
-```typescript
-const result = await service.translation.getByStatus('active');
-// Returns: PaginatedResultType<TranslationSession>
-```
-
-#### `getByDateRange(startDate, endDate, params?)` - List by date range
-
-```typescript
-const now = Math.floor(Date.now() / 1000);
-const lastWeek = now - 7 * 24 * 60 * 60;
-const result = await service.translation.getByDateRange(lastWeek, now);
-// Returns: PaginatedResultType<TranslationSession>
-```
-
 #### `update(data)` - Update session fields
 
 ```typescript
@@ -390,13 +354,6 @@ const updated = await service.translation.updateStatus('session_123', 'active');
 
 ```typescript
 const ended = await service.translation.end('session_123');
-// Returns: TranslationSession
-```
-
-#### `generateSummary(id)` - Generate AI summary
-
-```typescript
-const withSummary = await service.translation.generateSummary('session_123');
 // Returns: TranslationSession
 ```
 
@@ -438,24 +395,13 @@ const updated = await service.translation.updateParticipant('session_123', {
 // Returns: TranslationParticipant
 ```
 
-#### `removeParticipant(sessionId, participantId)` - Remove participant
-
-```typescript
-const removed = await service.translation.removeParticipant('session_123', 'participant_456');
-// Returns: boolean
-```
-
 ## Best Practices
 
 1. **Use `initiate()` for new sessions** - This creates the session and returns runtime credentials in one call.
 
 2. **Use pagination for large datasets** - Translation sessions accumulate quickly. Always paginate.
 
-3. **Check session status** - Use `getByStatus()` to find active, completed, or failed sessions.
-
-4. **Handle timestamps correctly** - Multiply by 1000 when converting UTC seconds to JavaScript Date.
-
-5. **Generate summaries after completion** - Call `generateSummary()` after ending a session.
+3. **Handle timestamps correctly** - Multiply by 1000 when converting UTC seconds to JavaScript Date.
 
 ## Troubleshooting
 

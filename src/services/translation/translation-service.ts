@@ -33,19 +33,19 @@ import { HttpClient } from '../../client/HttpClient';
  *
  * @example
  * ```typescript
- * const client = new WiilClient({ apiKey: 'your-api-key' });
+ * const service = new WiilService({ apiKey: 'your-api-key' });
  *
  * // Initiate a translation session
- * const access = await client.translation.initiate({
- *   initiator: { languageCode: 'en', displayName: 'John' },
- *   participant: { languageCode: 'es' }
+ * const access = await service.translation.initiate({
+ *   initiator: { externalParticipantId: 'user_123', language: 'en' },
+ *   participant: { language: 'es' }
  * });
  *
  * // Get translation session
- * const session = await client.translation.get('session_123');
+ * const session = await service.translation.get('session_123');
  *
  * // List sessions by organization
- * const sessions = await client.translation.getByOrganization('org_123');
+ * const sessions = await service.translation.getByOrganization('org_123');
  * ```
  */
 export class TranslationService {
@@ -71,11 +71,11 @@ export class TranslationService {
    *
    * @example
    * ```typescript
-   * const access = await client.translation.initiate({
-   *   initiator: { languageCode: 'en', displayName: 'John' },
-   *   participant: { languageCode: 'ja' }
+   * const access = await service.translation.initiate({
+   *   initiator: { externalParticipantId: 'user_123', language: 'en' },
+   *   participant: { language: 'ja' }
    * });
-   * console.log('Session initiated:', access.sessionId);
+   * console.log('Session initiated:', access.translationSessionId);
    * ```
    */
   public async initiate(data: TranslationSessionRequest): Promise<TranslationSessionAccess> {
@@ -94,9 +94,9 @@ export class TranslationService {
    *
    * @example
    * ```typescript
-   * const session = await client.translation.create({
-   *   organizationId: 'org_123',
-   *   direction: 'BIDIRECTIONAL'
+   * const session = await service.translation.create({
+   *   externalInitiatorId: 'user_123',
+   *   direction: 'bidirectional'
    * });
    * console.log('Translation session created:', session.id);
    * ```
@@ -117,7 +117,7 @@ export class TranslationService {
    *
    * @example
    * ```typescript
-   * const session = await client.translation.get('session_123');
+   * const session = await service.translation.get('session_123');
    * console.log('Session status:', session.status);
    * ```
    */
@@ -142,74 +142,6 @@ export class TranslationService {
     if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
 
     const path = `${this.resource_path}/by-organization/${organizationId}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-
-    return this.http.get<PaginatedResultType<TranslationSession>>(path);
-  }
-
-  /**
-   * Retrieves translation sessions by project.
-   *
-   * @param projectId - Project ID
-   * @param params - Optional pagination parameters
-   * @returns Promise resolving to paginated list of translation sessions
-   */
-  public async getByProject(
-    projectId: string,
-    params?: Partial<PaginationRequest>
-  ): Promise<PaginatedResultType<TranslationSession>> {
-    const queryParams = new URLSearchParams();
-
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
-
-    const path = `${this.resource_path}/by-project/${projectId}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-
-    return this.http.get<PaginatedResultType<TranslationSession>>(path);
-  }
-
-  /**
-   * Retrieves translation sessions by status.
-   *
-   * @param status - Session status
-   * @param params - Optional pagination parameters
-   * @returns Promise resolving to paginated list of translation sessions
-   */
-  public async getByStatus(
-    status: TranslationSessionStatus,
-    params?: Partial<PaginationRequest>
-  ): Promise<PaginatedResultType<TranslationSession>> {
-    const queryParams = new URLSearchParams();
-    queryParams.append('status', status);
-
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
-
-    const path = `${this.resource_path}/by-status?${queryParams.toString()}`;
-
-    return this.http.get<PaginatedResultType<TranslationSession>>(path);
-  }
-
-  /**
-   * Retrieves translation sessions within a date range.
-   *
-   * @param startDate - Range start timestamp (UTC seconds)
-   * @param endDate - Range end timestamp (UTC seconds)
-   * @param params - Optional pagination parameters
-   * @returns Promise resolving to paginated list of translation sessions
-   */
-  public async getByDateRange(
-    startDate: number,
-    endDate: number,
-    params?: Partial<PaginationRequest>
-  ): Promise<PaginatedResultType<TranslationSession>> {
-    const queryParams = new URLSearchParams();
-    queryParams.append('startDate', startDate.toString());
-    queryParams.append('endDate', endDate.toString());
-
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
-
-    const path = `${this.resource_path}/by-date-range?${queryParams.toString()}`;
 
     return this.http.get<PaginatedResultType<TranslationSession>>(path);
   }
@@ -251,19 +183,6 @@ export class TranslationService {
   public async end(id: string): Promise<TranslationSession> {
     return this.http.post<Record<string, never>, TranslationSession>(
       `${this.resource_path}/${id}/end`,
-      {}
-    );
-  }
-
-  /**
-   * Generates a summary for a translation session.
-   *
-   * @param id - Translation session ID
-   * @returns Promise resolving to the translation session with summary
-   */
-  public async generateSummary(id: string): Promise<TranslationSession> {
-    return this.http.post<Record<string, never>, TranslationSession>(
-      `${this.resource_path}/${id}/generate-summary`,
       {}
     );
   }
@@ -323,17 +242,6 @@ export class TranslationService {
       data,
       UpdateTranslationParticipantSchema
     );
-  }
-
-  /**
-   * Removes a participant from a translation session.
-   *
-   * @param sessionId - Translation session ID
-   * @param participantId - Participant ID
-   * @returns Promise resolving to boolean indicating removal success
-   */
-  public async removeParticipant(sessionId: string, participantId: string): Promise<boolean> {
-    return this.http.delete<boolean>(`${this.resource_path}/${sessionId}/participants/${participantId}`);
   }
 
   /**

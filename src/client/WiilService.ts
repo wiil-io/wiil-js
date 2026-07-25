@@ -19,7 +19,7 @@ export type WiilServiceConfig = Omit<WiilClientConfig, 'baseUrl'> & {
   /**
    * Optional override for the OTT API base URL.
    *
-   * @defaultValue 'https://ott.wiil.io'
+   * @defaultValue 'https://ott.wiil.io/v1'
    */
   baseUrl?: string;
   /**
@@ -30,7 +30,7 @@ export type WiilServiceConfig = Omit<WiilClientConfig, 'baseUrl'> & {
   apiBaseUrl?: string;
 };
 
-const DEFAULT_OTT_BASE_URL = 'https://ott.wiil.io';
+const DEFAULT_OTT_BASE_URL = 'https://ott.wiil.io/v1';
 const DEFAULT_API_BASE_URL = 'https://api.wiil.io/v1';
 const DEFAULT_TIMEOUT = 30000;
 
