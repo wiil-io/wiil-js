@@ -8,7 +8,6 @@ import { ZodType } from 'zod';
 import { WiilConfigurationError } from '../errors/WiilError';
 import { MessagingService } from '../services/messaging';
 import { OttService } from '../services/ott';
-import { TranslationService } from '../services/translation';
 import { HttpClient } from './HttpClient';
 import { WiilClientConfig } from './types';
 
@@ -37,8 +36,8 @@ const DEFAULT_TIMEOUT = 30000;
 /**
  * WIIL SDK client for outbound communication and real-time services.
  *
- * Provides access to messaging (calls, SMS, email), translation sessions,
- * and OTT connection services for AI-powered customer interactions.
+ * Provides access to messaging (calls, SMS, email) and OTT connection
+ * services for AI-powered customer interactions.
  *
  * @example
  * ```typescript
@@ -61,11 +60,6 @@ const DEFAULT_TIMEOUT = 30000;
 export class WiilService {
   private readonly http: HttpClient;
   private readonly apiHttp: HttpClient;
-
-  /**
-   * Translation service operations.
-   */
-  public readonly translation: TranslationService;
 
   /**
    * OTT connection configuration operations.
@@ -102,7 +96,6 @@ export class WiilService {
       baseUrl: config.apiBaseUrl ?? DEFAULT_API_BASE_URL,
       timeout: this.config.timeout,
     });
-    this.translation = new TranslationService(this.http);
     this.ott = new OttService(this.http);
     this.messaging = new MessagingService(this.apiHttp);
   }
